@@ -14,13 +14,18 @@ public class SmsResource {
     }
 
     @Path("verification-code")
-    public VerificationCodeResource getVerificationCodeResource() {
-        return new VerificationCodeResource(session);
+    public TokenCodeResource getVerificationCodeResource() {
+        return new TokenCodeResource(session, TokenCodeType.VERIFY);
     }
 
     @Path("authentication-code")
     public TokenCodeResource getAuthenticationCodeResource() {
         return new TokenCodeResource(session, TokenCodeType.OTP);
+    }
+
+    @Path("login-code")
+    public TokenCodeResource getLoginCodeResource() {
+        return new TokenCodeResource(session, TokenCodeType.LOGIN);
     }
 
     @Path("registration-code")
@@ -33,5 +38,8 @@ public class SmsResource {
         return new TokenCodeResource(session, TokenCodeType.RESET);
     }
 
-
+    @Path("update-profile")
+    public VerificationCodeResource getVerificateCodeResource(){
+        return new VerificationCodeResource(session);
+    }
 }

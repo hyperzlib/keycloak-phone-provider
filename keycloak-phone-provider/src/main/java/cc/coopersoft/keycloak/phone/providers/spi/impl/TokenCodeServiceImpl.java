@@ -4,10 +4,12 @@ import cc.coopersoft.keycloak.phone.authentication.requiredactions.UpdatePhoneNu
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialModel;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProvider;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProviderFactory;
+import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.jpa.TokenCode;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.credential.CredentialModel;
@@ -47,11 +49,11 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
-    public TokenCodeRepresentation ongoingProcess(String phoneNumber, TokenCodeType tokenCodeType) {
+    public TokenCodeRepresentation currentProcess(String phoneNumber, TokenCodeType tokenCodeType) {
 
         try {
             TokenCode entity = getEntityManager()
-                    .createNamedQuery("ongoingProcess", TokenCode.class)
+                    .createNamedQuery("currentProcess", TokenCode.class)
                     .setParameter("realmId", getRealm().getId())
                     .setParameter("phoneNumber", phoneNumber)
                     .setParameter("now", new Date(), TemporalType.TIMESTAMP)
@@ -66,11 +68,58 @@ public class TokenCodeServiceImpl implements TokenCodeService {
             tokenCodeRepresentation.setType(entity.getType());
             tokenCodeRepresentation.setCreatedAt(entity.getCreatedAt());
             tokenCodeRepresentation.setExpiresAt(entity.getExpiresAt());
+            tokenCodeRepresentation.setResendExpiresAt(entity.getResendExpiresAt());
             tokenCodeRepresentation.setConfirmed(entity.getConfirmed());
 
             return tokenCodeRepresentation;
         } catch (NoResultException e) {
             return null;
+        }
+    }
+
+    @Override
+    public void removeCode(String phoneNumber, TokenCodeType tokenCodeType) {
+        try {
+            EntityManager em = getEntityManager();
+            List<TokenCode> entityList = em
+                    .createNamedQuery("getAll", TokenCode.class)
+                    .setParameter("realmId", getRealm().getId())
+                    .setParameter("phoneNumber", phoneNumber)
+                    .setParameter("type", tokenCodeType.name())
+                    .getResultList();
+
+            if(entityList.size() > 0) {
+                for (TokenCode entity : entityList) {
+                    em.remove(entity);
+                }
+                em.flush();
+                em.clear();
+            }
+        } catch (NoResultException ignored) {
+
+        }
+    }
+
+    @Override
+    public boolean canResend(String phoneNumber, TokenCodeType tokenCodeType) {
+        try {
+            EntityManager em = getEntityManager();
+            TokenCode entityList = em
+                    .createNamedQuery("currentProcess", TokenCode.class)
+                    .setParameter("realmId", getRealm().getId())
+                    .setParameter("phoneNumber", phoneNumber)
+                    .setParameter("now", new Date(), TemporalType.TIMESTAMP)
+                    .setParameter("type", tokenCodeType.name())
+                    .getSingleResult();
+
+            if(entityList != null) {
+                Date resendExpiresAt = entityList.getResendExpiresAt();
+                return (resendExpiresAt == null || resendExpiresAt.before(new Date()));
+            } else {
+                return true;
+            }
+        } catch (NoResultException ignored) {
+            return true;
         }
     }
 
@@ -91,8 +140,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
-    public void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType, int tokenExpiresIn) {
-
+    public void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType, MessageSendResult sendResult) {
         TokenCode entity = new TokenCode();
         Instant now = Instant.now();
 
@@ -102,23 +150,50 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         entity.setCode(tokenCode.getCode());
         entity.setType(tokenCodeType.name());
         entity.setCreatedAt(Date.from(now));
-        entity.setExpiresAt(Date.from(now.plusSeconds(tokenExpiresIn)));
+        entity.setExpiresAt(sendResult.getExpires());
+        entity.setResendExpiresAt(sendResult.getResendExpires());
         entity.setConfirmed(tokenCode.getConfirmed());
 
         getEntityManager().persist(entity);
     }
 
     @Override
-    public void validateCode(UserModel user, String phoneNumber, String code) {
-        validateCode(user, phoneNumber, code, TokenCodeType.VERIFY);
+    public boolean validateCode(String phoneNumber, String code) {
+        return validateCode(phoneNumber, code, TokenCodeType.VERIFY);
     }
 
     @Override
-    public void validateCode(UserModel user, String phoneNumber, String code, TokenCodeType tokenCodeType) {
+    public boolean validateCode(String phoneNumber, String code, TokenCodeType tokenCodeType) {
+        TokenCodeRepresentation tokenCode = currentProcess(phoneNumber, tokenCodeType);
+        if (tokenCode == null) return false;
+        if (!tokenCode.getCode().equals(code)) return false;
 
+        removeCode(phoneNumber, tokenCodeType);
+        return true;
+    }
+
+    @Override
+    public boolean validateCode(UserModel user, String phoneNumber, String code) {
+        return validateCode(user, phoneNumber, code, TokenCodeType.VERIFY);
+    }
+
+    @Override
+    public boolean validateCode(UserModel user, String phoneNumber, String code, TokenCodeType tokenCodeType) {
+        TokenCodeRepresentation tokenCode = currentProcess(phoneNumber, tokenCodeType);
+        if (tokenCode == null) return false;
+        if (!tokenCode.getCode().equals(code)) return false;
+        if (!user.getAttribute("phoneNumber").contains(phoneNumber)) return false;
+
+        removeCode(phoneNumber, tokenCodeType);
+        return true;
+    }
+
+    @Override
+    public void setUserPhoneNumberByCode(UserModel user, String phoneNumber, String code){
+        TokenCodeType tokenCodeType = TokenCodeType.VERIFY;
         logger.info(String.format("valid %s , phone: %s, code: %s", tokenCodeType, phoneNumber, code));
 
-        TokenCodeRepresentation tokenCode = ongoingProcess(phoneNumber, tokenCodeType);
+        TokenCodeRepresentation tokenCode = currentProcess(phoneNumber, tokenCodeType);
         if (tokenCode == null)
             throw new BadRequestException(String.format("There is no valid ongoing %s process", tokenCodeType.getLabel()));
 
@@ -126,13 +201,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
         logger.info(String.format("User %s correctly answered the %s code", user.getId(), tokenCodeType.getLabel()));
 
-        tokenValidated(user,phoneNumber,tokenCode.getId());
-
-    }
-
-    @Override
-    public void tokenValidated(UserModel user, String phoneNumber, String tokenCodeId) {
-
+        removeCode(phoneNumber, tokenCodeType);
         session.users()
                 .searchForUserByUserAttribute("phoneNumber", phoneNumber, session.getContext().getRealm())
                 .stream().filter(u -> !u.getId().equals(user.getId()))
@@ -143,17 +212,26 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
         user.setSingleAttribute("phoneNumberVerified", "true");
         user.setSingleAttribute("phoneNumber", phoneNumber);
-        validateProcess(tokenCodeId, user);
 
         cleanUpAction(user);
     }
 
     @Override
-    public void validateProcess(String tokenCodeId, UserModel user) {
-        TokenCode entity = getEntityManager().find(TokenCode.class, tokenCodeId);
-        entity.setConfirmed(true);
-        entity.setByWhom(user.getId());
-        getEntityManager().persist(entity);
+    public void tokenValidated(UserModel user, String phoneNumber, String tokenCodeId) {
+        if(!UserUtils.isDuplicatePhoneAllowed()) { //解绑重复的手机号
+            session.users()
+                    .searchForUserByUserAttribute("phoneNumber", phoneNumber, session.getContext().getRealm())
+                    .stream().filter(u -> !u.getId().equals(user.getId()))
+                    .forEach(u -> {
+                        logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
+                        u.setSingleAttribute("phoneNumberVerified", "false");
+                    });
+        }
+
+        user.setSingleAttribute("phoneNumberVerified", "true");
+        user.setSingleAttribute("phoneNumber", phoneNumber);
+
+        cleanUpAction(user);
     }
 
     @Override
@@ -170,7 +248,18 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         }
     }
 
+    @Override
+    public Date getResendExpires(String phoneNumber, TokenCodeType tokenCodeType) {
+        if (this.canResend(phoneNumber, tokenCodeType))
+            throw new BadRequestException(String.format("Resend timeout in %s process for %s is finished.",
+                    tokenCodeType.getLabel(), phoneNumber));
 
+        TokenCodeRepresentation tokenCode = currentProcess(phoneNumber, tokenCodeType);
+        if (tokenCode == null)
+            throw new BadRequestException(String.format("There is no valid %s in process for %s",
+                    tokenCodeType.getLabel(), phoneNumber));
+        return tokenCode.getResendExpiresAt();
+    }
 
     @Override
     public void close() {

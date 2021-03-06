@@ -50,12 +50,7 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
         if (phoneNumber == null) return false;
         if (code == null) return false;
 
-        try {
-            getTokenCodeService().validateCode(user, phoneNumber, code, TokenCodeType.OTP);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return getTokenCodeService().validateCode(user, phoneNumber, code, TokenCodeType.OTP);
     }
 
     @Override

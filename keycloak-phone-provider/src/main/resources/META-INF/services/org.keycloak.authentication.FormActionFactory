@@ -2,3 +2,4 @@ cc.coopersoft.keycloak.phone.authentication.forms.RegistrationPhoneNumber
 cc.coopersoft.keycloak.phone.authentication.forms.RegistrationRedirectParametersReader
 cc.coopersoft.keycloak.phone.authentication.forms.RegistrationLeast
 cc.coopersoft.keycloak.phone.authentication.forms.RegistrationPhoneAsUserNameCreation
+cc.coopersoft.keycloak.phone.authentication.forms.RegistrationPhoneNumberOrEmail

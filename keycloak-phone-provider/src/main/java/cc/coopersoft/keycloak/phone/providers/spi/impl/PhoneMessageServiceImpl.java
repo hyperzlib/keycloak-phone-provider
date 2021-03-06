@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
+import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
@@ -11,8 +12,6 @@ import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 
 import javax.ws.rs.ForbiddenException;
-import javax.ws.rs.ServiceUnavailableException;
-import java.time.Instant;
 
 public class PhoneMessageServiceImpl implements PhoneMessageService {
 
@@ -43,33 +42,41 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
     }
 
     @Override
-    public int sendTokenCode(String phoneNumber,TokenCodeType type){
+    public MessageSendResult sendTokenCode(String phoneNumber, TokenCodeType type){
         if (getTokenCodeService().isAbusing(phoneNumber, type)) {
             throw new ForbiddenException("You requested the maximum number of messages the last hour");
         }
 
-        TokenCodeRepresentation ongoing = getTokenCodeService().ongoingProcess(phoneNumber, type);
-        if (ongoing != null) {
-            logger.info(String.format("No need of sending a new %s code for %s",type.getLabel(), phoneNumber));
-            return (int) (ongoing.getExpiresAt().getTime() - Instant.now().toEpochMilli()) / 1000;
+        MessageSendResult result;
+
+        if(!getTokenCodeService().canResend(phoneNumber, type)){
+            TokenCodeRepresentation current = getTokenCodeService().currentProcess(phoneNumber, type);
+            result = new MessageSendResult(-2).setError("RATE_LIMIT", "Please wait for minutes.");
+            if(current != null && current.getResendExpiresAt() != null){
+                result.setResendExpires(current.getResendExpiresAt());
+            }
+            return result;
         }
+
+        //remove old codes
+        getTokenCodeService().removeCode(phoneNumber, type);
 
         TokenCodeRepresentation token = TokenCodeRepresentation.forPhoneNumber(phoneNumber);
 
         try {
-            session.getProvider(MessageSenderService.class, service).sendSmsMessage(type,phoneNumber,token.getCode(),tokenExpiresIn);
-            getTokenCodeService().persistCode(token, type, tokenExpiresIn);
-
-            logger.info(String.format("Sent %s code to %s over %s",type.getLabel(), phoneNumber, service));
-
+            result = session.getProvider(MessageSenderService.class, service)
+                    .sendSmsMessage(type,phoneNumber, token.getCode(), tokenExpiresIn);
+            getTokenCodeService().persistCode(token, type, result);
         } catch (MessageSendException e) {
-
-            logger.error(String.format("Message sending to %s failed with %s: %s",
-                    phoneNumber, e.getErrorCode(), e.getErrorMessage()));
-            throw new ServiceUnavailableException("Internal server error");
+            result = new MessageSendResult(-1).setError(e.getErrorCode(), e.getErrorMessage());
         }
 
-        return tokenExpiresIn;
+        if(result.ok()){
+            logger.info(String.format("Sent %s code to %s over %s",type.getLabel(), phoneNumber, service));
+        } else {
+            logger.error(String.format("Message sending to %s failed with %s: %s",
+                    phoneNumber, result.getErrorCode(), result.getErrorMessage()));
+        }
+        return result;
     }
-
 }

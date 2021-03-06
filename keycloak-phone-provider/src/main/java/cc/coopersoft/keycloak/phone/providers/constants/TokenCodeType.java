@@ -4,7 +4,8 @@ public enum TokenCodeType {
     VERIFY("verification"),
     OTP("authentication"),
     RESET("reset credential"),
-    REGISTRATION("registration");
+    REGISTRATION("registration"),
+    LOGIN("login");
 
     private String label;
 

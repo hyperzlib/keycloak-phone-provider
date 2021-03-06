@@ -58,7 +58,6 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
             event.error(Errors.USERNAME_MISSING);
             Response challenge = context.form()
                     .setError(Messages.MISSING_USERNAME)
-//                    .setAttribute("captchaKey", siteKey)
                     .setAttribute("verificationCodeKind", VERIFICATION_CODE_KIND)
                     .createForm("login-reset-password-with-phone.ftl");
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
@@ -113,12 +112,8 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         String phoneNumber = Optional.ofNullable(context.getHttpRequest().getDecodedFormParameters().getFirst("phone_number")).orElse(
                 context.getHttpRequest().getDecodedFormParameters().getFirst("phoneNumber"));
         String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
-        try {
-            context.getSession().getProvider(TokenCodeService.class).validateCode(user, phoneNumber, code, TokenCodeType.RESET);
-            return true;
-        } catch (Exception e) {
-            return false;
-        }
+        return context.getSession().getProvider(TokenCodeService.class)
+                .validateCode(user, phoneNumber, code, TokenCodeType.RESET);
     }
 
     @Override

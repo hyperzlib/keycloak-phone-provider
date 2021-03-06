@@ -10,6 +10,7 @@
     <module name="org.keycloak.keycloak-core"/>
     <module name="org.keycloak.keycloak-server-spi"/>
     <module name="org.jboss.logging"/>
+    <module name="com.aliyuncs"/>
     <module name="keycloak-phone-provider"/>
   </dependencies>
 </module>

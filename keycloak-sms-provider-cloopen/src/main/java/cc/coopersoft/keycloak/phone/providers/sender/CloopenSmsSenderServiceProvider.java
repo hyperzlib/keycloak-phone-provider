@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
+import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import com.cloopen.rest.sdk.BodyType;
 import com.cloopen.rest.sdk.CCPRestSmsSDK;
@@ -53,7 +54,7 @@ public class CloopenSmsSenderServiceProvider implements MessageSenderService {
     }
 
     @Override
-    public void sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) throws MessageSendException {
+    public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) throws MessageSendException {
         //请使用管理控制台中已创建应用的APPID
         String appId = Optional.ofNullable(config.get(realm.getName().toUpperCase() + "_" + APP_ID_PARAM_NAME))
                 .orElse(config.get(APP_ID_PARAM_NAME));
@@ -79,10 +80,12 @@ public class CloopenSmsSenderServiceProvider implements MessageSenderService {
 //                System.out.println(key +" = "+object);
 //
 //            }
-        }else{
+            return new MessageSendResult(1).setResendExpires(120).setExpires(expires);
+        } else {
             //异常返回输出错误码和错误信息
-            throw new MessageSendException(500, result.get("statusCode").toString(), result.get("statusMsg").toString());
-            //System.out.println("错误码=" + result.get("statusCode") +" 错误信息= "+result.get("statusMsg"));
+            System.out.println("错误码=" + result.get("statusCode") +" 错误信息= "+result.get("statusMsg"));
+            return new MessageSendResult(-1).setError(result.get("statusCode").toString(),
+                    result.get("statusMsg").toString());
         }
     }
 }

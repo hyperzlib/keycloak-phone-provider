@@ -2,8 +2,9 @@
 <databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
                    xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
                    xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
-  <changeSet author="cooper" id="token-code-6.0">
-
+  <changeSet author="cooper" id="token-code-6.3">
+    <preConditions onFail="MARK_RAN"><tableExists tableName="PHONE_MESSAGE_TOKEN_CODE"/></preConditions>
+    <dropTable cascadeConstraints="true" tableName="PHONE_MESSAGE_TOKEN_CODE"/>
     <createTable tableName="PHONE_MESSAGE_TOKEN_CODE">
       <column name="ID" type="VARCHAR(36)">
         <constraints nullable="false"/>
@@ -21,6 +22,9 @@
         <constraints nullable="false"/>
       </column>
       <column name="CREATED_AT" type="DATETIME">
+        <constraints nullable="false"/>
+      </column>
+      <column name="RESEND_EXPIRES_AT" type="DATETIME">
         <constraints nullable="false"/>
       </column>
       <column name="EXPIRES_AT" type="DATETIME">

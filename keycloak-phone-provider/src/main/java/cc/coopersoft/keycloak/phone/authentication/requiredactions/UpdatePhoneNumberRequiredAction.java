@@ -28,6 +28,7 @@ public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
         TokenCodeService tokenCodeService = context.getSession().getProvider(TokenCodeService.class);
         String phoneNumber = context.getHttpRequest().getDecodedFormParameters().getFirst("phoneNumber");
         String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
+        /*
         try {
             tokenCodeService.validateCode(context.getUser(), phoneNumber, code);
             context.success();
@@ -40,6 +41,15 @@ public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
 
         } catch (ForbiddenException e) {
 
+            Response challenge = context.form()
+                    .setAttribute("phoneNumber", phoneNumber)
+                    .setError("verificationCodeDoesNotMatch")
+                    .createForm("login-update-phone-number.ftl");
+            context.challenge(challenge);
+        }*/
+        if(tokenCodeService.validateCode(context.getUser(), phoneNumber, code)){
+            context.success();
+        } else {
             Response challenge = context.form()
                     .setAttribute("phoneNumber", phoneNumber)
                     .setError("verificationCodeDoesNotMatch")

@@ -1,8 +1,8 @@
 package cc.coopersoft.keycloak.phone.providers.spi;
 
+import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
-import org.keycloak.models.KeycloakSession;
 
 public abstract class FullSmsSenderAbstractService implements MessageSenderService{
 
@@ -12,13 +12,11 @@ public abstract class FullSmsSenderAbstractService implements MessageSenderServi
         this.realmDisplay = realmDisplay;
     }
 
-    public abstract void sendMessage(String phoneNumber, String message) throws MessageSendException;
+    public abstract MessageSendResult sendMessage(String phoneNumber, String message) throws MessageSendException;
 
 
-    public void sendSmsMessage(TokenCodeType type, String phoneNumber, String code , int expires) throws MessageSendException{
-
-
+    public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code , int expires) throws MessageSendException{
         final String MESSAGE = String.format("[%s] - " + type.getLabel() + " code: %s, expires: %s minute ",realmDisplay , code, expires / 60);
-        sendMessage(phoneNumber,MESSAGE);
+        return sendMessage(phoneNumber,MESSAGE);
     }
 }

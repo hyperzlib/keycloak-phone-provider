@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
+import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
@@ -8,7 +9,6 @@ import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
-import org.apache.http.impl.client.DefaultHttpClient;
 import org.apache.http.impl.client.HttpClientBuilder;
 import org.apache.http.message.BasicHeader;
 import org.apache.http.message.BasicNameValuePair;
@@ -17,7 +17,6 @@ import org.keycloak.Config;
 import org.keycloak.models.RealmModel;
 
 import java.io.IOException;
-import java.io.UnsupportedEncodingException;
 import java.util.ArrayList;
 import java.util.Date;
 import java.util.List;
@@ -41,7 +40,7 @@ public class YunxinSmsSenderServiceProvider implements MessageSenderService {
   }
 
   @Override
-  public void sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) throws MessageSendException {
+  public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) {
 
     HttpPost httpPost = new HttpPost(SERVER_URL);
     String curTime = String.valueOf((new Date()).getTime() / 1000L);
@@ -78,10 +77,11 @@ public class YunxinSmsSenderServiceProvider implements MessageSenderService {
               new BasicHeader("CheckSum",checkSum)))
               .build().execute(httpPost);
       System.out.println(EntityUtils.toString(response.getEntity(), "utf-8"));
+      return new MessageSendResult(1).setResendExpires(120).setExpires(expires);
     } catch (IOException e) {
-      e.printStackTrace();
+      return new MessageSendResult(-1).setError("500",
+              e.getLocalizedMessage());
     }
-
   }
 
   @Override

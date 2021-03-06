@@ -32,7 +32,7 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
         TokenCodeService tokenCodeService = context.getSession().getProvider(TokenCodeService.class);
         String phoneNumber = context.getHttpRequest().getDecodedFormParameters().getFirst("phoneNumber");
         String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
-        try {
+        /*try {
             tokenCodeService.validateCode(context.getUser(), phoneNumber, code);
             PhoneOtpCredentialProvider socp = (PhoneOtpCredentialProvider) context.getSession()
                     .getProvider(CredentialProvider.class, PhoneOtpCredentialProviderFactory.PROVIDER_ID);
@@ -47,6 +47,18 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
 
         } catch (ForbiddenException e) {
 
+            Response challenge = context.form()
+                    .setAttribute("phoneNumber", phoneNumber)
+                    .setError("verificationCodeDoesNotMatch")
+                    .createForm("login-update-phone-number.ftl");
+            context.challenge(challenge);
+        }*/
+        if(tokenCodeService.validateCode(context.getUser(), phoneNumber, code)){
+            PhoneOtpCredentialProvider socp = (PhoneOtpCredentialProvider) context.getSession()
+                    .getProvider(CredentialProvider.class, PhoneOtpCredentialProviderFactory.PROVIDER_ID);
+            socp.createCredential(context.getRealm(), context.getUser(), PhoneOtpCredentialModel.create(phoneNumber));
+            context.success();
+        } else {
             Response challenge = context.form()
                     .setAttribute("phoneNumber", phoneNumber)
                     .setError("verificationCodeDoesNotMatch")

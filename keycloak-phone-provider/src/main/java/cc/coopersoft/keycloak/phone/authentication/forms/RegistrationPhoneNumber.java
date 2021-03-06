@@ -16,14 +16,12 @@ import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
-import org.keycloak.authentication.forms.RegistrationPage;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
-import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 
 import javax.ws.rs.core.MultivaluedMap;
@@ -62,7 +60,7 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 	}
 	@Override
 	public String getDisplayType() {
-		return "Phone validation";
+		return "Phone Validation";
 	}
 
 	@Override
@@ -141,7 +139,7 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 		}
 
 		String verificationCode = formData.getFirst(FIELD_VERIFICATION_CODE);
-		TokenCodeRepresentation tokenCode =  getTokenCodeService(session).ongoingProcess(phoneNumber, TokenCodeType.REGISTRATION);
+		TokenCodeRepresentation tokenCode =  getTokenCodeService(session).currentProcess(phoneNumber, TokenCodeType.REGISTRATION);
 		if (Validation.isBlank(verificationCode) || tokenCode == null || !tokenCode.getCode().equals(verificationCode)){
 			context.error(Errors.INVALID_REGISTRATION);
 			formData.remove(FIELD_VERIFICATION_CODE);

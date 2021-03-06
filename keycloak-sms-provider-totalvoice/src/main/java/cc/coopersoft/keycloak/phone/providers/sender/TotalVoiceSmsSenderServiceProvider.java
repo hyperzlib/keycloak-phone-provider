@@ -2,24 +2,25 @@ package cc.coopersoft.keycloak.phone.providers.sender;
 
 import br.com.totalvoice.TotalVoiceClient;
 import br.com.totalvoice.api.Sms;
+import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
+import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.FullSmsSenderAbstractService;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
+import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import org.json.JSONObject;
 import org.keycloak.Config.Scope;
 
-public class TotalVoiceSmsSenderServiceProvider extends FullSmsSenderAbstractService {
+public class TotalVoiceSmsSenderServiceProvider implements MessageSenderService {
 
-    private final TotalVoiceClient client;
     private final Sms smsClient;
 
     TotalVoiceSmsSenderServiceProvider(Scope config, String realmDisplay) {
-        super(realmDisplay);
-        this.client = new TotalVoiceClient(config.get("authToken"));
+        TotalVoiceClient client = new TotalVoiceClient(config.get("authToken"));
         this.smsClient = new Sms(client);
     }
 
     @Override
-    public void sendMessage(String phoneNumber, String message) throws MessageSendException {
+    public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String message, int expires) throws MessageSendException {
 
         try {
             JSONObject response = smsClient.enviar(phoneNumber, message);
@@ -29,8 +30,9 @@ public class TotalVoiceSmsSenderServiceProvider extends FullSmsSenderAbstractSer
                         String.valueOf(response.getInt("motivo")),
                         response.getString("mensagem"));
             }
+            return new MessageSendResult(1).setResendExpires(120).setExpires(expires);
         } catch (Exception e) {
-            throw new MessageSendException(500, "500", "Unexpected exception");
+            return new MessageSendResult(-1).setError("500", e.getLocalizedMessage());
         }
     }
 

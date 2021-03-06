@@ -56,14 +56,8 @@ public class AuthenticationCodeAuthenticator extends BaseDirectGrantAuthenticato
 //            kind = Optional.ofNullable(context.getAuthenticatorConfig().getConfig().get(AuthenticationCodeAuthenticatorFactory.KIND)).orElse("");
 //        }
 
-        try {
-            context.getSession().getProvider(TokenCodeService.class).validateCode(context.getUser(), phoneNumber, code, TokenCodeType.OTP);
-            return true;
-        } catch (Exception e) {
-            logger.info("Grant authenticator valid code failure",e);
-            return false;
-        }
-
+        return context.getSession().getProvider(TokenCodeService.class)
+                .validateCode(context.getUser(), phoneNumber, code, TokenCodeType.OTP);
     }
 
 }

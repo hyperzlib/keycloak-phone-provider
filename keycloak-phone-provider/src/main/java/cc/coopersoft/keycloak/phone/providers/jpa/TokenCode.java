@@ -10,10 +10,15 @@ import java.util.Date;
 @Table(name = "PHONE_MESSAGE_TOKEN_CODE")
 @NamedQueries({
         @NamedQuery(
-                name = "ongoingProcess",
+                name = "currentProcess",
                 query = "FROM TokenCode t WHERE t.realmId = :realmId " +
                         "AND t.phoneNumber = :phoneNumber " +
                         "AND t.expiresAt >= :now AND t.type = :type"
+        ),
+        @NamedQuery(
+                name = "getAll",
+                query = "FROM TokenCode t WHERE t.realmId = :realmId " +
+                        "AND t.phoneNumber = :phoneNumber AND t.type = :type"
         ),
         @NamedQuery(
                 name = "processesSince",
@@ -23,7 +28,6 @@ import java.util.Date;
         ),
 })
 public class TokenCode {
-
     @Id
     @Column(name = "ID")
     private String id;
@@ -43,6 +47,10 @@ public class TokenCode {
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "CREATED_AT", nullable = false)
     private Date createdAt;
+
+    @Temporal(TemporalType.TIMESTAMP)
+    @Column(name = "RESEND_EXPIRES_AT", nullable = false)
+    private Date resendExpiresAt;
 
     @Temporal(TemporalType.TIMESTAMP)
     @Column(name = "EXPIRES_AT", nullable = false)

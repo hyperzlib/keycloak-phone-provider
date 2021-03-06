@@ -43,7 +43,7 @@ public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator
     }
 
     TokenCodeService tokenCodeService = context.getSession().getProvider(TokenCodeService.class);
-    TokenCodeRepresentation tokenCode = tokenCodeService.ongoingProcess(phoneNumber, TokenCodeType.OTP);
+    TokenCodeRepresentation tokenCode = tokenCodeService.currentProcess(phoneNumber, TokenCodeType.OTP);
 
     if(tokenCode == null || !tokenCode.getCode().equals(code)){
       invalidCredentials(context);
@@ -64,7 +64,7 @@ public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator
     }
     context.setUser(user);
 
-    tokenCodeService.tokenValidated(user,phoneNumber,tokenCode.getId());
+    tokenCodeService.tokenValidated(user,phoneNumber, tokenCode.getId());
 
     context.success();
   }

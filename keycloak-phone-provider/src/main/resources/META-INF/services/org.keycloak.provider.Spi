@@ -1,3 +1,4 @@
 cc.coopersoft.keycloak.phone.providers.spi.TokenCodeServiceSpi
 cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageServiceSpi
 cc.coopersoft.keycloak.phone.providers.spi.MessageSenderServiceSpi
+cc.coopersoft.keycloak.phone.providers.spi.CaptchaServiceSpi

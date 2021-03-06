@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.sender;
 
+import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
@@ -66,7 +67,7 @@ public class TencentSmsSenderServiceProvider implements MessageSenderService {
 
 
   @Override
-  public void sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) throws MessageSendException {
+  public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) throws MessageSendException {
     try {
 
       /* 实例化一个请求对象，根据调用的接口和实际情况，可以进一步设置请求参数
@@ -127,8 +128,10 @@ public class TencentSmsSenderServiceProvider implements MessageSenderService {
       // 可以取出单个值，您可以通过官网接口文档或跳转到 response 对象的定义处查看返回字段的定义
       System.out.println(res.getRequestId());
 
+      return new MessageSendResult(1).setResendExpires(120).setExpires(expires);
     } catch (TencentCloudSDKException e) {
       e.printStackTrace();
+      return new MessageSendResult(-1).setError(e.getErrorCode(), e.getLocalizedMessage());
     }
   }
 

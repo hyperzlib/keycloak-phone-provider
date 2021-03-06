@@ -1,8 +1,9 @@
 package cc.coopersoft.keycloak.phone.utils;
 
-import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserModel;
-import org.keycloak.models.UserProvider;
+import org.keycloak.models.*;
+import org.keycloak.services.managers.AppAuthManager;
+import org.keycloak.services.managers.AuthenticationManager;
+import org.keycloak.services.managers.RealmManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
@@ -12,7 +13,6 @@ import java.util.stream.Collectors;
  *
  *
  */
-
 
 public class UserUtils {
 

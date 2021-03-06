@@ -19,6 +19,7 @@ public class TokenCodeRepresentation {
     private String type;
     private Date createdAt;
     private Date expiresAt;
+    private Date resendExpiresAt;
     private Boolean confirmed;
 
     public static TokenCodeRepresentation forPhoneNumber(String phoneNumber) {
