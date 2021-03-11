@@ -1,0 +1,14 @@
+<?xml version="1.0" encoding="UTF-8" standalone="no"?>
+<databaseChangeLog xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance"
+                   xmlns="http://www.liquibase.org/xml/ns/dbchangelog"
+                   xsi:schemaLocation="http://www.liquibase.org/xml/ns/dbchangelog http://www.liquibase.org/xml/ns/dbchangelog/dbchangelog-3.1.xsd">
+  <changeSet author="cooper" id="token-code-6.4-clean">
+    <preConditions onSqlOutput="TEST" onFail="MARK_RAN">
+      <not>
+        <changeSetExecuted id="token-code-6.4" author="cooper" changeLogFile="META-INF/changelog/token-code-changelog-6.4.xml"/>
+      </not>
+      <tableExists tableName="PHONE_MESSAGE_TOKEN_CODE" />
+    </preConditions>
+    <dropTable tableName="PHONE_MESSAGE_TOKEN_CODE" />
+  </changeSet>
+</databaseChangeLog>
