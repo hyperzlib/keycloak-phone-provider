@@ -35,6 +35,7 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
 
     public static final String PHONE_LOGIN_FORM_TPL = "login.ftl";
 
+    public static final String FIELD_LOGIN_TYPE = "loginType";
     public static final String FIELD_PHONE_NUMBER = "phoneNumber";
     public static final String FIELD_VERIFICATION_CODE = "loginCode";
 
@@ -71,7 +72,7 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
             context.getEvent().user(user);
             context.getEvent().error(Errors.USER_DISABLED);
             Response challengeResponse = challenge(context, Messages.ACCOUNT_DISABLED, formData);
-            context.forceChallenge(challengeResponse);
+            context.challenge(challengeResponse);
             return false;
         }
         return !isTemporarilyDisabledByBruteForce(context, user, formData);
@@ -84,7 +85,7 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
                 context.getEvent().user(user);
                 context.getEvent().error(Errors.USER_TEMPORARILY_DISABLED);
                 Response challengeResponse = challenge(context, Messages.INVALID_USER, formData);
-                context.forceChallenge(challengeResponse);
+                context.challenge(challengeResponse);
                 return true;
             }
         }
@@ -112,6 +113,11 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
     @Override
     public void action(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        if (!formData.containsKey(FIELD_LOGIN_TYPE) || !formData.getFirst(FIELD_LOGIN_TYPE).equals("phone")){
+            context.attempted();
+            return;
+        }
+
         if (formData.containsKey("cancel")) {
             context.cancelLogin();
             return;
@@ -149,6 +155,11 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+        if (!formData.containsKey(FIELD_LOGIN_TYPE) || !formData.getFirst(FIELD_LOGIN_TYPE).equals("phone")){
+            context.attempted();
+            return;
+        }
+
         LoginFormsProvider form = context.form().setExecution(context.getExecution().getId());
 
         context.challenge(makeForm(form));
