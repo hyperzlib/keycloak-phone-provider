@@ -169,7 +169,7 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 			if (emailValid && !context.getRealm().isDuplicateEmailsAllowed()) {
 				boolean duplicateEmail = false;
 				try {
-					if(session.users().getUserByEmail(email, context.getRealm()) != null) {
+					if(session.users().getUserByEmail(context.getRealm(), email) != null) {
 						duplicateEmail = true;
 					}
 				} catch (ModelDuplicateException e) {

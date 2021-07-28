@@ -12,7 +12,6 @@ import java.util.Date;
 @AllArgsConstructor
 @NoArgsConstructor
 public class TokenCodeRepresentation {
-
     private String id;
     private String phoneNumber;
     private String code;
@@ -23,7 +22,6 @@ public class TokenCodeRepresentation {
     private Boolean confirmed;
 
     public static TokenCodeRepresentation forPhoneNumber(String phoneNumber) {
-
         TokenCodeRepresentation tokenCode = new TokenCodeRepresentation();
 
         tokenCode.id = KeycloakModelUtils.generateId();

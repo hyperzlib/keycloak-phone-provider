@@ -1,10 +1,12 @@
 package cc.coopersoft.keycloak.phone.providers.rest;
 
-import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.JsonUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonLoader;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.cache.NoCache;
-import org.json.JSONObject;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
@@ -12,6 +14,9 @@ import org.keycloak.services.managers.AuthenticationManager.AuthResult;
 
 import javax.ws.rs.*;
 import javax.ws.rs.core.Response;
+
+import java.io.IOException;
+import java.util.HashMap;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
@@ -54,8 +59,14 @@ public class VerificationCodeResource {
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     public Response setUserPhoneNumberJson(String reqBody){
-        JSONObject jsonObject = new JSONObject(reqBody);
-        return this.setUserPhoneNumber(jsonObject.getString("phone_number"), jsonObject.getString("code"));
+        try {
+            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+
+            return this.setUserPhoneNumber(jsonObject.get("phone_number").asText(), jsonObject.get("code").asText());
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.serverError().build();
     }
 
     @POST
@@ -75,14 +86,19 @@ public class VerificationCodeResource {
 
             return Response.ok().entity("{\"status\":1}").build();
         } catch(BadRequestException | NotAuthorizedException e){
-            JSONObject response = new JSONObject();
+            HashMap<String, Object> response = new HashMap<>();
             response.put("status", -1);
             response.put("error", e.getMessage());
-            return Response.ok().entity(response.toString()).build();
+            response.put("errormsg", "needAuth");
+            try {
+                return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
+            } catch (JsonProcessingException jsonProcessingException) {
+                logger.error("Serialize JSON Error", jsonProcessingException);
+            }
+            return Response.serverError().build();
         }
     }
 
-    @GET
     @POST
     @NoCache
     @Path("/unset")
@@ -90,20 +106,26 @@ public class VerificationCodeResource {
     @Consumes({APPLICATION_JSON, APPLICATION_FORM_URLENCODED})
     public Response unsetUserPhoneNumber(){
         try {
-            if (auth == null) throw new NotAuthorizedException("Bearer");
+            try {
+                if (auth == null) throw new NotAuthorizedException("Bearer");
 
-            UserModel user = auth.getUser();
-            if(!user.isEmailVerified()){
-                return Response.ok().entity("{\"status\":-2, \"error\": \"Email Unverified.\"}").build();
-            } else {
-                user.removeAttribute("phoneNumber");
-                return Response.ok().entity("{\"status\":1}").build();
+                UserModel user = auth.getUser();
+                if (!user.isEmailVerified()) {
+                    return Response.ok().entity("{\"status\":-2, \"error\": \"Email Unverified.\"}").build();
+                } else {
+                    user.removeAttribute("phoneNumber");
+                    return Response.ok().entity("{\"status\":1}").build();
+                }
+            } catch (BadRequestException | NotAuthorizedException e) {
+                HashMap<String, Object> response = new HashMap<>();
+                response.put("status", -1);
+                response.put("error", e.getMessage());
+                response.put("errormsg", "needAuth");
+                return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
             }
-        } catch(BadRequestException | NotAuthorizedException e){
-            JSONObject response = new JSONObject();
-            response.put("status", -1);
-            response.put("error", e.getMessage());
-            return Response.ok().entity(response.toString()).build();
+        } catch (JsonProcessingException jsonProcessingException){
+            logger.error("Serialize JSON Error", jsonProcessingException);
+            return Response.serverError().build();
         }
     }
 }

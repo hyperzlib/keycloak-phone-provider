@@ -11,18 +11,18 @@ import java.util.Date;
 @NamedQueries({
         @NamedQuery(
                 name = "currentProcess",
-                query = "FROM TokenCode t WHERE t.realmId = :realmId " +
+                query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
                         "AND t.phoneNumber = :phoneNumber " +
                         "AND t.expiresAt >= :now AND t.type = :type"
         ),
         @NamedQuery(
                 name = "getAll",
-                query = "FROM TokenCode t WHERE t.realmId = :realmId " +
+                query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
                         "AND t.phoneNumber = :phoneNumber AND t.type = :type"
         ),
         @NamedQuery(
                 name = "processesSince",
-                query = "FROM TokenCode t WHERE t.realmId = :realmId " +
+                query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
                         "AND t.phoneNumber = :phoneNumber " +
                         "AND t.createdAt >= :date AND t.type = :type"
         ),

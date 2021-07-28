@@ -53,8 +53,7 @@ public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator
     UserModel user = UserUtils.findUserByPhone(context.getSession().users(),
             context.getRealm(),phoneNumber);
     if (user == null){
-
-      if (context.getSession().users().getUserByUsername(phoneNumber, context.getRealm()) != null){
+      if (context.getSession().users().getUserByUsername(context.getRealm(), phoneNumber) != null){
         invalidCredentials(context,AuthenticationFlowError.USER_CONFLICT);
         return;
       }

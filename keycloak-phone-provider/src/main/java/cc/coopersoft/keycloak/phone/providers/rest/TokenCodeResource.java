@@ -6,9 +6,10 @@ import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.github.fge.jackson.JsonLoader;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.cache.NoCache;
-import org.json.JSONObject;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
@@ -21,9 +22,8 @@ import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
 import java.io.IOException;
-import java.util.ArrayList;
 import java.util.Date;
-import java.util.List;
+import java.util.Iterator;
 import java.util.Map;
 
 import static javax.ws.rs.core.MediaType.*;
@@ -47,12 +47,18 @@ public class TokenCodeResource {
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     public Response getTokenCodeJson(String reqBody) {
-        JSONObject jsonObject = new JSONObject(reqBody);
-        MultivaluedHashMap<String, String> formData = new MultivaluedHashMap<>();
-        for(String key : jsonObject.keySet()){
-            formData.addAll(key, jsonObject.getString(key));
+        try {
+            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+            MultivaluedHashMap<String, String> formData = new MultivaluedHashMap<>();
+            for (Iterator<Map.Entry<String, JsonNode>> it = jsonObject.fields(); it.hasNext(); ) {
+                Map.Entry<String, JsonNode> node = it.next();
+                formData.addAll(node.getKey(), node.getValue().asText());
+            }
+            return this.getTokenCode(formData);
+        } catch (IOException e) {
+            e.printStackTrace();
         }
-        return this.getTokenCode(formData);
+        return Response.serverError().build();
     }
 
     @POST
@@ -98,8 +104,13 @@ public class TokenCodeResource {
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
     public Response getResendExpireJson(String reqBody) {
-        JSONObject jsonObject = new JSONObject(reqBody);
-        return this.getResendExpire(jsonObject.getString("phone_number"));
+        try {
+            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+            return this.getResendExpire(jsonObject.get("phone_number").asText(""));
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+        return Response.serverError().build();
     }
 
     @POST

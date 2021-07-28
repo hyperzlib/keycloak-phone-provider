@@ -65,10 +65,10 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         }
 
         RealmModel realm = context.getRealm();
-        UserModel user = context.getSession().users().getUserByUsername(
-                Optional.ofNullable(username).map(String::trim).orElse(""), realm);
+        UserModel user = context.getSession().users().getUserByUsername(realm,
+                Optional.ofNullable(username).map(String::trim).orElse(""));
         if (user == null && realm.isLoginWithEmailAllowed() && username != null && username.contains("@")) {
-            user = context.getSession().users().getUserByEmail(username, realm);
+            user = context.getSession().users().getUserByEmail(realm, username);
         }
 
         if (user == null) {

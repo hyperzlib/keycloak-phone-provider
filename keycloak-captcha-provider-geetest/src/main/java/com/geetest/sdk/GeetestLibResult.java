@@ -4,7 +4,7 @@
  * Copyright 2020 GEETEST, Inc. All rights reserved.
  * GEETEST PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
-package com.sdk;
+package com.geetest.sdk;
 
 /**
  * sdk lib包的返回结果信息。

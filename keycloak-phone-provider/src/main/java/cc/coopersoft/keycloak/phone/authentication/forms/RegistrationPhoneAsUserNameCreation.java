@@ -7,8 +7,6 @@ import org.keycloak.authentication.FormAction;
 import org.keycloak.authentication.FormActionFactory;
 import org.keycloak.authentication.FormContext;
 import org.keycloak.authentication.ValidationContext;
-import org.keycloak.authentication.forms.RegistrationPage;
-import org.keycloak.authentication.forms.RegistrationUserCreation;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.events.EventType;
@@ -18,8 +16,10 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.messages.Messages;
-import org.keycloak.services.resources.AttributeFormDataProcessor;
 import org.keycloak.services.validation.Validation;
+import org.keycloak.userprofile.UserProfile;
+import org.keycloak.userprofile.UserProfileContext;
+import org.keycloak.userprofile.UserProfileProvider;
 
 import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
@@ -110,7 +110,6 @@ public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, F
 
     @Override
     public void validate(ValidationContext context) {
-
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         List<FormMessage> errors = new ArrayList<>();
         context.getEvent().detail(Details.REGISTER_METHOD, "form");
@@ -133,7 +132,7 @@ public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, F
             return;
         }
 
-        if (context.getSession().users().getUserByUsername(phoneNumber, context.getRealm()) != null) {
+        if (context.getSession().users().getUserByUsername(context.getRealm(), phoneNumber) != null) {
             context.error(Errors.USERNAME_IN_USE);
             errors.add(new FormMessage(RegistrationPhoneNumber.FIELD_PHONE_NUMBER, Messages.USERNAME_EXISTS));
             formData.remove(RegistrationPhoneNumber.FIELD_PHONE_NUMBER);
@@ -146,19 +145,25 @@ public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, F
 
     @Override
     public void success(FormContext context) {
-
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
 
         String username = formData.getFirst(RegistrationPhoneNumber.FIELD_PHONE_NUMBER);
 
         context.getEvent().detail(Details.USERNAME, username)
-                .detail(Details.REGISTER_METHOD, "form");
-        UserModel user = context.getSession().users().addUser(context.getRealm(), username);
+                .detail(Details.REGISTER_METHOD, "phone");
+
+        KeycloakSession session = context.getSession();
+
+        UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
+        UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION_USER_CREATION, formData);
+        UserModel user = profile.create();
+
         user.setEnabled(true);
 
-        context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, username);
-        AttributeFormDataProcessor.process(formData, context.getRealm(), user);
         context.setUser(user);
+
+        context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, username);
+
         context.getEvent().user(user);
         context.getEvent().success();
         context.newEvent().event(EventType.LOGIN);
@@ -169,8 +174,7 @@ public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, F
         if (authType != null) {
             context.getEvent().detail(Details.AUTH_TYPE, authType);
         }
-
-        logger.info(String.format("user: %s is created, user name is %s ",user.getId(), user.getUsername()));
+        //logger.info(String.format("user: %s is created, user name is %s ",user.getId(), user.getUsername()));
     }
 
     @Override

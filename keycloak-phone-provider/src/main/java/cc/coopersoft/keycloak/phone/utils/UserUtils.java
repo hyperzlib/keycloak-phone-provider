@@ -1,12 +1,10 @@
 package cc.coopersoft.keycloak.phone.utils;
 
 import org.keycloak.models.*;
-import org.keycloak.services.managers.AppAuthManager;
-import org.keycloak.services.managers.AuthenticationManager;
-import org.keycloak.services.managers.RealmManager;
 
 import java.util.List;
 import java.util.stream.Collectors;
+import java.util.stream.Stream;
 
 /**
  *
@@ -19,25 +17,31 @@ public class UserUtils {
     private static UserModel singleUser(List<UserModel> users){
         if (users.isEmpty()) {
             return null;
-        }else if (users.size() > 1){
+        } else if (users.size() > 1){
             return users.stream()
-                    .filter(u -> u.getAttribute("phoneNumberVerified")
-                            .stream().anyMatch("true"::equals))
+                    .filter(u -> u.getAttributeStream("phoneNumberVerified")
+                            .anyMatch("true"::equals))
                     .findFirst().orElse(null);
-        }else
+        } else {
             return users.get(0);
+        }
+    }
+
+    private static UserModel singleUser(Stream<UserModel> users){
+        return users.filter(u -> u.getAttributeStream("phoneNumberVerified")
+                        .anyMatch("true"::equals)).findFirst().orElse(null);
     }
 
     public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm, String phoneNumber){
-        List<UserModel> users = userProvider.searchForUserByUserAttribute(
-                "phoneNumber", phoneNumber, realm);
+        Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
+                realm, "phoneNumber", phoneNumber);
         return singleUser(users);
     }
 
     public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm, String phoneNumber, String notIs){
-        List<UserModel> users = userProvider.searchForUserByUserAttribute(
-                "phoneNumber", phoneNumber, realm);
-        return singleUser(users.stream().filter(u -> !u.getId().equals(notIs)).collect(Collectors.toList()));
+        Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
+                realm, "phoneNumber", phoneNumber);
+        return singleUser(users.filter(u -> !u.getId().equals(notIs)).collect(Collectors.toList()));
     }
 
     public static boolean isDuplicatePhoneAllowed(){

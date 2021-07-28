@@ -4,9 +4,16 @@
  * Copyright 2020 GEETEST, Inc. All rights reserved.
  * GEETEST PROPRIETARY/CONFIDENTIAL. Use is subject to license terms.
  */
-package com.sdk;
+package com.geetest.sdk;
 
-import org.json.JSONObject;
+import com.fasterxml.jackson.annotation.JsonProperty;
+import com.fasterxml.jackson.core.JsonProcessingException;
+import com.fasterxml.jackson.databind.JsonNode;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import com.github.fge.jackson.JsonLoader;
+import lombok.AllArgsConstructor;
+import lombok.Data;
+import lombok.NoArgsConstructor;
 
 import javax.crypto.Mac;
 import javax.crypto.spec.SecretKeySpec;
@@ -20,6 +27,23 @@ import java.security.MessageDigest;
 import java.util.Iterator;
 import java.util.Map;
 import java.util.UUID;
+
+@Data
+@NoArgsConstructor
+@AllArgsConstructor
+class GeetestValidateRequest {
+    @JsonProperty("success")
+    public int success;
+
+    @JsonProperty("gt")
+    public String gt;
+
+    @JsonProperty("challenge")
+    public String challenge;
+
+    @JsonProperty("new_captcha")
+    public boolean newCaptcha;
+}
 
 /**
  * sdk lib包，核心逻辑。
@@ -100,9 +124,14 @@ public class GeetestLib {
     public GeetestLibResult register(String digestmod, Map<String, String> paramMap) {
         this.gtlog(String.format("register(): 开始验证初始化, digestmod=%s.", digestmod));
         String origin_challenge = this.requestRegister(paramMap);
-        this.buildRegisterResult(origin_challenge, digestmod);
-        this.gtlog(String.format("register(): 验证初始化, lib包返回信息=%s.", this.libResult));
-        return this.libResult;
+        try {
+            this.buildRegisterResult(origin_challenge, digestmod);
+            this.gtlog(String.format("register(): 验证初始化, lib包返回信息=%s.", this.libResult));
+            return this.libResult;
+        } catch (JsonProcessingException e) {
+            e.printStackTrace();
+        }
+        return null;
     }
 
     /**
@@ -111,15 +140,15 @@ public class GeetestLib {
     private String requestRegister(Map<String, String> paramMap) {
         paramMap.put("gt", this.geetest_id);
         paramMap.put("json_format", JSON_FORMAT);
-        paramMap.put("sdk", VERSION);
+        paramMap.put("com/geetest/sdk", VERSION);
         String register_url = API_URL + REGISTER_URL;
         this.gtlog(String.format("requestRegister(): 验证初始化, 向极验发送请求, url=%s, params=%s.", register_url, paramMap));
         String origin_challenge;
         try {
             String resBody = this.httpGet(register_url, paramMap);
             this.gtlog(String.format("requestRegister(): 验证初始化, 与极验网络交互正常, 返回body=%s.", resBody));
-            JSONObject jsonObject = new JSONObject(resBody);
-            origin_challenge = jsonObject.getString("challenge");
+            JsonNode jsonObject = JsonLoader.fromString(resBody);
+            origin_challenge = jsonObject.get("challenge").asText();
         } catch (Exception e) {
             this.gtlog("requestRegister(): 验证初始化, 请求异常，后续流程走宕机模式, " + e.toString());
             origin_challenge = "";
@@ -130,17 +159,16 @@ public class GeetestLib {
     /**
      * 构建验证初始化接口返回数据
      */
-    private void buildRegisterResult(String origin_challenge, String digestmod) {
+    private void buildRegisterResult(String origin_challenge, String digestmod) throws JsonProcessingException {
+        ObjectMapper mapper = new ObjectMapper();
         // origin_challenge为空或者值为0代表失败
         if (origin_challenge == null || origin_challenge.isEmpty() || "0".equals(origin_challenge)) {
             // 本地随机生成32位字符串
             String challenge = UUID.randomUUID().toString().replaceAll("-", "");
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("success", 0);
-            jsonObject.put("gt", this.geetest_id);
-            jsonObject.put("challenge", challenge);
-            jsonObject.put("new_captcha", NEW_CAPTCHA);
-            this.libResult.setAll(0, jsonObject.toString(), "请求极验register接口失败，后续流程走宕机模式");
+            GeetestValidateRequest requestData = new GeetestValidateRequest(0, this.geetest_id,
+                    challenge, NEW_CAPTCHA);
+            this.libResult.setAll(0, mapper.writeValueAsString(requestData),
+                    "请求极验register接口失败，后续流程走宕机模式");
         } else {
             String challenge;
             if ("md5".equals(digestmod)) {
@@ -152,12 +180,9 @@ public class GeetestLib {
             } else {
                 challenge = this.md5_encode(origin_challenge + this.geetest_key);
             }
-            JSONObject jsonObject = new JSONObject();
-            jsonObject.put("success", 1);
-            jsonObject.put("gt", this.geetest_id);
-            jsonObject.put("challenge", challenge);
-            jsonObject.put("new_captcha", NEW_CAPTCHA);
-            this.libResult.setAll(1, jsonObject.toString(), "");
+            GeetestValidateRequest requestData = new GeetestValidateRequest(1, this.geetest_id,
+                    challenge, NEW_CAPTCHA);
+            this.libResult.setAll(1, mapper.writeValueAsString(requestData), "");
         }
     }
 
@@ -204,7 +229,7 @@ public class GeetestLib {
         paramMap.put("seccode", seccode);
         paramMap.put("json_format", JSON_FORMAT);
         paramMap.put("challenge", challenge);
-        paramMap.put("sdk", VERSION);
+        paramMap.put("com/geetest/sdk", VERSION);
         paramMap.put("captchaid", this.geetest_id);
         String validate_url = API_URL + VALIDATE_URL;
         this.gtlog(String.format("requestValidate(): 二次验证 正常模式, 向极验发送请求, url=%s, params=%s.", validate_url, paramMap));
@@ -212,8 +237,9 @@ public class GeetestLib {
         try {
             String resBody = this.httpPost(validate_url, paramMap);
             this.gtlog(String.format("requestValidate(): 二次验证 正常模式, 与极验网络交互正常, 返回body=%s.", resBody));
-            JSONObject jsonObject = new JSONObject(resBody);
-            response_seccode = jsonObject.getString("seccode");
+
+            JsonNode jsonObject = JsonLoader.fromString(resBody);
+            response_seccode = jsonObject.get("seccode").asText();
         } catch (Exception e) {
             this.gtlog("requestValidate(): 二次验证 正常模式, 请求异常, " + e.toString());
             response_seccode = "";

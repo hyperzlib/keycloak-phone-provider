@@ -36,7 +36,7 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
     @Override
     public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
         if (!supportsCredentialType(credentialType)) return false;
-        return !getCredentialStore().getStoredCredentialsByType(realm, user, credentialType).isEmpty();
+        return getCredentialStore().getStoredCredentialsByTypeStream(realm, user, credentialType).count() > 0;
     }
 
     @Override

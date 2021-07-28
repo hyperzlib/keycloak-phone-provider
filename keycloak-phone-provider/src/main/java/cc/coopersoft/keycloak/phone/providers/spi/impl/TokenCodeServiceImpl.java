@@ -26,6 +26,7 @@ import javax.ws.rs.ForbiddenException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
+import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 
 public class TokenCodeServiceImpl implements TokenCodeService {
@@ -182,7 +183,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         TokenCodeRepresentation tokenCode = currentProcess(phoneNumber, tokenCodeType);
         if (tokenCode == null) return false;
         if (!tokenCode.getCode().equals(code)) return false;
-        if (!user.getAttribute("phoneNumber").contains(phoneNumber)) return false;
+        if (user.getAttributeStream("phoneNumber").noneMatch(p -> p.equals(phoneNumber))) return false;
 
         removeCode(phoneNumber, tokenCodeType);
         return true;
@@ -203,8 +204,8 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
         removeCode(phoneNumber, tokenCodeType);
         session.users()
-                .searchForUserByUserAttribute("phoneNumber", phoneNumber, session.getContext().getRealm())
-                .stream().filter(u -> !u.getId().equals(user.getId()))
+                .searchForUserByUserAttributeStream(session.getContext().getRealm(), "phoneNumber", phoneNumber)
+                .filter(u -> !u.getId().equals(user.getId()))
                 .forEach(u -> {
                     logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
                     u.setSingleAttribute("phoneNumberVerified", "false");
@@ -219,9 +220,8 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     @Override
     public void tokenValidated(UserModel user, String phoneNumber, String tokenCodeId) {
         if(!UserUtils.isDuplicatePhoneAllowed()) { //解绑重复的手机号
-            session.users()
-                    .searchForUserByUserAttribute("phoneNumber", phoneNumber, session.getContext().getRealm())
-                    .stream().filter(u -> !u.getId().equals(user.getId()))
+            session.users().searchForUserByUserAttributeStream(session.getContext().getRealm(), "phoneNumber",
+                    phoneNumber).filter(u -> !u.getId().equals(user.getId()))
                     .forEach(u -> {
                         logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
                         u.setSingleAttribute("phoneNumberVerified", "false");
@@ -240,11 +240,14 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         PhoneOtpCredentialProvider socp = (PhoneOtpCredentialProvider)
                 session.getProvider(CredentialProvider.class, PhoneOtpCredentialProviderFactory.PROVIDER_ID);
         if (socp.isConfiguredFor(getRealm(), user, PhoneOtpCredentialModel.TYPE)) {
-            CredentialModel credential = session.userCredentialManager()
-                    .getStoredCredentialsByType(getRealm(), user, PhoneOtpCredentialModel.TYPE).get(0);
-            credential.setCredentialData("{\"phoneNumber\":\"" + user.getFirstAttribute("phoneNumber") + "\"}");
-            PhoneOtpCredentialModel credentialModel = PhoneOtpCredentialModel.createFromCredentialModel(credential);
-            session.userCredentialManager().updateCredential(getRealm(), user, credentialModel);
+            Optional<CredentialModel> credentialOptional = session.userCredentialManager()
+                    .getStoredCredentialsByTypeStream(getRealm(), user, PhoneOtpCredentialModel.TYPE).findFirst();
+            if(credentialOptional.isPresent()) {
+                CredentialModel credential = credentialOptional.get();
+                credential.setCredentialData("{\"phoneNumber\":\"" + user.getFirstAttribute("phoneNumber") + "\"}");
+                PhoneOtpCredentialModel credentialModel = PhoneOtpCredentialModel.createFromCredentialModel(credential);
+                session.userCredentialManager().updateCredential(getRealm(), user, credentialModel);
+            }
         }
     }
 

@@ -13,7 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <version.keycloak>11.0.3</version.keycloak>
+        <version.keycloak>14.0.0</version.keycloak>
 
         <docker.image.name>coopersoft/keycloak-phone</docker.image.name>
 
@@ -29,13 +29,15 @@
         <module>keycloak-sms-provider-yunxin</module>
         <module>keycloak-sms-provider-aliyun</module>
         <module>keycloak-sms-provider-tencent</module>
+        <module>keycloak-captcha-provider-geetest</module>
+        <module>keycloak-captcha-provider-recaptcha</module>
     </modules>
 
     <dependencies>
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.12</version>
+            <version>1.18.14</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
