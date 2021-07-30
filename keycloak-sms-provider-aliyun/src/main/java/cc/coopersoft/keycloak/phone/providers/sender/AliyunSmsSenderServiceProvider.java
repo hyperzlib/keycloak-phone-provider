@@ -4,6 +4,7 @@ import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import com.aliyuncs.CommonRequest;
 import com.aliyuncs.CommonResponse;
 import com.aliyuncs.DefaultAcsClient;
@@ -45,7 +46,7 @@ public class AliyunSmsSenderServiceProvider implements MessageSenderService {
     }
 
     @Override
-    public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) {
+    public MessageSendResult sendSmsMessage(TokenCodeType type, PhoneNumber phoneNumber, String code, int expires) {
         String templateId = this.getConfig(realm.getName(), type.name(), "template");
         String signName = this.getConfig(realm.getName(), type.name(), "signName");
         CommonRequest request = new CommonRequest();
@@ -54,7 +55,7 @@ public class AliyunSmsSenderServiceProvider implements MessageSenderService {
         request.setSysVersion("2017-05-25");
         request.setSysAction("SendSms");
         request.putQueryParameter("RegionId", "cn-hangzhou");
-        request.putQueryParameter("PhoneNumbers", phoneNumber);
+        request.putQueryParameter("PhoneNumbers", phoneNumber.getPhoneNumber());
         request.putQueryParameter("SignName", signName);
         request.putQueryParameter("TemplateCode", templateId);
 

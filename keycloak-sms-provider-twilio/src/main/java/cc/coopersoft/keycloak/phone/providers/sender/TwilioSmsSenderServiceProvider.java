@@ -6,12 +6,8 @@ import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import com.twilio.Twilio;
 import com.twilio.rest.api.v2010.account.Message;
 import com.twilio.type.PhoneNumber;
-import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
-import cc.coopersoft.keycloak.phone.providers.spi.FullSmsSenderAbstractService;
 import org.jboss.logging.Logger;
 import org.keycloak.Config.Scope;
-import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.RealmModel;
 
 public class TwilioSmsSenderServiceProvider implements MessageSenderService {
 
@@ -25,10 +21,11 @@ public class TwilioSmsSenderServiceProvider implements MessageSenderService {
     }
 
     @Override
-    public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) {
+    public MessageSendResult sendSmsMessage(TokenCodeType type, cc.coopersoft.keycloak.phone.utils.PhoneNumber phoneNumber,
+                                            String code, int expires) {
 
         Message msg = Message.creator(
-                new PhoneNumber(phoneNumber),
+                new PhoneNumber(phoneNumber.toString()),
                 new PhoneNumber(twilioPhoneNumber),
                 code).create();
 

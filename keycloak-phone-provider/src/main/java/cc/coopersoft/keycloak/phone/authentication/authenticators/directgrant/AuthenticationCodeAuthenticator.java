@@ -2,6 +2,7 @@ package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -37,16 +38,14 @@ public class AuthenticationCodeAuthenticator extends BaseDirectGrantAuthenticato
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        if (!validateVerificationCode(context,getPhoneNumber(context))) {
+        if (!validateVerificationCode(context, getPhoneNumber(context))) {
             invalidCredentials(context,context.getUser());
             return;
         }
         context.success();
     }
 
-
-
-    private boolean validateVerificationCode(AuthenticationFlowContext context, String phoneNumber) {
+    private boolean validateVerificationCode(AuthenticationFlowContext context, PhoneNumber phoneNumber) {
 
         String code = getAuthenticationCode(context);
 

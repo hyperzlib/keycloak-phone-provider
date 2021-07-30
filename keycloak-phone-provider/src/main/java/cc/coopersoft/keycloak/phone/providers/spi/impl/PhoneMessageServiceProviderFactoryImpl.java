@@ -7,18 +7,13 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
 public class PhoneMessageServiceProviderFactoryImpl implements PhoneMessageServiceProviderFactory {
-
-    private Scope config;
-
     @Override
     public PhoneMessageService create(KeycloakSession session) {
-        return new PhoneMessageServiceImpl(session, config);
+        return new PhoneMessageServiceImpl(session);
     }
 
     @Override
-    public void init(Scope config) {
-        this.config = config;
-    }
+    public void init(Scope config) { }
 
     @Override
     public void postInit(KeycloakSessionFactory keycloakSessionFactory) {

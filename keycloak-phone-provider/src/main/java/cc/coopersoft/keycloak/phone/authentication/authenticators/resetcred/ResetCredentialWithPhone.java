@@ -1,5 +1,7 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.resetcred;
 
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
@@ -31,11 +33,12 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
 
     public static final String NOT_SEND_EMAIL = "should-send-email";
 
+    protected PhoneNumber getPhoneNumber(AuthenticationFlowContext context){
+        return new PhoneNumber(context.getHttpRequest().getDecodedFormParameters());
+    }
+
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-
-
-
         super.authenticate(context);
 
         Response challenge = context.form()
@@ -50,11 +53,9 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         EventBuilder event = context.getEvent();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         String username = formData.getFirst("username");
-        String phoneNumber = formData.getFirst("phoneNumber");
+        PhoneNumber phoneNumber = new PhoneNumber(formData);
 
-
-        if ((username == null || username.isEmpty()) && (phoneNumber == null || phoneNumber.isEmpty())) {
-
+        if ((username == null || username.isEmpty()) && phoneNumber.isEmpty()) {
             event.error(Errors.USERNAME_MISSING);
             Response challenge = context.form()
                     .setError(Messages.MISSING_USERNAME)
@@ -72,8 +73,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         }
 
         if (user == null) {
-
-            user = UserUtils.findUserByPhone(context.getSession().users(),context.getRealm(),phoneNumber);
+            user = UserUtils.findUserByPhone(context.getSession().users(), context.getRealm(), phoneNumber);
             if ((user == null) || !validateVerificationCode(context,user)) {
                 Response challenge = context.form()
                         .setError(Messages.INVALID_USER)
@@ -92,11 +92,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
 
         // we don't want people guessing usernames, so if there is a problem, just continue, but don't set the user
         // a null user will notify further executions, that this was a failure.
-        if (user == null) {
-            event.clone()
-                    .detail(Details.USERNAME, username)
-                    .error(Errors.USER_NOT_FOUND);
-        } else if (!user.isEnabled()) {
+        if (!user.isEnabled()) {
             event.clone()
                     .detail(Details.USERNAME, username)
                     .user(user).error(Errors.USER_DISABLED);
@@ -107,11 +103,10 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         context.success();
     }
 
-
     private boolean validateVerificationCode(AuthenticationFlowContext context, UserModel user) {
-        String phoneNumber = Optional.ofNullable(context.getHttpRequest().getDecodedFormParameters().getFirst("phone_number")).orElse(
-                context.getHttpRequest().getDecodedFormParameters().getFirst("phoneNumber"));
-        String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
+        PhoneNumber phoneNumber = getPhoneNumber(context);
+        String code = context.getHttpRequest().getDecodedFormParameters()
+                .getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
         return context.getSession().getProvider(TokenCodeService.class)
                 .validateCode(user, phoneNumber, code, TokenCodeType.RESET);
     }

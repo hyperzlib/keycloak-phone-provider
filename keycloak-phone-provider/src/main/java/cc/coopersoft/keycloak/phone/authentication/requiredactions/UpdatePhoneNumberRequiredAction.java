@@ -1,11 +1,11 @@
 package cc.coopersoft.keycloak.phone.authentication.requiredactions;
 
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
 import javax.ws.rs.core.Response;
 
 public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
@@ -26,8 +26,8 @@ public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
     @Override
     public void processAction(RequiredActionContext context) {
         TokenCodeService tokenCodeService = context.getSession().getProvider(TokenCodeService.class);
-        String phoneNumber = context.getHttpRequest().getDecodedFormParameters().getFirst("phoneNumber");
-        String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
+        PhoneNumber phoneNumber = new PhoneNumber(context.getHttpRequest().getDecodedFormParameters());
+        String code = context.getHttpRequest().getDecodedFormParameters().getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
         /*
         try {
             tokenCodeService.validateCode(context.getUser(), phoneNumber, code);
@@ -51,7 +51,8 @@ public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
             context.success();
         } else {
             Response challenge = context.form()
-                    .setAttribute("phoneNumber", phoneNumber)
+                    .setAttribute("areaCode", phoneNumber.getAreaCode())
+                    .setAttribute("phoneNumber", phoneNumber.getPhoneNumber())
                     .setError("verificationCodeDoesNotMatch")
                     .createForm("login-update-phone-number.ftl");
             context.challenge(challenge);

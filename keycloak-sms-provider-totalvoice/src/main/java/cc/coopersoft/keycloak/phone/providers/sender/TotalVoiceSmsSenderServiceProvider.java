@@ -7,6 +7,7 @@ import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.FullSmsSenderAbstractService;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.json.JSONObject;
 import org.keycloak.Config.Scope;
 
@@ -20,10 +21,11 @@ public class TotalVoiceSmsSenderServiceProvider implements MessageSenderService 
     }
 
     @Override
-    public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String message, int expires) throws MessageSendException {
+    public MessageSendResult sendSmsMessage(TokenCodeType type, PhoneNumber phoneNumber, String message,
+                                            int expires) throws MessageSendException {
 
         try {
-            JSONObject response = smsClient.enviar(phoneNumber, message);
+            JSONObject response = smsClient.enviar(phoneNumber.getPhoneNumber(), message);
 
             if (!response.getBoolean("sucesso")) {
                 throw new MessageSendException(response.getInt("status"),

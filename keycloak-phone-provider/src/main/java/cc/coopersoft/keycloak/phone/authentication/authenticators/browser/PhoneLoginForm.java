@@ -1,13 +1,12 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.browser;
 
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
-import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
-import org.jboss.resteasy.specimpl.MultivaluedMapImpl;
 import org.keycloak.authentication.AbstractFormAuthenticator;
 import org.keycloak.authentication.AuthenticationFlowContext;
-import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
@@ -16,18 +15,13 @@ import org.keycloak.forms.login.freemarker.model.LoginBean;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
-import org.keycloak.models.utils.FormMessage;
-import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
-import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 
 import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
-import java.util.ArrayList;
-import java.util.List;
 
 public class PhoneLoginForm extends AbstractFormAuthenticator implements Authenticator {
 
@@ -36,13 +30,8 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
     public static final String PHONE_LOGIN_FORM_TPL = "login.ftl";
 
     public static final String FIELD_LOGIN_TYPE = "loginType";
-    public static final String FIELD_PHONE_NUMBER = "phoneNumber";
-    public static final String FIELD_VERIFICATION_CODE = "loginCode";
 
-    public static final String MISSING_PHONE_NUMBER = "requiredPhoneNumber";
-    public static final String MISSING_VERIFY_CODE = "requireSmsVerifyCode";
     public static final String USER_NOT_EXISTS = "userNotExists";
-    public static final String VERIFY_CODE_MISMATCH = "smsVerifyCodeIncorrect";
 
     private TokenCodeService getTokenCodeService(KeycloakSession session) {
         return session.getProvider(TokenCodeService.class);
@@ -57,7 +46,7 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
     }
 
     protected Response makeForm(LoginFormsProvider form){
-        MultivaluedMap<String, String> formData = new MultivaluedHashMap<String, String>();
+        MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
         return makeForm(form, formData);
     }
 
@@ -125,9 +114,9 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
 
         KeycloakSession session = context.getSession();
 
-        String phoneNumber = formData.getFirst(FIELD_PHONE_NUMBER);
-        if (Validation.isBlank(phoneNumber)) {
-            context.challenge(challenge(context, MISSING_PHONE_NUMBER, formData));
+        PhoneNumber phoneNumber = new PhoneNumber(formData);
+        if (phoneNumber.isEmpty()) {
+            context.challenge(challenge(context, PhoneConstants.MISSING_PHONE_NUMBER, formData));
             return;
         }
         UserModel user = UserUtils.findUserByPhone(session.users(), context.getRealm(), phoneNumber);
@@ -135,14 +124,14 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
             context.challenge(challenge(context, USER_NOT_EXISTS, formData));
             return;
         }
-        String code = formData.getFirst(FIELD_VERIFICATION_CODE);
-        if (Validation.isBlank(phoneNumber)) {
-            context.challenge(challenge(context, MISSING_VERIFY_CODE, formData));
+        String code = formData.getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
+        if (Validation.isBlank(code)) {
+            context.challenge(challenge(context, PhoneConstants.MISSING_VERIFY_CODE, formData));
             return;
         }
         TokenCodeService tokenCodeService = getTokenCodeService(session);
         if(!tokenCodeService.validateCode(user, phoneNumber, code, TokenCodeType.LOGIN)){ //验证码错误
-            context.challenge(challenge(context, VERIFY_CODE_MISMATCH, formData));
+            context.challenge(challenge(context, PhoneConstants.SMS_CODE_MISMATCH, formData));
             return;
         }
 

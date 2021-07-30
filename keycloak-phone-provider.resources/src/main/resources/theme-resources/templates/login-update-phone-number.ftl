@@ -36,7 +36,7 @@
               </div>
               <div class="${properties.kcFormGroupClass!} row">
                 <label for="code" class="${properties.kcLabelClass!}">${msg("verificationCode")}</label>
-                <input tabindex="3" id="code" class="${properties.kcInputClass!}" name="code"
+                <input tabindex="3" id="code" class="${properties.kcInputClass!}" name="smsCode"
                        type="text" <#if phoneNumber??>autofocus</#if>
                        autocomplete="off"/>
               </div>

@@ -1,17 +1,17 @@
-package cc.coopersoft.keycloak.phone.providers.spi.impl;
+package cc.coopersoft.keycloak.phone.providers.spi;
 
-import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
-import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeServiceProviderFactory;
+import cc.coopersoft.keycloak.phone.providers.spi.impl.TokenCodeServiceImpl;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.provider.ProviderFactory;
 
-public class TokenCodeServiceProviderFactoryImpl implements TokenCodeServiceProviderFactory {
+public class ConfigServiceProviderFactory implements ProviderFactory<ConfigService> {
     private Config.Scope config;
 
     @Override
-    public TokenCodeService create(KeycloakSession session) {
-        return new TokenCodeServiceImpl(session, config);
+    public ConfigService create(KeycloakSession session) {
+        return new ConfigService(session, config);
     }
 
     @Override
@@ -29,6 +29,6 @@ public class TokenCodeServiceProviderFactoryImpl implements TokenCodeServiceProv
 
     @Override
     public String getId() {
-        return "default";
+        return "config";
     }
 }

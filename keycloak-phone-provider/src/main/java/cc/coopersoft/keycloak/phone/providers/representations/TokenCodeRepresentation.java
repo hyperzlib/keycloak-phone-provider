@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.representations;
 
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -13,6 +14,7 @@ import java.util.Date;
 @NoArgsConstructor
 public class TokenCodeRepresentation {
     private String id;
+    private String areaCode;
     private String phoneNumber;
     private String code;
     private String type;
@@ -21,11 +23,12 @@ public class TokenCodeRepresentation {
     private Date resendExpiresAt;
     private Boolean confirmed;
 
-    public static TokenCodeRepresentation forPhoneNumber(String phoneNumber) {
+    public static TokenCodeRepresentation forPhoneNumber(PhoneNumber phoneNumber) {
         TokenCodeRepresentation tokenCode = new TokenCodeRepresentation();
 
         tokenCode.id = KeycloakModelUtils.generateId();
-        tokenCode.phoneNumber = phoneNumber;
+        tokenCode.areaCode = phoneNumber.getAreaCode();
+        tokenCode.phoneNumber = phoneNumber.getPhoneNumber();
         tokenCode.code = generateTokenCode();
         tokenCode.confirmed = false;
 

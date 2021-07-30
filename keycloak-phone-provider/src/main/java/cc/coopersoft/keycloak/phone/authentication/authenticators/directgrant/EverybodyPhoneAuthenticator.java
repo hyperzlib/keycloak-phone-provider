@@ -3,6 +3,7 @@ package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -28,9 +29,9 @@ public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator
 
   @Override
   public void authenticate(AuthenticationFlowContext context){
-    String phoneNumber = getPhoneNumber(context);
+    PhoneNumber phoneNumber = getPhoneNumber(context);
 
-    if (Validation.isBlank(phoneNumber)){
+    if (phoneNumber.isEmpty()){
       invalidCredentials(context);
       return;
     }
@@ -51,15 +52,15 @@ public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator
     }
 
     UserModel user = UserUtils.findUserByPhone(context.getSession().users(),
-            context.getRealm(),phoneNumber);
+            context.getRealm(), phoneNumber);
     if (user == null){
-      if (context.getSession().users().getUserByUsername(context.getRealm(), phoneNumber) != null){
+      if (context.getSession().users().getUserByUsername(context.getRealm(), phoneNumber.getPhoneNumber()) != null){
         invalidCredentials(context,AuthenticationFlowError.USER_CONFLICT);
         return;
       }
-      user = context.getSession().users().addUser(context.getRealm(), phoneNumber);
+      user = context.getSession().users().addUser(context.getRealm(), phoneNumber.getPhoneNumber());
       user.setEnabled(true);
-      context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, phoneNumber);
+      context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, phoneNumber.getPhoneNumber());
     }
     context.setUser(user);
 

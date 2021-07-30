@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.credential;
 
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import com.fasterxml.jackson.annotation.JsonCreator;
 import lombok.Getter;
 import org.keycloak.common.util.Time;
@@ -21,7 +22,7 @@ public class PhoneOtpCredentialModel extends CredentialModel {
         this.emptySecretData = emptySecretData;
     }
 
-    public static PhoneOtpCredentialModel create(String phoneNumber) {
+    public static PhoneOtpCredentialModel create(PhoneNumber phoneNumber) {
 
         SmsOtpCredentialData credentialData = new SmsOtpCredentialData(phoneNumber);
         EmptySecretData secretData = new EmptySecretData();
@@ -65,12 +66,19 @@ public class PhoneOtpCredentialModel extends CredentialModel {
 
     @Getter
     public static class SmsOtpCredentialData {
+        private final String areaCode;
         private final String phoneNumber;
 
         @JsonCreator
-        @ConstructorProperties("phoneNumber")
-        SmsOtpCredentialData(String phoneNumber) {
+        @ConstructorProperties({"areaCode", "phoneNumber"})
+        SmsOtpCredentialData(String areaCode, String phoneNumber) {
+            this.areaCode = areaCode;
             this.phoneNumber = phoneNumber;
+        }
+
+        SmsOtpCredentialData(PhoneNumber phoneNumber) {
+            this.areaCode = phoneNumber.getAreaCode();
+            this.phoneNumber = phoneNumber.getPhoneNumber();
         }
     }
 

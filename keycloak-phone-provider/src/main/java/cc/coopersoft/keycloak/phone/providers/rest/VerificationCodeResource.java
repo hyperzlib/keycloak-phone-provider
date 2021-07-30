@@ -2,6 +2,8 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.JsonUtils;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
@@ -62,7 +64,9 @@ public class VerificationCodeResource {
         try {
             JsonNode jsonObject = JsonLoader.fromString(reqBody);
 
-            return this.setUserPhoneNumber(jsonObject.get("phone_number").asText(), jsonObject.get("code").asText());
+            return this.setUserPhoneNumber(jsonObject.get(PhoneConstants.FIELD_AREA_CODE).asText(),
+                    jsonObject.get(PhoneConstants.FIELD_PHONE_NUMBER).asText(),
+                    jsonObject.get(PhoneConstants.FIELD_VERIFICATION_CODE).asText());
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -74,11 +78,13 @@ public class VerificationCodeResource {
     @Path("")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response setUserPhoneNumber(@FormParam("phone_number") String phoneNumber,
-                                       @FormParam("code") String code){
+    public Response setUserPhoneNumber(@FormParam(PhoneConstants.FIELD_AREA_CODE) String areaCode,
+                                       @FormParam(PhoneConstants.FIELD_PHONE_NUMBER) String phoneNumberStr,
+                                       @FormParam(PhoneConstants.FIELD_VERIFICATION_CODE) String code){
         try {
+            PhoneNumber phoneNumber = new PhoneNumber(areaCode, phoneNumberStr);
             if (auth == null) throw new NotAuthorizedException("Bearer");
-            if (phoneNumber == null) throw new BadRequestException("Must inform a phone number");
+            if (phoneNumber.isEmpty()) throw new BadRequestException("Must inform a phone number");
             if (code == null) throw new BadRequestException("Must inform a token code");
 
             UserModel user = auth.getUser();

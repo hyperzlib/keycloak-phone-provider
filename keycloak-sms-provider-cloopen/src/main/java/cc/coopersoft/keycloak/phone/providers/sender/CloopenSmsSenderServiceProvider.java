@@ -2,10 +2,10 @@ package cc.coopersoft.keycloak.phone.providers.sender;
 
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import com.cloopen.rest.sdk.BodyType;
 import com.cloopen.rest.sdk.CCPRestSmsSDK;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
-import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.models.RealmModel;
@@ -54,7 +54,7 @@ public class CloopenSmsSenderServiceProvider implements MessageSenderService {
     }
 
     @Override
-    public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) throws MessageSendException {
+    public MessageSendResult sendSmsMessage(TokenCodeType type, PhoneNumber phoneNumber, String code, int expires) {
         //请使用管理控制台中已创建应用的APPID
         String appId = Optional.ofNullable(config.get(realm.getName().toUpperCase() + "_" + APP_ID_PARAM_NAME))
                 .orElse(config.get(APP_ID_PARAM_NAME));
@@ -68,11 +68,11 @@ public class CloopenSmsSenderServiceProvider implements MessageSenderService {
 
 //        String subAppend="1234";  //可选 扩展码，四位数字 0~9999
 //        String reqId="fadfafas";  //可选 第三方自定义消息id，最大支持32位英文数字，同账号下同一自然天内不允许重复
-        Map<String, Object> result = client.sendTemplateSMS(phoneNumber,templateId,datas);
+        Map<String, Object> result = client.sendTemplateSMS(phoneNumber.getPhoneNumber(), templateId, datas);
         //Map<String, Object> result = client.sendTemplateSMS(phoneNumber,templateId,datas,subAppend,reqId);
         if("000000".equals(result.get("statusCode"))){
             //正常返回输出data包体信息（map）
-            Map<String,Object> data = (Map<String, Object>) result.get("data");
+            Map<String, Object> data = (Map<String, Object>) result.get("data");
             logger.info("cloopen send message result: " + data.toString());
 //            Set<String> keySet = data.keySet();
 //            for(String key:keySet){

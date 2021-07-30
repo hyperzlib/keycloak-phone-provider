@@ -5,6 +5,8 @@ import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
@@ -67,16 +69,16 @@ public class TokenCodeResource {
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_FORM_URLENCODED)
     public Response getTokenCode(MultivaluedMap<String, String> formData) {
-        String phoneNumber = formData.getFirst("phone_number");
+        PhoneNumber phoneNumber = new PhoneNumber(formData);
         String response;
 
-        if (phoneNumber == null){
-            response = "{\"status\":0,\"error\":\"phone-number-empty\",\"message\":\"Must inform a phone number.\"}";
+        if (phoneNumber.isEmpty()){
+            response = "{\"status\":0,\"error\":\"phoneNumberEmpty\",\"message\":\"Must inform a phone number.\"}";
             return Response.ok(response, APPLICATION_JSON_TYPE).build();
         }
         if (!this.session.getProvider(CaptchaService.class).verify(formData, this.auth) &&
                 !this.isTrustedClient(formData.getFirst("client_id"), formData.getFirst("client_secret"))){
-            response = "{\"status\":0,\"error\":\"captcha-not-completed\",\"message\":\"Captcha not completed.\"}";
+            response = "{\"status\":0,\"error\":\"captchaNotCompleted\",\"message\":\"Captcha not completed.\"}";
             return Response.ok(response, APPLICATION_JSON_TYPE).build();
         }
 
@@ -84,12 +86,12 @@ public class TokenCodeResource {
             //需要检测用户是否存在
             UserModel user = UserUtils.findUserByPhone(session.users(), session.getContext().getRealm(), phoneNumber);
             if(user == null){
-                response = "{\"status\":0,\"error\":\"user-not-exists\",\"message\":\"User not exists.\"}";
+                response = "{\"status\":0,\"error\":\"userNotExists\",\"message\":\"User not exists.\"}";
                 return Response.ok(response, APPLICATION_JSON_TYPE).build();
             }
         }
 
-        logger.info(String.format("Requested %s code to %s",tokenCodeType.getLabel(), phoneNumber));
+        logger.info(String.format("Requested %s code to %s",tokenCodeType.getLabel(), phoneNumber.getPhoneNumber()));
         MessageSendResult result = session.getProvider(PhoneMessageService.class).sendTokenCode(phoneNumber, tokenCodeType);
 
         response = String.format("{\"status\":1,\"expires_in\":%d,\"resend_expires\":%d}",
@@ -106,9 +108,10 @@ public class TokenCodeResource {
     public Response getResendExpireJson(String reqBody) {
         try {
             JsonNode jsonObject = JsonLoader.fromString(reqBody);
-            return this.getResendExpire(jsonObject.get("phone_number").asText(""));
+            return this.getResendExpire(jsonObject.get(PhoneConstants.FIELD_AREA_CODE).asText(),
+                    jsonObject.get(PhoneConstants.FIELD_PHONE_NUMBER).asText());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return Response.serverError().build();
     }
@@ -118,18 +121,21 @@ public class TokenCodeResource {
     @Path("/resend-expires")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response getResendExpirePost(@FormParam("phone_number") String phoneNumber) {
-        return this.getResendExpire(phoneNumber);
+    public Response getResendExpirePost(@FormParam(PhoneConstants.FIELD_AREA_CODE) String areaCode,
+                                        @FormParam(PhoneConstants.FIELD_PHONE_NUMBER) String phoneNumber) {
+        return this.getResendExpire(areaCode, phoneNumber);
     }
 
     @GET
     @NoCache
     @Path("/resend-expires")
     @Produces(APPLICATION_JSON)
-    public Response getResendExpire(@QueryParam("phone_number") String phoneNumber) {
+    public Response getResendExpire(@QueryParam(PhoneConstants.FIELD_AREA_CODE) String areaCode,
+                                    @QueryParam(PhoneConstants.FIELD_PHONE_NUMBER) String phoneNumberStr) {
         String response;
-        if (phoneNumber == null){
-            response = "{\"status\":0,\"error\":\"phone-number-empty\",\"message\":\"Must inform a phone number.\"}";
+        PhoneNumber phoneNumber = new PhoneNumber(areaCode, phoneNumberStr);
+        if (phoneNumber.isEmpty()){
+            response = "{\"status\":0,\"error\":\"phoneNumberEmpty\",\"message\":\"Must inform a phone number.\"}";
             return Response.ok(response, APPLICATION_JSON_TYPE).build();
         }
 

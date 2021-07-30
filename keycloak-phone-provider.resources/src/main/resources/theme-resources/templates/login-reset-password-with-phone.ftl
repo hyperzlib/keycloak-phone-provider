@@ -57,7 +57,7 @@
                                 <label for="code" class="${properties.kcLabelClass!}">${msg("verificationCode")}</label>
                             </div>
                             <div class="col-xs-9 col-sm-9 col-md-9 col-lg-9">
-                                <input type="text" id="code" name="code" class="${properties.kcInputClass!}" autofocus/>
+                                <input type="text" id="code" name="smsCode" class="${properties.kcInputClass!}" autofocus/>
                             </div>
                             <div class="col-xs-3 col-sm-3 col-md-3 col-lg-3">
                                 <input class="${properties.kcButtonClass!} ${properties.kcButtonPrimaryClass!} ${properties.kcButtonBlockClass!} ${properties.kcButtonLargeClass!}"

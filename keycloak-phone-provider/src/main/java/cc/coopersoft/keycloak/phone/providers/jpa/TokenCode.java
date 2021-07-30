@@ -12,20 +12,21 @@ import java.util.Date;
         @NamedQuery(
                 name = "currentProcess",
                 query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
-                        "AND t.phoneNumber = :phoneNumber " +
+                        "AND t.areaCode = :areaCode AND t.phoneNumber = :phoneNumber " +
                         "AND t.expiresAt >= :now AND t.type = :type"
         ),
         @NamedQuery(
                 name = "getAll",
                 query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
-                        "AND t.phoneNumber = :phoneNumber AND t.type = :type"
+                        "AND t.areaCode = :areaCode AND t.phoneNumber = :phoneNumber " +
+                        "AND t.type = :type"
         ),
         @NamedQuery(
                 name = "processesSince",
                 query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
-                        "AND t.phoneNumber = :phoneNumber " +
+                        "AND t.areaCode = :areaCode AND t.phoneNumber = :phoneNumber " +
                         "AND t.createdAt >= :date AND t.type = :type"
-        ),
+        )
 })
 public class TokenCode {
     @Id
@@ -34,6 +35,9 @@ public class TokenCode {
 
     @Column(name = "REALM_ID", nullable = false)
     private String realmId;
+
+    @Column(name = "AREA_CODE", nullable = false)
+    private String areaCode;
 
     @Column(name = "PHONE_NUMBER", nullable = false)
     private String phoneNumber;
@@ -59,6 +63,6 @@ public class TokenCode {
     @Column(name = "CONFIRMED", nullable = false)
     private Boolean confirmed;
 
-    @Column(name = "BY_WHOM", nullable = true)
+    @Column(name = "BY_WHOM")
     private String byWhom;
 }

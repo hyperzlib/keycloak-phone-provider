@@ -11,7 +11,6 @@ import java.util.stream.Stream;
  *
  *
  */
-
 public class UserUtils {
 
     private static UserModel singleUser(List<UserModel> users){
@@ -32,15 +31,16 @@ public class UserUtils {
                         .anyMatch("true"::equals)).findFirst().orElse(null);
     }
 
-    public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm, String phoneNumber){
+    public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm, PhoneNumber phoneNumber){
         Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
-                realm, "phoneNumber", phoneNumber);
+                realm, "phoneNumber", phoneNumber.getFullPhoneNumber());
         return singleUser(users);
     }
 
-    public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm, String phoneNumber, String notIs){
+    public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm,
+                                            PhoneNumber phoneNumber, String notIs){
         Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
-                realm, "phoneNumber", phoneNumber);
+                realm, "phoneNumber", phoneNumber.getFullPhoneNumber());
         return singleUser(users.filter(u -> !u.getId().equals(notIs)).collect(Collectors.toList()));
     }
 

@@ -3,6 +3,7 @@ package cc.coopersoft.keycloak.phone.credential;
 import cc.coopersoft.keycloak.phone.authentication.authenticators.browser.SmsOtpMfaAuthenticatorFactory;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.jboss.logging.Logger;
 import org.keycloak.common.util.Time;
 import org.keycloak.credential.*;
@@ -42,12 +43,12 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
     @Override
     public boolean isValid(RealmModel realm, UserModel user, CredentialInput input) {
 
-        String phoneNumber = user.getFirstAttribute("phoneNumber");
+        PhoneNumber phoneNumber = new PhoneNumber(user.getFirstAttribute("phoneNumber"));
         String code = input.getChallengeResponse();
 
         if (!(input instanceof UserCredentialModel)) return false;
         if (!input.getType().equals(getType())) return false;
-        if (phoneNumber == null) return false;
+        if (phoneNumber.isEmpty()) return false;
         if (code == null) return false;
 
         return getTokenCodeService().validateCode(user, phoneNumber, code, TokenCodeType.OTP);

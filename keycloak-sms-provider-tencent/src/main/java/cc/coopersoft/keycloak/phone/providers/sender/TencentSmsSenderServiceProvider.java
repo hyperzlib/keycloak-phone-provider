@@ -4,6 +4,7 @@ import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import com.tencentcloudapi.common.Credential;
 import com.tencentcloudapi.common.exception.TencentCloudSDKException;
 import com.tencentcloudapi.common.profile.ClientProfile;
@@ -67,7 +68,8 @@ public class TencentSmsSenderServiceProvider implements MessageSenderService {
 
 
   @Override
-  public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) throws MessageSendException {
+  public MessageSendResult sendSmsMessage(TokenCodeType type, PhoneNumber phoneNumber, String code,
+                                          int expires) throws MessageSendException {
     try {
 
       /* 实例化一个请求对象，根据调用的接口和实际情况，可以进一步设置请求参数
@@ -111,7 +113,7 @@ public class TencentSmsSenderServiceProvider implements MessageSenderService {
 
       /* 下发手机号码，采用 e.164 标准，+[国家或地区码][手机号]
        * 例如+8613711112222， 其中前面有一个+号 ，86为国家码，13711112222为手机号，最多不要超过200个手机号*/
-      String[] phoneNumbers = {phoneNumber};
+      String[] phoneNumbers = {phoneNumber.getPhoneNumber()};
       req.setPhoneNumberSet(phoneNumbers);
 
       /* 模板参数: 若无模板参数，则设置为空*/

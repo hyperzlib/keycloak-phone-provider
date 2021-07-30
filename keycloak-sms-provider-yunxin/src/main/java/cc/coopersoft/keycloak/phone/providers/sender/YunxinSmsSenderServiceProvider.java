@@ -4,6 +4,7 @@ import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.apache.http.HttpHeaders;
 import org.apache.http.HttpResponse;
 import org.apache.http.NameValuePair;
@@ -40,7 +41,7 @@ public class YunxinSmsSenderServiceProvider implements MessageSenderService {
   }
 
   @Override
-  public MessageSendResult sendSmsMessage(TokenCodeType type, String phoneNumber, String code, int expires) {
+  public MessageSendResult sendSmsMessage(TokenCodeType type, PhoneNumber phoneNumber, String code, int expires) {
 
     HttpPost httpPost = new HttpPost(SERVER_URL);
     String curTime = String.valueOf((new Date()).getTime() / 1000L);
@@ -58,7 +59,7 @@ public class YunxinSmsSenderServiceProvider implements MessageSenderService {
      */
     String templateId= config.get(realm.getName().toUpperCase() + "_" + type.name().toUpperCase() + "_TEMPLATE");
     nvps.add(new BasicNameValuePair("templateid", templateId));
-    nvps.add(new BasicNameValuePair("mobile", phoneNumber));
+    nvps.add(new BasicNameValuePair("mobile", phoneNumber.getPhoneNumber()));
     nvps.add(new BasicNameValuePair("codeLen", String.valueOf(code.length())));
 
 

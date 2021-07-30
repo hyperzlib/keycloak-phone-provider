@@ -4,8 +4,7 @@ import org.keycloak.provider.Provider;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.provider.Spi;
 
-public class TokenCodeServiceSpi implements Spi {
-
+public class ConfigServiceSpi implements Spi {
     @Override
     public boolean isInternal() {
         return false;
@@ -13,7 +12,7 @@ public class TokenCodeServiceSpi implements Spi {
 
     @Override
     public String getName() {
-        return "tokenCodeService";
+        return "phoneProvider";
     }
 
     @Override

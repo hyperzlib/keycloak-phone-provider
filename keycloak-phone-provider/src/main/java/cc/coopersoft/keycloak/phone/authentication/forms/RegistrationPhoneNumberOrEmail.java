@@ -2,13 +2,15 @@
  * add by zhangzhl
  * 2020-07-27
  * 注册页手机号码必填验证
- * 
+ *
  */
 package cc.coopersoft.keycloak.phone.authentication.forms;
 
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
@@ -35,13 +37,8 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 	private static final Logger logger = Logger.getLogger(RegistrationPhoneNumberOrEmail.class);
 
 	public static final String PROVIDER_ID = "registration-phone-or-email";
-	public static final String FIELD_EMAIL = RegistrationPage.FIELD_EMAIL;
-	public static final String FIELD_PHONE_NUMBER = "phoneNumber";
-	public static final String FIELD_VERIFICATION_CODE = "registerCode";
 
 	public static final String MISSING_PHONE_NUMBER_OR_EMAIL = "requiredPhoneNumberOrEmail";
-	public static final String PHONE_EXISTS = "phoneNumberExists";
-	public static final String VERIFICATION_CODE_MISMATCH = "smsVerifyCodeIncorrect";
 
 	public static final String PHONE_IN_USE = "phone-in-use";
 
@@ -79,7 +76,7 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 		return false;
 	}
 
-	private static AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+	private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
 			AuthenticationExecutionModel.Requirement.REQUIRED,
 			AuthenticationExecutionModel.Requirement.DISABLED
 	};
@@ -124,37 +121,38 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 		context.getEvent().detail(Details.REGISTER_METHOD, "form");
 		String eventError = Errors.INVALID_REGISTRATION;
 		KeycloakSession session = context.getSession();
+		PhoneNumber phoneNumber = new PhoneNumber(formData);
 
-		if(formData.containsKey(FIELD_PHONE_NUMBER) &&
-				!Validation.isBlank(formData.getFirst(FIELD_PHONE_NUMBER))){
+		if(!phoneNumber.isEmpty()){
 			//使用手机号注册
-			formData.remove(FIELD_EMAIL);
-			String phoneNumber = formData.getFirst(FIELD_PHONE_NUMBER);
-			context.getEvent().detail(FIELD_PHONE_NUMBER, phoneNumber);
+			formData.remove(PhoneConstants.FIELD_EMAIL);
+			context.getEvent().detail(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber());
 
 			if (!UserUtils.isDuplicatePhoneAllowed() &&
-					UserUtils.findUserByPhone(session.users(),context.getRealm(),phoneNumber) != null) {
-				formData.remove(FIELD_PHONE_NUMBER);
+					UserUtils.findUserByPhone(session.users(), context.getRealm(), phoneNumber) != null) {
+				formData.remove(PhoneConstants.FIELD_PHONE_NUMBER);
 				eventError = PHONE_IN_USE;
-				context.getEvent().detail(FIELD_PHONE_NUMBER, phoneNumber);
-				errors.add(new FormMessage(FIELD_PHONE_NUMBER, PHONE_EXISTS));
+				context.getEvent().detail(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber());
+				errors.add(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, PhoneConstants.PHONE_EXISTS));
 			} else {
 				//检查短信验证码
-				String verificationCode = formData.getFirst(FIELD_VERIFICATION_CODE);
+				String verificationCode = formData.getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
 				TokenCodeRepresentation tokenCode =  getTokenCodeService(session)
 						.currentProcess(phoneNumber, TokenCodeType.REGISTRATION);
 				if (Validation.isBlank(verificationCode) || tokenCode == null ||
 						!tokenCode.getCode().equals(verificationCode)){
 					context.error(Errors.INVALID_REGISTRATION);
-					context.getEvent().detail(FIELD_PHONE_NUMBER, phoneNumber);
-					errors.add(new FormMessage(FIELD_VERIFICATION_CODE, VERIFICATION_CODE_MISMATCH));
+					context.getEvent().detail(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber());
+					errors.add(new FormMessage(PhoneConstants.FIELD_VERIFICATION_CODE,
+							PhoneConstants.SMS_CODE_MISMATCH));
 				}
-				context.getSession().setAttribute("tokenId",tokenCode.getId());
+				context.getSession().setAttribute(PhoneConstants.FIELD_TOKEN_ID, tokenCode.getId());
 			}
-		} else if(formData.containsKey(FIELD_EMAIL) &&
-				!Validation.isBlank(formData.getFirst(FIELD_EMAIL))) {
+		} else if(formData.containsKey(PhoneConstants.FIELD_EMAIL) &&
+				!Validation.isBlank(formData.getFirst(PhoneConstants.FIELD_EMAIL))) {
 			//使用邮箱注册，验证电子邮箱
-			formData.remove(FIELD_PHONE_NUMBER);
+			formData.remove(PhoneConstants.FIELD_AREA_CODE);
+			formData.remove(PhoneConstants.FIELD_PHONE_NUMBER);
 			String email = formData.getFirst(Validation.FIELD_EMAIL);
 			boolean emailValid = true;
 			if (Validation.isBlank(email)) {
@@ -202,12 +200,12 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 
 		user.setFirstName(formData.getFirst(RegistrationPage.FIELD_FIRST_NAME));
 		user.setLastName(formData.getFirst(RegistrationPage.FIELD_LAST_NAME));
-		if(formData.containsKey(FIELD_PHONE_NUMBER)) {
-			String phoneNumber = formData.getFirst(FIELD_PHONE_NUMBER);
-			String tokenId = context.getSession().getAttribute("tokenId", String.class);
+		if(formData.containsKey(PhoneConstants.FIELD_PHONE_NUMBER)) {
+			PhoneNumber phoneNumber = new PhoneNumber(formData);
+			String tokenId = context.getSession().getAttribute(PhoneConstants.FIELD_TOKEN_ID, String.class);
 
 			logger.info(String.format("registration user %s phone success, tokenId is: %s", user.getId(), tokenId));
-			getTokenCodeService(context.getSession()).tokenValidated(user,phoneNumber,tokenId);
+			getTokenCodeService(context.getSession()).tokenValidated(user, phoneNumber, tokenId);
 		} else {
 			logger.info(String.format("registration user %s by email success.", user.getId()));
 			user.setEmail(formData.getFirst(RegistrationPage.FIELD_EMAIL));

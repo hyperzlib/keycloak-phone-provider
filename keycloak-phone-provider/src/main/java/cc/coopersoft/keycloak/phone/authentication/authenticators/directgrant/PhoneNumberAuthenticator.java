@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
@@ -28,14 +29,13 @@ public class PhoneNumberAuthenticator extends BaseDirectGrantAuthenticator {
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
+        PhoneNumber phoneNumber = getPhoneNumber(context);
 
-        String phoneNumber = getPhoneNumber(context);
-
-        if (Validation.isBlank(phoneNumber)){
+        if (phoneNumber.isEmpty()){
             invalidCredentials(context);
             return;
         }
-        UserModel user = UserUtils.findUserByPhone(context.getSession().users(),context.getRealm(),phoneNumber);
+        UserModel user = UserUtils.findUserByPhone(context.getSession().users(), context.getRealm(), phoneNumber);
         if (user == null) {
             invalidCredentials(context);
             return;

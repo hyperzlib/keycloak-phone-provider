@@ -9,7 +9,7 @@
           <form id="kc-form-login" action="${url.loginAction}" method="post">
             <div class="${properties.kcFormGroupClass!} row">
               <label for="code" class="${properties.kcLabelClass!}">${msg("authenticationCode")}</label>
-              <input tabindex="1" id="code" class="${properties.kcInputClass!}" name="code"
+              <input tabindex="1" id="code" class="${properties.kcInputClass!}" name="smsCode"
                      type="text" autofocus
                      autocomplete="off"/>
             </div>

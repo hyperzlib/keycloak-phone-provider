@@ -4,6 +4,8 @@ import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialModel;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProvider;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProviderFactory;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.credential.CredentialProvider;
@@ -30,8 +32,8 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
     @Override
     public void processAction(RequiredActionContext context) {
         TokenCodeService tokenCodeService = context.getSession().getProvider(TokenCodeService.class);
-        String phoneNumber = context.getHttpRequest().getDecodedFormParameters().getFirst("phoneNumber");
-        String code = context.getHttpRequest().getDecodedFormParameters().getFirst("code");
+        PhoneNumber phoneNumber = new PhoneNumber(context.getHttpRequest().getDecodedFormParameters());
+        String code = context.getHttpRequest().getDecodedFormParameters().getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
         /*try {
             tokenCodeService.validateCode(context.getUser(), phoneNumber, code);
             PhoneOtpCredentialProvider socp = (PhoneOtpCredentialProvider) context.getSession()
@@ -60,7 +62,8 @@ public class ConfigSmsOtpRequiredAction implements RequiredActionProvider {
             context.success();
         } else {
             Response challenge = context.form()
-                    .setAttribute("phoneNumber", phoneNumber)
+                    .setAttribute("areaCode", phoneNumber.getAreaCode())
+                    .setAttribute("phoneNumber", phoneNumber.getPhoneNumber())
                     .setError("verificationCodeDoesNotMatch")
                     .createForm("login-update-phone-number.ftl");
             context.challenge(challenge);

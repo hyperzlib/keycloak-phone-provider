@@ -5,6 +5,8 @@ import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProvider;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProviderFactory;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.jboss.resteasy.spi.HttpResponse;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -33,7 +35,7 @@ public class SmsOtpMfaAuthenticator implements Authenticator, CredentialValidato
 
     protected boolean validateAnswer(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        String secret = formData.getFirst("code");
+        String secret = formData.getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
         String credentialId = formData.getFirst("credentialId");
         if (credentialId == null || credentialId.isEmpty()) {
             credentialId = getCredentialProvider(context.getSession())
@@ -84,7 +86,7 @@ public class SmsOtpMfaAuthenticator implements Authenticator, CredentialValidato
             return;
         }
         PhoneMessageService phoneMessageService = context.getSession().getProvider(PhoneMessageService.class);
-        String phoneNumber = context.getUser().getFirstAttribute("phoneNumber");
+        PhoneNumber phoneNumber = new PhoneNumber(context.getUser().getFirstAttribute("phoneNumber"));
         Response challenge;
         try {
             phoneMessageService.sendTokenCode(phoneNumber, TokenCodeType.OTP);
