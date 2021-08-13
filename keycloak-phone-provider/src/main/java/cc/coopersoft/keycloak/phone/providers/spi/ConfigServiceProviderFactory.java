@@ -7,21 +7,20 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderFactory;
 
 public class ConfigServiceProviderFactory implements ProviderFactory<ConfigService> {
-    private Config.Scope config;
+    private ConfigService instance;
 
     @Override
     public ConfigService create(KeycloakSession session) {
-        return new ConfigService(session, config);
+        return instance;
     }
 
     @Override
     public void init(Config.Scope scope) {
-        this.config = scope;
+        instance = new ConfigService(scope);
     }
 
     @Override
-    public void postInit(KeycloakSessionFactory keycloakSessionFactory) {
-    }
+    public void postInit(KeycloakSessionFactory keycloakSessionFactory) { }
 
     @Override
     public void close() {

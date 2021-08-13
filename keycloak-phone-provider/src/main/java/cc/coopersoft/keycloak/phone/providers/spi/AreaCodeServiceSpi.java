@@ -1,11 +1,10 @@
 package cc.coopersoft.keycloak.phone.providers.spi;
 
-import org.keycloak.Config;
 import org.keycloak.provider.Provider;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.provider.Spi;
 
-public class ConfigServiceSpi implements Spi {
+public class AreaCodeServiceSpi implements Spi {
     @Override
     public boolean isInternal() {
         return false;
@@ -13,17 +12,17 @@ public class ConfigServiceSpi implements Spi {
 
     @Override
     public String getName() {
-        return "phoneProvider";
+        return "phoneAreaCodeProvider";
     }
 
     @Override
     public Class<? extends Provider> getProviderClass() {
-        return ConfigService.class;
+        return AreaCodeService.class;
     }
 
     @Override
     @SuppressWarnings("rawtypes")
     public Class<? extends ProviderFactory> getProviderFactoryClass() {
-        return ConfigServiceProviderFactory.class;
+        return AreaCodeServiceProviderFactory.class;
     }
 }
