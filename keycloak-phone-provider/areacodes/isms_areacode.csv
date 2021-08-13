@@ -1,0 +1,218 @@
+id	country	countrycn	code	areacode	img
+1	Afghanistan	阿富汗	AF	93	af
+2	Albania	阿尔巴尼亚	AL	355	al
+3	Algeria	阿尔及利亚	DZ	213	dz
+4	American Samoa	美属萨摩亚	AS	1684	as
+5	Andorra	安道尔	AD	376	ad
+6	Angola	安哥拉	AO	244	ao
+7	Anguilla	安圭拉	AI	1264	ai
+8	Antigua and Barbuda	安提瓜和巴布达	AG	1268	ag
+9	Argentina	阿根廷	AR	54	ar
+10	Armenia	亚美尼亚	AM	374	am
+11	Aruba	阿鲁巴	AW	297	aw
+12	Australia	澳大利亚	AU	61	au
+13	Austria	奥地利	AT	43	at
+14	Azerbaijan	阿塞拜疆	AZ	994	az
+15	Bahamas	巴哈马	BS	1242	bs
+16	Bahrain	巴林	BH	973	bh
+17	Bangladesh	孟加拉国	BD	880	bd
+18	Barbados	巴巴多斯	BB	1246	bb
+19	Belarus	白俄罗斯	BY	375	by
+20	Belgium	比利时	BE	32	be
+21	Belize	伯利兹	BZ	501	bz
+22	Benin	贝宁	BJ	229	bj
+23	Bermuda	百慕大群岛	BM	1441	bm
+24	Bhutan	不丹	BT	975	bt
+25	Bolivia	玻利维亚	BO	591	bo
+26	Bosnia and Herzegovina	波斯尼亚和黑塞哥维那	BA	387	ba
+27	Botswana	博茨瓦纳	BW	267	bw
+28	Brazil	巴西	BR	55	br
+29	Brunei	文莱	BN	673	bn
+30	Bulgaria	保加利亚	BG	359	bg
+31	Burkina Faso	布基纳法索	BF	226	bf
+32	Burundi	布隆迪	BI	257	bi
+33	Cambodia	柬埔寨	KH	855	kh
+34	Cameroon	喀麦隆	CM	237	cm
+35	Canada	加拿大	CA	1	ca
+36	Cape Verde	开普	CV	238	cv
+37	Cayman Islands	开曼群岛	KY	1345	ky
+38	Central African Republic	中非共和国	CF	236	cf
+39	Chad	乍得	TD	235	td
+40	Chile	智利	CL	56	cl
+41	China	中国	CN	86	cn
+42	Colombia	哥伦比亚	CO	57	co
+43	Comoros	科摩罗	KM	269	km
+44	Cook Islands	库克群岛	CK	682	ck
+45	Costa Rica	哥斯达黎加	CR	506	cr
+46	Croatia	克罗地亚	HR	385	hr
+47	Cuba	古巴	CU	53	cu
+48	Curacao	库拉索	CW	599	cw
+49	Cyprus	塞浦路斯	CY	357	cy
+50	Czech	捷克	CZ	420	cz
+51	Democratic Republic of the Congo	刚果民主共和国	CD	243	cd
+52	Denmark	丹麦	DK	45	dk
+53	Djibouti	吉布提	DJ	253	dj
+54	Dominica	多米尼加	DM	1767	dm
+55	Dominican Republic	多米尼加共和国	DO	1809	do
+56	East Timor	东帝汶	TL	670	tl
+57	Ecuador	厄瓜多尔	EC	593	ec
+58	Egypt	埃及	EG	20	eg
+59	El Salvador	萨尔瓦多	SV	503	sv
+60	Equatorial Guinea	赤道几内亚	GQ	240	gq
+61	Eritrea	厄立特里亚	ER	291	er
+62	Estonia	爱沙尼亚	EE	372	ee
+63	Ethiopia	埃塞俄比亚	ET	251	et
+64	Faroe Islands	法罗群岛	FO	298	fo
+65	Fiji	斐济	FJ	679	fj
+66	Finland	芬兰	FI	358	fi
+67	France	法国	FR	33	fr
+68	French Guiana	法属圭亚那	GF	594	gf
+69	French Polynesia	法属波利尼西亚	PF	689	pf
+70	Gabon	加蓬	GA	241	ga
+71	Gambia	冈比亚	GM	220	gm
+72	Georgia	格鲁吉亚	GE	995	ge
+73	Germany	德国	DE	49	de
+74	Ghana	加纳	GH	233	gh
+75	Gibraltar	直布罗陀	GI	350	gi
+76	Greece	希腊	GR	30	gr
+77	Greenland	格陵兰岛	GL	299	gl
+78	Grenada	格林纳达	GD	1473	gd
+79	Guadeloupe	瓜德罗普岛	GP	590	gp
+80	Guam	关岛	GU	1671	gu
+81	Guatemala	瓜地马拉	GT	502	gt
+82	Guinea	几内亚	GN	224	gn
+83	Guinea-Bissau	几内亚比绍共和国	GW	245	gw
+84	Guyana	圭亚那	GY	592	gy
+85	Haiti	海地	HT	509	ht
+86	Honduras	洪都拉斯	HN	504	hn
+87	Hong Kong	中国香港	HK	852	hk
+88	Hungary	匈牙利	HU	36	hu
+89	Iceland	冰岛	IS	354	is
+90	India	印度	IN	91	in
+91	Indonesia	印度尼西亚	ID	62	id
+92	Iran	伊朗	IR	98	ir
+93	Iraq	伊拉克	IQ	964	iq
+94	Ireland	爱尔兰	IE	353	ie
+95	Israel	以色列	IL	972	il
+96	Italy	意大利	IT	39	it
+97	Ivory Coast	象牙海岸	CI	225	ci
+98	Jamaica	牙买加	JM	1876	jm
+99	Japan	日本	JP	81	jp
+100	Jordan	约旦	JO	962	jo
+101	Kazakhstan	哈萨克斯坦	KZ	7	kz
+102	Kenya	肯尼亚	KE	254	ke
+103	Kiribati	基里巴斯	KI	686	ki
+104	Kuwait	科威特	KW	965	kw
+105	Kyrgyzstan	吉尔吉斯斯坦	KG	996	kg
+106	Laos	老挝	LA	856	la
+107	Latvia	拉脱维亚	LV	371	lv
+108	Lebanon	黎巴嫩	LB	961	lb
+109	Lesotho	莱索托	LS	266	ls
+110	Liberia	利比里亚	LR	231	lr
+111	Libya	利比亚	LY	218	ly
+112	Liechtenstein	列支敦士登	LI	423	li
+113	Lithuania	立陶宛	LT	370	lt
+114	Luxembourg	卢森堡	LU	352	lu
+115	Macau	中国澳门	MO	853	mo
+116	Macedonia	马其顿	MK	389	mk
+117	Madagascar	马达加斯加	MG	261	mg
+118	Malawi	马拉维	MW	265	mw
+119	Malaysia	马来西亚	MY	60	my
+120	Maldives	马尔代夫	MV	960	mv
+121	Mali	马里	ML	223	ml
+122	Malta	马耳他	MT	356	mt
+123	Martinique	马提尼克	MQ	596	mq
+124	Mauritania	毛里塔尼亚	MR	222	mr
+125	Mauritius	毛里求斯	MU	230	mu
+126	Mayotte	马约特	YT	269	yt
+127	Mexico	墨西哥	MX	52	mx
+128	Moldova	摩尔多瓦	MD	373	md
+129	Monaco	摩纳哥	MC	377	mc
+130	Mongolia	蒙古	MN	976	mn
+131	Montenegro	黑山	ME	382	me
+132	Montserrat	蒙特塞拉特岛	MS	1664	ms
+133	Morocco	摩洛哥	MA	212	ma
+134	Mozambique	莫桑比克	MZ	258	mz
+135	Myanmar	缅甸	MM	95	mm
+136	Namibia	纳米比亚	NA	264	na
+137	Nepal	尼泊尔	NP	977	np
+138	Netherlands	荷兰	NL	31	nl
+139	New Caledonia	新喀里多尼亚	NC	687	nc
+140	New Zealand	新西兰	NZ	64	nz
+141	Nicaragua	尼加拉瓜	NI	505	ni
+142	Niger	尼日尔	NE	227	ne
+143	Nigeria	尼日利亚	NG	234	ng
+144	Norway	挪威	NO	47	no
+145	Oman	阿曼	OM	968	om
+146	Pakistan	巴基斯坦	PK	92	pk
+147	Palau	帕劳	PW	680	pw
+148	Palestine	巴勒斯坦	BL	970	bl
+149	Panama	巴拿马	PA	507	pa
+150	Papua New Guinea	巴布亚新几内亚	PG	675	pg
+151	Paraguay	巴拉圭	PY	595	py
+152	Peru	秘鲁	PE	51	pe
+153	Philippines	菲律宾	PH	63	ph
+154	Poland	波兰	PL	48	pl
+155	Portugal	葡萄牙	PT	351	pt
+156	Puerto Rico	波多黎各	PR	1787	pr
+157	Qatar	卡塔尔	QA	974	qa
+158	Republic Of The Congo	刚果共和国	CG	242	cg
+159	Réunion Island	留尼汪	RE	262	re
+160	Romania	罗马尼亚	RO	40	ro
+161	Russia	俄罗斯	RU	7	ru
+162	Rwanda	卢旺达	RW	250	rw
+163	Saint Kitts and Nevis	圣基茨和尼维斯	KN	1869	kn
+164	Saint Lucia	圣露西亚	LC	1758	lc
+165	Saint Pierre and Miquelon	圣彼埃尔和密克隆岛	PM	508	pm
+166	Saint Vincent and The Grenadines	圣文森特和格林纳丁斯	VC	1784	vc
+167	Samoa	萨摩亚	WS	685	ws
+168	San Marino	圣马力诺	SM	378	sm
+169	Sao Tome and Principe	圣多美和普林西比	ST	239	st
+170	Saudi Arabia	沙特阿拉伯	SA	966	sa
+171	Senegal	塞内加尔	SN	221	sn
+172	Serbia	塞尔维亚	RS	381	rs
+173	Seychelles	塞舌尔	SC	248	sc
+174	Sierra Leone	塞拉利昂	SL	232	sl
+175	Singapore	新加坡	SG	65	sg
+176	Sint Maarten (Dutch Part)	圣马丁岛（荷兰部分）	SX	1721	sx
+177	Slovakia	斯洛伐克	SK	421	sk
+178	Slovenia	斯洛文尼亚	SI	386	si
+179	Solomon Islands	所罗门群岛	SB	677	sb
+180	Somalia	索马里	SO	252	so
+181	South Africa	南非	ZA	27	za
+182	South Korea	韩国	KR	82	kr
+183	Spain	西班牙	ES	34	es
+184	Sri Lanka	斯里兰卡	LK	94	lk
+185	Sudan	苏丹	SD	249	sd
+186	Suriname	苏里南	SR	597	sr
+187	Swaziland	斯威士兰	SZ	268	sz
+188	Sweden	瑞典	SE	46	se
+189	Switzerland	瑞士	CH	41	ch
+190	Syria	叙利亚	SY	963	sy
+191	Taiwan	中国台湾	TW	886	tw
+192	Tajikistan	塔吉克斯坦	TJ	992	tj
+193	Tanzania	坦桑尼亚	TZ	255	tz
+194	Thailand	泰国	TH	66	th
+195	Timor-Leste	东帝汶	TL	670	tl
+196	Togo	多哥	TG	228	tg
+197	Tonga	汤加	TO	676	to
+198	Trinidad and Tobago	特立尼达和多巴哥	TT	1868	tt
+199	Tunisia	突尼斯	TN	216	tn
+200	Turkey	土耳其	TR	90	tr
+201	Turkmenistan	土库曼斯坦	TM	993	tm
+202	Turks and Caicos Islands	特克斯和凯科斯群岛	TC	1649	tc
+203	Uganda	乌干达	UG	256	ug
+204	Ukraine	乌克兰	UA	380	ua
+205	United Arab Emirates	阿拉伯联合酋长国	AE	971	ae
+206	United Kingdom	英国	GB	44	gb
+207	United States	美国	US	1	us
+208	Uruguay	乌拉圭	UY	598	uy
+209	Uzbekistan	乌兹别克斯坦	UZ	998	uz
+210	Vanuatu	瓦努阿图	VU	678	vu
+211	Venezuela	委内瑞拉	VE	58	ve
+212	Vietnam	越南	VN	84	vn
+213	Virgin Islands, British	英属处女群岛	VG	1340	vg
+214	Virgin Islands, US	美属维尔京群岛	VI	1284	vi
+215	Yemen	也门	YE	967	ye
+216	Zambia	赞比亚	ZM	260	zm
+217	Zimbabwe	津巴布韦	ZW	263	zw

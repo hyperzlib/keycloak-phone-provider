@@ -1,0 +1,1738 @@
+[
+    {
+        "areaCode": 93,
+        "countryCode": "AF",
+        "name": {
+            "en": "Afghanistan",
+            "zh-cn": "阿富汗"
+        }
+    },
+    {
+        "areaCode": 355,
+        "countryCode": "AL",
+        "name": {
+            "en": "Albania",
+            "zh-cn": "阿尔巴尼亚"
+        }
+    },
+    {
+        "areaCode": 213,
+        "countryCode": "DZ",
+        "name": {
+            "en": "Algeria",
+            "zh-cn": "阿尔及利亚"
+        }
+    },
+    {
+        "areaCode": 1684,
+        "countryCode": "AS",
+        "name": {
+            "en": "American Samoa",
+            "zh-cn": "美属萨摩亚"
+        }
+    },
+    {
+        "areaCode": 376,
+        "countryCode": "AD",
+        "name": {
+            "en": "Andorra",
+            "zh-cn": "安道尔"
+        }
+    },
+    {
+        "areaCode": 244,
+        "countryCode": "AO",
+        "name": {
+            "en": "Angola",
+            "zh-cn": "安哥拉"
+        }
+    },
+    {
+        "areaCode": 1264,
+        "countryCode": "AI",
+        "name": {
+            "en": "Anguilla",
+            "zh-cn": "安圭拉"
+        }
+    },
+    {
+        "areaCode": 1268,
+        "countryCode": "AG",
+        "name": {
+            "en": "Antigua and Barbuda",
+            "zh-cn": "安提瓜和巴布达"
+        }
+    },
+    {
+        "areaCode": 54,
+        "countryCode": "AR",
+        "name": {
+            "en": "Argentina",
+            "zh-cn": "阿根廷"
+        }
+    },
+    {
+        "areaCode": 374,
+        "countryCode": "AM",
+        "name": {
+            "en": "Armenia",
+            "zh-cn": "亚美尼亚"
+        }
+    },
+    {
+        "areaCode": 297,
+        "countryCode": "AW",
+        "name": {
+            "en": "Aruba",
+            "zh-cn": "阿鲁巴"
+        }
+    },
+    {
+        "areaCode": 61,
+        "countryCode": "AU",
+        "name": {
+            "en": "Australia",
+            "zh-cn": "澳大利亚"
+        }
+    },
+    {
+        "areaCode": 43,
+        "countryCode": "AT",
+        "name": {
+            "en": "Austria",
+            "zh-cn": "奥地利"
+        }
+    },
+    {
+        "areaCode": 994,
+        "countryCode": "AZ",
+        "name": {
+            "en": "Azerbaijan",
+            "zh-cn": "阿塞拜疆"
+        }
+    },
+    {
+        "areaCode": 1242,
+        "countryCode": "BS",
+        "name": {
+            "en": "Bahamas",
+            "zh-cn": "巴哈马"
+        }
+    },
+    {
+        "areaCode": 973,
+        "countryCode": "BH",
+        "name": {
+            "en": "Bahrain",
+            "zh-cn": "巴林"
+        }
+    },
+    {
+        "areaCode": 880,
+        "countryCode": "BD",
+        "name": {
+            "en": "Bangladesh",
+            "zh-cn": "孟加拉国"
+        }
+    },
+    {
+        "areaCode": 1246,
+        "countryCode": "BB",
+        "name": {
+            "en": "Barbados",
+            "zh-cn": "巴巴多斯"
+        }
+    },
+    {
+        "areaCode": 375,
+        "countryCode": "BY",
+        "name": {
+            "en": "Belarus",
+            "zh-cn": "白俄罗斯"
+        }
+    },
+    {
+        "areaCode": 32,
+        "countryCode": "BE",
+        "name": {
+            "en": "Belgium",
+            "zh-cn": "比利时"
+        }
+    },
+    {
+        "areaCode": 501,
+        "countryCode": "BZ",
+        "name": {
+            "en": "Belize",
+            "zh-cn": "伯利兹"
+        }
+    },
+    {
+        "areaCode": 229,
+        "countryCode": "BJ",
+        "name": {
+            "en": "Benin",
+            "zh-cn": "贝宁"
+        }
+    },
+    {
+        "areaCode": 1441,
+        "countryCode": "BM",
+        "name": {
+            "en": "Bermuda",
+            "zh-cn": "百慕大群岛"
+        }
+    },
+    {
+        "areaCode": 975,
+        "countryCode": "BT",
+        "name": {
+            "en": "Bhutan",
+            "zh-cn": "不丹"
+        }
+    },
+    {
+        "areaCode": 591,
+        "countryCode": "BO",
+        "name": {
+            "en": "Bolivia",
+            "zh-cn": "玻利维亚"
+        }
+    },
+    {
+        "areaCode": 387,
+        "countryCode": "BA",
+        "name": {
+            "en": "Bosnia and Herzegovina",
+            "zh-cn": "波斯尼亚和黑塞哥维那"
+        }
+    },
+    {
+        "areaCode": 267,
+        "countryCode": "BW",
+        "name": {
+            "en": "Botswana",
+            "zh-cn": "博茨瓦纳"
+        }
+    },
+    {
+        "areaCode": 55,
+        "countryCode": "BR",
+        "name": {
+            "en": "Brazil",
+            "zh-cn": "巴西"
+        }
+    },
+    {
+        "areaCode": 673,
+        "countryCode": "BN",
+        "name": {
+            "en": "Brunei",
+            "zh-cn": "文莱"
+        }
+    },
+    {
+        "areaCode": 359,
+        "countryCode": "BG",
+        "name": {
+            "en": "Bulgaria",
+            "zh-cn": "保加利亚"
+        }
+    },
+    {
+        "areaCode": 226,
+        "countryCode": "BF",
+        "name": {
+            "en": "Burkina Faso",
+            "zh-cn": "布基纳法索"
+        }
+    },
+    {
+        "areaCode": 257,
+        "countryCode": "BI",
+        "name": {
+            "en": "Burundi",
+            "zh-cn": "布隆迪"
+        }
+    },
+    {
+        "areaCode": 855,
+        "countryCode": "KH",
+        "name": {
+            "en": "Cambodia",
+            "zh-cn": "柬埔寨"
+        }
+    },
+    {
+        "areaCode": 237,
+        "countryCode": "CM",
+        "name": {
+            "en": "Cameroon",
+            "zh-cn": "喀麦隆"
+        }
+    },
+    {
+        "areaCode": 1,
+        "countryCode": "CA",
+        "name": {
+            "en": "Canada",
+            "zh-cn": "加拿大"
+        }
+    },
+    {
+        "areaCode": 238,
+        "countryCode": "CV",
+        "name": {
+            "en": "Cape Verde",
+            "zh-cn": "开普"
+        }
+    },
+    {
+        "areaCode": 1345,
+        "countryCode": "KY",
+        "name": {
+            "en": "Cayman Islands",
+            "zh-cn": "开曼群岛"
+        }
+    },
+    {
+        "areaCode": 236,
+        "countryCode": "CF",
+        "name": {
+            "en": "Central African Republic",
+            "zh-cn": "中非共和国"
+        }
+    },
+    {
+        "areaCode": 235,
+        "countryCode": "TD",
+        "name": {
+            "en": "Chad",
+            "zh-cn": "乍得"
+        }
+    },
+    {
+        "areaCode": 56,
+        "countryCode": "CL",
+        "name": {
+            "en": "Chile",
+            "zh-cn": "智利"
+        }
+    },
+    {
+        "areaCode": 86,
+        "countryCode": "CN",
+        "name": {
+            "en": "China",
+            "zh-cn": "中国"
+        }
+    },
+    {
+        "areaCode": 57,
+        "countryCode": "CO",
+        "name": {
+            "en": "Colombia",
+            "zh-cn": "哥伦比亚"
+        }
+    },
+    {
+        "areaCode": 269,
+        "countryCode": "KM",
+        "name": {
+            "en": "Comoros",
+            "zh-cn": "科摩罗"
+        }
+    },
+    {
+        "areaCode": 682,
+        "countryCode": "CK",
+        "name": {
+            "en": "Cook Islands",
+            "zh-cn": "库克群岛"
+        }
+    },
+    {
+        "areaCode": 506,
+        "countryCode": "CR",
+        "name": {
+            "en": "Costa Rica",
+            "zh-cn": "哥斯达黎加"
+        }
+    },
+    {
+        "areaCode": 385,
+        "countryCode": "HR",
+        "name": {
+            "en": "Croatia",
+            "zh-cn": "克罗地亚"
+        }
+    },
+    {
+        "areaCode": 53,
+        "countryCode": "CU",
+        "name": {
+            "en": "Cuba",
+            "zh-cn": "古巴"
+        }
+    },
+    {
+        "areaCode": 599,
+        "countryCode": "CW",
+        "name": {
+            "en": "Curacao",
+            "zh-cn": "库拉索"
+        }
+    },
+    {
+        "areaCode": 357,
+        "countryCode": "CY",
+        "name": {
+            "en": "Cyprus",
+            "zh-cn": "塞浦路斯"
+        }
+    },
+    {
+        "areaCode": 420,
+        "countryCode": "CZ",
+        "name": {
+            "en": "Czech",
+            "zh-cn": "捷克"
+        }
+    },
+    {
+        "areaCode": 243,
+        "countryCode": "CD",
+        "name": {
+            "en": "Democratic Republic of the Congo",
+            "zh-cn": "刚果民主共和国"
+        }
+    },
+    {
+        "areaCode": 45,
+        "countryCode": "DK",
+        "name": {
+            "en": "Denmark",
+            "zh-cn": "丹麦"
+        }
+    },
+    {
+        "areaCode": 253,
+        "countryCode": "DJ",
+        "name": {
+            "en": "Djibouti",
+            "zh-cn": "吉布提"
+        }
+    },
+    {
+        "areaCode": 1767,
+        "countryCode": "DM",
+        "name": {
+            "en": "Dominica",
+            "zh-cn": "多米尼加"
+        }
+    },
+    {
+        "areaCode": 1809,
+        "countryCode": "DO",
+        "name": {
+            "en": "Dominican Republic",
+            "zh-cn": "多米尼加共和国"
+        }
+    },
+    {
+        "areaCode": 670,
+        "countryCode": "TL",
+        "name": {
+            "en": "East Timor",
+            "zh-cn": "东帝汶"
+        }
+    },
+    {
+        "areaCode": 593,
+        "countryCode": "EC",
+        "name": {
+            "en": "Ecuador",
+            "zh-cn": "厄瓜多尔"
+        }
+    },
+    {
+        "areaCode": 20,
+        "countryCode": "EG",
+        "name": {
+            "en": "Egypt",
+            "zh-cn": "埃及"
+        }
+    },
+    {
+        "areaCode": 503,
+        "countryCode": "SV",
+        "name": {
+            "en": "El Salvador",
+            "zh-cn": "萨尔瓦多"
+        }
+    },
+    {
+        "areaCode": 240,
+        "countryCode": "GQ",
+        "name": {
+            "en": "Equatorial Guinea",
+            "zh-cn": "赤道几内亚"
+        }
+    },
+    {
+        "areaCode": 291,
+        "countryCode": "ER",
+        "name": {
+            "en": "Eritrea",
+            "zh-cn": "厄立特里亚"
+        }
+    },
+    {
+        "areaCode": 372,
+        "countryCode": "EE",
+        "name": {
+            "en": "Estonia",
+            "zh-cn": "爱沙尼亚"
+        }
+    },
+    {
+        "areaCode": 251,
+        "countryCode": "ET",
+        "name": {
+            "en": "Ethiopia",
+            "zh-cn": "埃塞俄比亚"
+        }
+    },
+    {
+        "areaCode": 298,
+        "countryCode": "FO",
+        "name": {
+            "en": "Faroe Islands",
+            "zh-cn": "法罗群岛"
+        }
+    },
+    {
+        "areaCode": 679,
+        "countryCode": "FJ",
+        "name": {
+            "en": "Fiji",
+            "zh-cn": "斐济"
+        }
+    },
+    {
+        "areaCode": 358,
+        "countryCode": "FI",
+        "name": {
+            "en": "Finland",
+            "zh-cn": "芬兰"
+        }
+    },
+    {
+        "areaCode": 33,
+        "countryCode": "FR",
+        "name": {
+            "en": "France",
+            "zh-cn": "法国"
+        }
+    },
+    {
+        "areaCode": 594,
+        "countryCode": "GF",
+        "name": {
+            "en": "French Guiana",
+            "zh-cn": "法属圭亚那"
+        }
+    },
+    {
+        "areaCode": 689,
+        "countryCode": "PF",
+        "name": {
+            "en": "French Polynesia",
+            "zh-cn": "法属波利尼西亚"
+        }
+    },
+    {
+        "areaCode": 241,
+        "countryCode": "GA",
+        "name": {
+            "en": "Gabon",
+            "zh-cn": "加蓬"
+        }
+    },
+    {
+        "areaCode": 220,
+        "countryCode": "GM",
+        "name": {
+            "en": "Gambia",
+            "zh-cn": "冈比亚"
+        }
+    },
+    {
+        "areaCode": 995,
+        "countryCode": "GE",
+        "name": {
+            "en": "Georgia",
+            "zh-cn": "格鲁吉亚"
+        }
+    },
+    {
+        "areaCode": 49,
+        "countryCode": "DE",
+        "name": {
+            "en": "Germany",
+            "zh-cn": "德国"
+        }
+    },
+    {
+        "areaCode": 233,
+        "countryCode": "GH",
+        "name": {
+            "en": "Ghana",
+            "zh-cn": "加纳"
+        }
+    },
+    {
+        "areaCode": 350,
+        "countryCode": "GI",
+        "name": {
+            "en": "Gibraltar",
+            "zh-cn": "直布罗陀"
+        }
+    },
+    {
+        "areaCode": 30,
+        "countryCode": "GR",
+        "name": {
+            "en": "Greece",
+            "zh-cn": "希腊"
+        }
+    },
+    {
+        "areaCode": 299,
+        "countryCode": "GL",
+        "name": {
+            "en": "Greenland",
+            "zh-cn": "格陵兰岛"
+        }
+    },
+    {
+        "areaCode": 1473,
+        "countryCode": "GD",
+        "name": {
+            "en": "Grenada",
+            "zh-cn": "格林纳达"
+        }
+    },
+    {
+        "areaCode": 590,
+        "countryCode": "GP",
+        "name": {
+            "en": "Guadeloupe",
+            "zh-cn": "瓜德罗普岛"
+        }
+    },
+    {
+        "areaCode": 1671,
+        "countryCode": "GU",
+        "name": {
+            "en": "Guam",
+            "zh-cn": "关岛"
+        }
+    },
+    {
+        "areaCode": 502,
+        "countryCode": "GT",
+        "name": {
+            "en": "Guatemala",
+            "zh-cn": "瓜地马拉"
+        }
+    },
+    {
+        "areaCode": 224,
+        "countryCode": "GN",
+        "name": {
+            "en": "Guinea",
+            "zh-cn": "几内亚"
+        }
+    },
+    {
+        "areaCode": 245,
+        "countryCode": "GW",
+        "name": {
+            "en": "Guinea-Bissau",
+            "zh-cn": "几内亚比绍共和国"
+        }
+    },
+    {
+        "areaCode": 592,
+        "countryCode": "GY",
+        "name": {
+            "en": "Guyana",
+            "zh-cn": "圭亚那"
+        }
+    },
+    {
+        "areaCode": 509,
+        "countryCode": "HT",
+        "name": {
+            "en": "Haiti",
+            "zh-cn": "海地"
+        }
+    },
+    {
+        "areaCode": 504,
+        "countryCode": "HN",
+        "name": {
+            "en": "Honduras",
+            "zh-cn": "洪都拉斯"
+        }
+    },
+    {
+        "areaCode": 852,
+        "countryCode": "HK",
+        "name": {
+            "en": "Hong Kong",
+            "zh-cn": "中国香港"
+        }
+    },
+    {
+        "areaCode": 36,
+        "countryCode": "HU",
+        "name": {
+            "en": "Hungary",
+            "zh-cn": "匈牙利"
+        }
+    },
+    {
+        "areaCode": 354,
+        "countryCode": "IS",
+        "name": {
+            "en": "Iceland",
+            "zh-cn": "冰岛"
+        }
+    },
+    {
+        "areaCode": 91,
+        "countryCode": "IN",
+        "name": {
+            "en": "India",
+            "zh-cn": "印度"
+        }
+    },
+    {
+        "areaCode": 62,
+        "countryCode": "ID",
+        "name": {
+            "en": "Indonesia",
+            "zh-cn": "印度尼西亚"
+        }
+    },
+    {
+        "areaCode": 98,
+        "countryCode": "IR",
+        "name": {
+            "en": "Iran",
+            "zh-cn": "伊朗"
+        }
+    },
+    {
+        "areaCode": 964,
+        "countryCode": "IQ",
+        "name": {
+            "en": "Iraq",
+            "zh-cn": "伊拉克"
+        }
+    },
+    {
+        "areaCode": 353,
+        "countryCode": "IE",
+        "name": {
+            "en": "Ireland",
+            "zh-cn": "爱尔兰"
+        }
+    },
+    {
+        "areaCode": 972,
+        "countryCode": "IL",
+        "name": {
+            "en": "Israel",
+            "zh-cn": "以色列"
+        }
+    },
+    {
+        "areaCode": 39,
+        "countryCode": "IT",
+        "name": {
+            "en": "Italy",
+            "zh-cn": "意大利"
+        }
+    },
+    {
+        "areaCode": 225,
+        "countryCode": "CI",
+        "name": {
+            "en": "Ivory Coast",
+            "zh-cn": "象牙海岸"
+        }
+    },
+    {
+        "areaCode": 1876,
+        "countryCode": "JM",
+        "name": {
+            "en": "Jamaica",
+            "zh-cn": "牙买加"
+        }
+    },
+    {
+        "areaCode": 81,
+        "countryCode": "JP",
+        "name": {
+            "en": "Japan",
+            "zh-cn": "日本"
+        }
+    },
+    {
+        "areaCode": 962,
+        "countryCode": "JO",
+        "name": {
+            "en": "Jordan",
+            "zh-cn": "约旦"
+        }
+    },
+    {
+        "areaCode": 7,
+        "countryCode": "KZ",
+        "name": {
+            "en": "Kazakhstan",
+            "zh-cn": "哈萨克斯坦"
+        }
+    },
+    {
+        "areaCode": 254,
+        "countryCode": "KE",
+        "name": {
+            "en": "Kenya",
+            "zh-cn": "肯尼亚"
+        }
+    },
+    {
+        "areaCode": 686,
+        "countryCode": "KI",
+        "name": {
+            "en": "Kiribati",
+            "zh-cn": "基里巴斯"
+        }
+    },
+    {
+        "areaCode": 965,
+        "countryCode": "KW",
+        "name": {
+            "en": "Kuwait",
+            "zh-cn": "科威特"
+        }
+    },
+    {
+        "areaCode": 996,
+        "countryCode": "KG",
+        "name": {
+            "en": "Kyrgyzstan",
+            "zh-cn": "吉尔吉斯斯坦"
+        }
+    },
+    {
+        "areaCode": 856,
+        "countryCode": "LA",
+        "name": {
+            "en": "Laos",
+            "zh-cn": "老挝"
+        }
+    },
+    {
+        "areaCode": 371,
+        "countryCode": "LV",
+        "name": {
+            "en": "Latvia",
+            "zh-cn": "拉脱维亚"
+        }
+    },
+    {
+        "areaCode": 961,
+        "countryCode": "LB",
+        "name": {
+            "en": "Lebanon",
+            "zh-cn": "黎巴嫩"
+        }
+    },
+    {
+        "areaCode": 266,
+        "countryCode": "LS",
+        "name": {
+            "en": "Lesotho",
+            "zh-cn": "莱索托"
+        }
+    },
+    {
+        "areaCode": 231,
+        "countryCode": "LR",
+        "name": {
+            "en": "Liberia",
+            "zh-cn": "利比里亚"
+        }
+    },
+    {
+        "areaCode": 218,
+        "countryCode": "LY",
+        "name": {
+            "en": "Libya",
+            "zh-cn": "利比亚"
+        }
+    },
+    {
+        "areaCode": 423,
+        "countryCode": "LI",
+        "name": {
+            "en": "Liechtenstein",
+            "zh-cn": "列支敦士登"
+        }
+    },
+    {
+        "areaCode": 370,
+        "countryCode": "LT",
+        "name": {
+            "en": "Lithuania",
+            "zh-cn": "立陶宛"
+        }
+    },
+    {
+        "areaCode": 352,
+        "countryCode": "LU",
+        "name": {
+            "en": "Luxembourg",
+            "zh-cn": "卢森堡"
+        }
+    },
+    {
+        "areaCode": 853,
+        "countryCode": "MO",
+        "name": {
+            "en": "Macau",
+            "zh-cn": "中国澳门"
+        }
+    },
+    {
+        "areaCode": 389,
+        "countryCode": "MK",
+        "name": {
+            "en": "Macedonia",
+            "zh-cn": "马其顿"
+        }
+    },
+    {
+        "areaCode": 261,
+        "countryCode": "MG",
+        "name": {
+            "en": "Madagascar",
+            "zh-cn": "马达加斯加"
+        }
+    },
+    {
+        "areaCode": 265,
+        "countryCode": "MW",
+        "name": {
+            "en": "Malawi",
+            "zh-cn": "马拉维"
+        }
+    },
+    {
+        "areaCode": 60,
+        "countryCode": "MY",
+        "name": {
+            "en": "Malaysia",
+            "zh-cn": "马来西亚"
+        }
+    },
+    {
+        "areaCode": 960,
+        "countryCode": "MV",
+        "name": {
+            "en": "Maldives",
+            "zh-cn": "马尔代夫"
+        }
+    },
+    {
+        "areaCode": 223,
+        "countryCode": "ML",
+        "name": {
+            "en": "Mali",
+            "zh-cn": "马里"
+        }
+    },
+    {
+        "areaCode": 356,
+        "countryCode": "MT",
+        "name": {
+            "en": "Malta",
+            "zh-cn": "马耳他"
+        }
+    },
+    {
+        "areaCode": 596,
+        "countryCode": "MQ",
+        "name": {
+            "en": "Martinique",
+            "zh-cn": "马提尼克"
+        }
+    },
+    {
+        "areaCode": 222,
+        "countryCode": "MR",
+        "name": {
+            "en": "Mauritania",
+            "zh-cn": "毛里塔尼亚"
+        }
+    },
+    {
+        "areaCode": 230,
+        "countryCode": "MU",
+        "name": {
+            "en": "Mauritius",
+            "zh-cn": "毛里求斯"
+        }
+    },
+    {
+        "areaCode": 269,
+        "countryCode": "YT",
+        "name": {
+            "en": "Mayotte",
+            "zh-cn": "马约特"
+        }
+    },
+    {
+        "areaCode": 52,
+        "countryCode": "MX",
+        "name": {
+            "en": "Mexico",
+            "zh-cn": "墨西哥"
+        }
+    },
+    {
+        "areaCode": 373,
+        "countryCode": "MD",
+        "name": {
+            "en": "Moldova",
+            "zh-cn": "摩尔多瓦"
+        }
+    },
+    {
+        "areaCode": 377,
+        "countryCode": "MC",
+        "name": {
+            "en": "Monaco",
+            "zh-cn": "摩纳哥"
+        }
+    },
+    {
+        "areaCode": 976,
+        "countryCode": "MN",
+        "name": {
+            "en": "Mongolia",
+            "zh-cn": "蒙古"
+        }
+    },
+    {
+        "areaCode": 382,
+        "countryCode": "ME",
+        "name": {
+            "en": "Montenegro",
+            "zh-cn": "黑山"
+        }
+    },
+    {
+        "areaCode": 1664,
+        "countryCode": "MS",
+        "name": {
+            "en": "Montserrat",
+            "zh-cn": "蒙特塞拉特岛"
+        }
+    },
+    {
+        "areaCode": 212,
+        "countryCode": "MA",
+        "name": {
+            "en": "Morocco",
+            "zh-cn": "摩洛哥"
+        }
+    },
+    {
+        "areaCode": 258,
+        "countryCode": "MZ",
+        "name": {
+            "en": "Mozambique",
+            "zh-cn": "莫桑比克"
+        }
+    },
+    {
+        "areaCode": 95,
+        "countryCode": "MM",
+        "name": {
+            "en": "Myanmar",
+            "zh-cn": "缅甸"
+        }
+    },
+    {
+        "areaCode": 264,
+        "countryCode": "NA",
+        "name": {
+            "en": "Namibia",
+            "zh-cn": "纳米比亚"
+        }
+    },
+    {
+        "areaCode": 977,
+        "countryCode": "NP",
+        "name": {
+            "en": "Nepal",
+            "zh-cn": "尼泊尔"
+        }
+    },
+    {
+        "areaCode": 31,
+        "countryCode": "NL",
+        "name": {
+            "en": "Netherlands",
+            "zh-cn": "荷兰"
+        }
+    },
+    {
+        "areaCode": 687,
+        "countryCode": "NC",
+        "name": {
+            "en": "New Caledonia",
+            "zh-cn": "新喀里多尼亚"
+        }
+    },
+    {
+        "areaCode": 64,
+        "countryCode": "NZ",
+        "name": {
+            "en": "New Zealand",
+            "zh-cn": "新西兰"
+        }
+    },
+    {
+        "areaCode": 505,
+        "countryCode": "NI",
+        "name": {
+            "en": "Nicaragua",
+            "zh-cn": "尼加拉瓜"
+        }
+    },
+    {
+        "areaCode": 227,
+        "countryCode": "NE",
+        "name": {
+            "en": "Niger",
+            "zh-cn": "尼日尔"
+        }
+    },
+    {
+        "areaCode": 234,
+        "countryCode": "NG",
+        "name": {
+            "en": "Nigeria",
+            "zh-cn": "尼日利亚"
+        }
+    },
+    {
+        "areaCode": 47,
+        "countryCode": "NO",
+        "name": {
+            "en": "Norway",
+            "zh-cn": "挪威"
+        }
+    },
+    {
+        "areaCode": 968,
+        "countryCode": "OM",
+        "name": {
+            "en": "Oman",
+            "zh-cn": "阿曼"
+        }
+    },
+    {
+        "areaCode": 92,
+        "countryCode": "PK",
+        "name": {
+            "en": "Pakistan",
+            "zh-cn": "巴基斯坦"
+        }
+    },
+    {
+        "areaCode": 680,
+        "countryCode": "PW",
+        "name": {
+            "en": "Palau",
+            "zh-cn": "帕劳"
+        }
+    },
+    {
+        "areaCode": 970,
+        "countryCode": "BL",
+        "name": {
+            "en": "Palestine",
+            "zh-cn": "巴勒斯坦"
+        }
+    },
+    {
+        "areaCode": 507,
+        "countryCode": "PA",
+        "name": {
+            "en": "Panama",
+            "zh-cn": "巴拿马"
+        }
+    },
+    {
+        "areaCode": 675,
+        "countryCode": "PG",
+        "name": {
+            "en": "Papua New Guinea",
+            "zh-cn": "巴布亚新几内亚"
+        }
+    },
+    {
+        "areaCode": 595,
+        "countryCode": "PY",
+        "name": {
+            "en": "Paraguay",
+            "zh-cn": "巴拉圭"
+        }
+    },
+    {
+        "areaCode": 51,
+        "countryCode": "PE",
+        "name": {
+            "en": "Peru",
+            "zh-cn": "秘鲁"
+        }
+    },
+    {
+        "areaCode": 63,
+        "countryCode": "PH",
+        "name": {
+            "en": "Philippines",
+            "zh-cn": "菲律宾"
+        }
+    },
+    {
+        "areaCode": 48,
+        "countryCode": "PL",
+        "name": {
+            "en": "Poland",
+            "zh-cn": "波兰"
+        }
+    },
+    {
+        "areaCode": 351,
+        "countryCode": "PT",
+        "name": {
+            "en": "Portugal",
+            "zh-cn": "葡萄牙"
+        }
+    },
+    {
+        "areaCode": 1787,
+        "countryCode": "PR",
+        "name": {
+            "en": "Puerto Rico",
+            "zh-cn": "波多黎各"
+        }
+    },
+    {
+        "areaCode": 974,
+        "countryCode": "QA",
+        "name": {
+            "en": "Qatar",
+            "zh-cn": "卡塔尔"
+        }
+    },
+    {
+        "areaCode": 242,
+        "countryCode": "CG",
+        "name": {
+            "en": "Republic Of The Congo",
+            "zh-cn": "刚果共和国"
+        }
+    },
+    {
+        "areaCode": 262,
+        "countryCode": "RE",
+        "name": {
+            "en": "Réunion Island",
+            "zh-cn": "留尼汪"
+        }
+    },
+    {
+        "areaCode": 40,
+        "countryCode": "RO",
+        "name": {
+            "en": "Romania",
+            "zh-cn": "罗马尼亚"
+        }
+    },
+    {
+        "areaCode": 7,
+        "countryCode": "RU",
+        "name": {
+            "en": "Russia",
+            "zh-cn": "俄罗斯"
+        }
+    },
+    {
+        "areaCode": 250,
+        "countryCode": "RW",
+        "name": {
+            "en": "Rwanda",
+            "zh-cn": "卢旺达"
+        }
+    },
+    {
+        "areaCode": 1869,
+        "countryCode": "KN",
+        "name": {
+            "en": "Saint Kitts and Nevis",
+            "zh-cn": "圣基茨和尼维斯"
+        }
+    },
+    {
+        "areaCode": 1758,
+        "countryCode": "LC",
+        "name": {
+            "en": "Saint Lucia",
+            "zh-cn": "圣露西亚"
+        }
+    },
+    {
+        "areaCode": 508,
+        "countryCode": "PM",
+        "name": {
+            "en": "Saint Pierre and Miquelon",
+            "zh-cn": "圣彼埃尔和密克隆岛"
+        }
+    },
+    {
+        "areaCode": 1784,
+        "countryCode": "VC",
+        "name": {
+            "en": "Saint Vincent and The Grenadines",
+            "zh-cn": "圣文森特和格林纳丁斯"
+        }
+    },
+    {
+        "areaCode": 685,
+        "countryCode": "WS",
+        "name": {
+            "en": "Samoa",
+            "zh-cn": "萨摩亚"
+        }
+    },
+    {
+        "areaCode": 378,
+        "countryCode": "SM",
+        "name": {
+            "en": "San Marino",
+            "zh-cn": "圣马力诺"
+        }
+    },
+    {
+        "areaCode": 239,
+        "countryCode": "ST",
+        "name": {
+            "en": "Sao Tome and Principe",
+            "zh-cn": "圣多美和普林西比"
+        }
+    },
+    {
+        "areaCode": 966,
+        "countryCode": "SA",
+        "name": {
+            "en": "Saudi Arabia",
+            "zh-cn": "沙特阿拉伯"
+        }
+    },
+    {
+        "areaCode": 221,
+        "countryCode": "SN",
+        "name": {
+            "en": "Senegal",
+            "zh-cn": "塞内加尔"
+        }
+    },
+    {
+        "areaCode": 381,
+        "countryCode": "RS",
+        "name": {
+            "en": "Serbia",
+            "zh-cn": "塞尔维亚"
+        }
+    },
+    {
+        "areaCode": 248,
+        "countryCode": "SC",
+        "name": {
+            "en": "Seychelles",
+            "zh-cn": "塞舌尔"
+        }
+    },
+    {
+        "areaCode": 232,
+        "countryCode": "SL",
+        "name": {
+            "en": "Sierra Leone",
+            "zh-cn": "塞拉利昂"
+        }
+    },
+    {
+        "areaCode": 65,
+        "countryCode": "SG",
+        "name": {
+            "en": "Singapore",
+            "zh-cn": "新加坡"
+        }
+    },
+    {
+        "areaCode": 1721,
+        "countryCode": "SX",
+        "name": {
+            "en": "Sint Maarten (Dutch Part)",
+            "zh-cn": "圣马丁岛（荷兰部分）"
+        }
+    },
+    {
+        "areaCode": 421,
+        "countryCode": "SK",
+        "name": {
+            "en": "Slovakia",
+            "zh-cn": "斯洛伐克"
+        }
+    },
+    {
+        "areaCode": 386,
+        "countryCode": "SI",
+        "name": {
+            "en": "Slovenia",
+            "zh-cn": "斯洛文尼亚"
+        }
+    },
+    {
+        "areaCode": 677,
+        "countryCode": "SB",
+        "name": {
+            "en": "Solomon Islands",
+            "zh-cn": "所罗门群岛"
+        }
+    },
+    {
+        "areaCode": 252,
+        "countryCode": "SO",
+        "name": {
+            "en": "Somalia",
+            "zh-cn": "索马里"
+        }
+    },
+    {
+        "areaCode": 27,
+        "countryCode": "ZA",
+        "name": {
+            "en": "South Africa",
+            "zh-cn": "南非"
+        }
+    },
+    {
+        "areaCode": 82,
+        "countryCode": "KR",
+        "name": {
+            "en": "South Korea",
+            "zh-cn": "韩国"
+        }
+    },
+    {
+        "areaCode": 34,
+        "countryCode": "ES",
+        "name": {
+            "en": "Spain",
+            "zh-cn": "西班牙"
+        }
+    },
+    {
+        "areaCode": 94,
+        "countryCode": "LK",
+        "name": {
+            "en": "Sri Lanka",
+            "zh-cn": "斯里兰卡"
+        }
+    },
+    {
+        "areaCode": 249,
+        "countryCode": "SD",
+        "name": {
+            "en": "Sudan",
+            "zh-cn": "苏丹"
+        }
+    },
+    {
+        "areaCode": 597,
+        "countryCode": "SR",
+        "name": {
+            "en": "Suriname",
+            "zh-cn": "苏里南"
+        }
+    },
+    {
+        "areaCode": 268,
+        "countryCode": "SZ",
+        "name": {
+            "en": "Swaziland",
+            "zh-cn": "斯威士兰"
+        }
+    },
+    {
+        "areaCode": 46,
+        "countryCode": "SE",
+        "name": {
+            "en": "Sweden",
+            "zh-cn": "瑞典"
+        }
+    },
+    {
+        "areaCode": 41,
+        "countryCode": "CH",
+        "name": {
+            "en": "Switzerland",
+            "zh-cn": "瑞士"
+        }
+    },
+    {
+        "areaCode": 963,
+        "countryCode": "SY",
+        "name": {
+            "en": "Syria",
+            "zh-cn": "叙利亚"
+        }
+    },
+    {
+        "areaCode": 886,
+        "countryCode": "TW",
+        "name": {
+            "en": "Taiwan",
+            "zh-cn": "中国台湾"
+        }
+    },
+    {
+        "areaCode": 992,
+        "countryCode": "TJ",
+        "name": {
+            "en": "Tajikistan",
+            "zh-cn": "塔吉克斯坦"
+        }
+    },
+    {
+        "areaCode": 255,
+        "countryCode": "TZ",
+        "name": {
+            "en": "Tanzania",
+            "zh-cn": "坦桑尼亚"
+        }
+    },
+    {
+        "areaCode": 66,
+        "countryCode": "TH",
+        "name": {
+            "en": "Thailand",
+            "zh-cn": "泰国"
+        }
+    },
+    {
+        "areaCode": 670,
+        "countryCode": "TL",
+        "name": {
+            "en": "Timor-Leste",
+            "zh-cn": "东帝汶"
+        }
+    },
+    {
+        "areaCode": 228,
+        "countryCode": "TG",
+        "name": {
+            "en": "Togo",
+            "zh-cn": "多哥"
+        }
+    },
+    {
+        "areaCode": 676,
+        "countryCode": "TO",
+        "name": {
+            "en": "Tonga",
+            "zh-cn": "汤加"
+        }
+    },
+    {
+        "areaCode": 1868,
+        "countryCode": "TT",
+        "name": {
+            "en": "Trinidad and Tobago",
+            "zh-cn": "特立尼达和多巴哥"
+        }
+    },
+    {
+        "areaCode": 216,
+        "countryCode": "TN",
+        "name": {
+            "en": "Tunisia",
+            "zh-cn": "突尼斯"
+        }
+    },
+    {
+        "areaCode": 90,
+        "countryCode": "TR",
+        "name": {
+            "en": "Turkey",
+            "zh-cn": "土耳其"
+        }
+    },
+    {
+        "areaCode": 993,
+        "countryCode": "TM",
+        "name": {
+            "en": "Turkmenistan",
+            "zh-cn": "土库曼斯坦"
+        }
+    },
+    {
+        "areaCode": 1649,
+        "countryCode": "TC",
+        "name": {
+            "en": "Turks and Caicos Islands",
+            "zh-cn": "特克斯和凯科斯群岛"
+        }
+    },
+    {
+        "areaCode": 256,
+        "countryCode": "UG",
+        "name": {
+            "en": "Uganda",
+            "zh-cn": "乌干达"
+        }
+    },
+    {
+        "areaCode": 380,
+        "countryCode": "UA",
+        "name": {
+            "en": "Ukraine",
+            "zh-cn": "乌克兰"
+        }
+    },
+    {
+        "areaCode": 971,
+        "countryCode": "AE",
+        "name": {
+            "en": "United Arab Emirates",
+            "zh-cn": "阿拉伯联合酋长国"
+        }
+    },
+    {
+        "areaCode": 44,
+        "countryCode": "GB",
+        "name": {
+            "en": "United Kingdom",
+            "zh-cn": "英国"
+        }
+    },
+    {
+        "areaCode": 1,
+        "countryCode": "US",
+        "name": {
+            "en": "United States",
+            "zh-cn": "美国"
+        }
+    },
+    {
+        "areaCode": 598,
+        "countryCode": "UY",
+        "name": {
+            "en": "Uruguay",
+            "zh-cn": "乌拉圭"
+        }
+    },
+    {
+        "areaCode": 998,
+        "countryCode": "UZ",
+        "name": {
+            "en": "Uzbekistan",
+            "zh-cn": "乌兹别克斯坦"
+        }
+    },
+    {
+        "areaCode": 678,
+        "countryCode": "VU",
+        "name": {
+            "en": "Vanuatu",
+            "zh-cn": "瓦努阿图"
+        }
+    },
+    {
+        "areaCode": 58,
+        "countryCode": "VE",
+        "name": {
+            "en": "Venezuela",
+            "zh-cn": "委内瑞拉"
+        }
+    },
+    {
+        "areaCode": 84,
+        "countryCode": "VN",
+        "name": {
+            "en": "Vietnam",
+            "zh-cn": "越南"
+        }
+    },
+    {
+        "areaCode": 1340,
+        "countryCode": "VG",
+        "name": {
+            "en": "Virgin Islands, British",
+            "zh-cn": "英属处女群岛"
+        }
+    },
+    {
+        "areaCode": 1284,
+        "countryCode": "VI",
+        "name": {
+            "en": "Virgin Islands, US",
+            "zh-cn": "美属维尔京群岛"
+        }
+    },
+    {
+        "areaCode": 967,
+        "countryCode": "YE",
+        "name": {
+            "en": "Yemen",
+            "zh-cn": "也门"
+        }
+    },
+    {
+        "areaCode": 260,
+        "countryCode": "ZM",
+        "name": {
+            "en": "Zambia",
+            "zh-cn": "赞比亚"
+        }
+    },
+    {
+        "areaCode": 263,
+        "countryCode": "ZW",
+        "name": {
+            "en": "Zimbabwe",
+            "zh-cn": "津巴布韦"
+        }
+    }
+]
