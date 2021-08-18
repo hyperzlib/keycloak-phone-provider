@@ -5,7 +5,6 @@ import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
-import jdk.internal.org.objectweb.asm.TypeReference;
 import lombok.AllArgsConstructor;
 import lombok.Data;
 import lombok.NoArgsConstructor;
@@ -27,6 +26,7 @@ public class AreaCodeService implements Provider {
 
     public AreaCodeService(KeycloakSession session){
         this.session = session;
+        
         this.config = session.getProvider(ConfigService.class);
     }
 

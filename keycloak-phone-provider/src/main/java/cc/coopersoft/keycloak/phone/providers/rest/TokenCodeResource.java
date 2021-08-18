@@ -91,7 +91,7 @@ public class TokenCodeResource {
             }
         }
 
-        logger.info(String.format("Requested %s code to %s",tokenCodeType.getLabel(), phoneNumber.getPhoneNumber()));
+        logger.info(String.format("Requested %s code to %s",tokenCodeType.getLabel(), phoneNumber.getFullPhoneNumber()));
         MessageSendResult result = session.getProvider(PhoneMessageService.class).sendTokenCode(phoneNumber, tokenCodeType);
 
         response = String.format("{\"status\":1,\"expires_in\":%d,\"resend_expires\":%d}",

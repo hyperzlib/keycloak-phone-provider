@@ -6,7 +6,7 @@ import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProvider;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProviderFactory;
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
-import cc.coopersoft.keycloak.phone.providers.jpa.TokenCode;
+import cc.coopersoft.keycloak.phone.providers.jpa.TokenCodeEntity;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
@@ -57,8 +57,8 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     public TokenCodeRepresentation currentProcess(PhoneNumber phoneNumber, TokenCodeType tokenCodeType) {
 
         try {
-            TokenCode entity = getEntityManager()
-                    .createNamedQuery("currentProcess", TokenCode.class)
+            TokenCodeEntity entity = getEntityManager()
+                    .createNamedQuery("currentProcess", TokenCodeEntity.class)
                     .setParameter("realmId", getRealm().getId())
                     .setParameter("areaCode", phoneNumber.getAreaCode())
                     .setParameter("phoneNumber", phoneNumber.getPhoneNumber())
@@ -87,8 +87,8 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     public void removeCode(PhoneNumber phoneNumber, TokenCodeType tokenCodeType) {
         try {
             EntityManager em = getEntityManager();
-            List<TokenCode> entityList = em
-                    .createNamedQuery("getAll", TokenCode.class)
+            List<TokenCodeEntity> entityList = em
+                    .createNamedQuery("getAll", TokenCodeEntity.class)
                     .setParameter("realmId", getRealm().getId())
                     .setParameter("areaCode", phoneNumber.getAreaCode())
                     .setParameter("phoneNumber", phoneNumber.getPhoneNumber())
@@ -96,7 +96,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
                     .getResultList();
 
             if(entityList.size() > 0) {
-                for (TokenCode entity : entityList) {
+                for (TokenCodeEntity entity : entityList) {
                     em.remove(entity);
                 }
                 em.flush();
@@ -111,8 +111,8 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     public boolean canResend(PhoneNumber phoneNumber, TokenCodeType tokenCodeType) {
         try {
             EntityManager em = getEntityManager();
-            TokenCode entityList = em
-                    .createNamedQuery("currentProcess", TokenCode.class)
+            TokenCodeEntity entityList = em
+                    .createNamedQuery("currentProcess", TokenCodeEntity.class)
                     .setParameter("realmId", getRealm().getId())
                     .setParameter("areaCode", phoneNumber.getAreaCode())
                     .setParameter("phoneNumber", phoneNumber.getPhoneNumber())
@@ -136,8 +136,8 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
         Date oneHourAgo = new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1));
 
-        List<TokenCode> entities = getEntityManager()
-                .createNamedQuery("processesSince", TokenCode.class)
+        List<TokenCodeEntity> entities = getEntityManager()
+                .createNamedQuery("processesSince", TokenCodeEntity.class)
                 .setParameter("realmId", getRealm().getId())
                 .setParameter("areaCode", phoneNumber.getAreaCode())
                 .setParameter("phoneNumber", phoneNumber.getPhoneNumber())
@@ -150,7 +150,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
     @Override
     public void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType, MessageSendResult sendResult) {
-        TokenCode entity = new TokenCode();
+        TokenCodeEntity entity = new TokenCodeEntity();
         Instant now = Instant.now();
 
         entity.setId(tokenCode.getId());

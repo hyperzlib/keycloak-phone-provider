@@ -1,15 +1,18 @@
 package cc.coopersoft.keycloak.phone.providers.jpa;
 
+import org.jboss.logging.Logger;
 import org.keycloak.connections.jpa.entityprovider.JpaEntityProvider;
 
 import java.util.Collections;
 import java.util.List;
 
 public class TokenCodeJpaEntityProvider implements JpaEntityProvider {
+    private static final Logger log = Logger.getLogger(TokenCodeJpaEntityProvider.class);
 
     @Override
     public List<Class<?>> getEntities() {
-        return Collections.singletonList(TokenCode.class);
+        log.info("get TokenCodeEntity");
+        return Collections.<Class<?>>singletonList(TokenCodeEntity.class);
     }
 
     @Override
@@ -23,6 +26,6 @@ public class TokenCodeJpaEntityProvider implements JpaEntityProvider {
 
     @Override
     public String getFactoryId() {
-        return "tokenCodeEntityProvider";
+        return TokenCodeJpaEntityProviderFactory.ID;
     }
 }

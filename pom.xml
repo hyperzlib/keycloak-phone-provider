@@ -13,7 +13,10 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>1.8</maven.compiler.source>
         <maven.compiler.target>1.8</maven.compiler.target>
-        <version.keycloak>14.0.0</version.keycloak>
+        <version.keycloak>15.0.1</version.keycloak>
+
+        <maven.compiler.source>1.8</maven.compiler.source>
+        <maven.compiler.target>1.8</maven.compiler.target>
 
         <docker.image.name>coopersoft/keycloak-phone</docker.image.name>
 

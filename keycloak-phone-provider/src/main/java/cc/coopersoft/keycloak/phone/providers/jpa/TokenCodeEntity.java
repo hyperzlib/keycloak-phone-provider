@@ -1,34 +1,37 @@
 package cc.coopersoft.keycloak.phone.providers.jpa;
 
-import lombok.Data;
+import lombok.*;
 
 import javax.persistence.*;
 import java.util.Date;
+import java.util.Objects;
 
+@Getter
+@Setter
+@RequiredArgsConstructor
 @Entity
-@Data
 @Table(name = "PHONE_MESSAGE_TOKEN_CODE")
 @NamedQueries({
         @NamedQuery(
                 name = "currentProcess",
-                query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
+                query = "SELECT t FROM TokenCodeEntity t WHERE t.realmId = :realmId " +
                         "AND t.areaCode = :areaCode AND t.phoneNumber = :phoneNumber " +
                         "AND t.expiresAt >= :now AND t.type = :type"
         ),
         @NamedQuery(
                 name = "getAll",
-                query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
+                query = "SELECT t FROM TokenCodeEntity t WHERE t.realmId = :realmId " +
                         "AND t.areaCode = :areaCode AND t.phoneNumber = :phoneNumber " +
                         "AND t.type = :type"
         ),
         @NamedQuery(
                 name = "processesSince",
-                query = "SELECT t FROM TokenCode t WHERE t.realmId = :realmId " +
+                query = "SELECT t FROM TokenCodeEntity t WHERE t.realmId = :realmId " +
                         "AND t.areaCode = :areaCode AND t.phoneNumber = :phoneNumber " +
                         "AND t.createdAt >= :date AND t.type = :type"
         )
 })
-public class TokenCode {
+public class TokenCodeEntity {
     @Id
     @Column(name = "ID")
     private String id;
@@ -65,4 +68,19 @@ public class TokenCode {
 
     @Column(name = "BY_WHOM")
     private String byWhom;
+
+    @Override
+    public boolean equals(Object o) {
+        if (this == o) return true;
+        if (o == null) return false;
+        if (!(o instanceof TokenCodeEntity)) return false;
+        TokenCodeEntity that = (TokenCodeEntity) o;
+
+        return Objects.equals(id, that.id);
+    }
+
+    @Override
+    public int hashCode() {
+        return id.hashCode();
+    }
 }
