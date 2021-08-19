@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.rest;
 
+import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.JsonUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
@@ -26,6 +27,9 @@ import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
 public class VerificationCodeResource {
 
     private static final Logger logger = Logger.getLogger(VerificationCodeResource.class);
+
+    public static final String ENTITY_SUCCESS = "{\"status\":1}";
+
     private final KeycloakSession session;
     private final AuthResult auth;
 
@@ -90,7 +94,7 @@ public class VerificationCodeResource {
             UserModel user = auth.getUser();
             getTokenCodeService().setUserPhoneNumberByCode(user, phoneNumber, code);
 
-            return Response.ok().entity("{\"status\":1}").build();
+            return Response.ok().entity(ENTITY_SUCCESS).build();
         } catch(BadRequestException | NotAuthorizedException e){
             HashMap<String, Object> response = new HashMap<>();
             response.put("status", -1);
@@ -112,18 +116,28 @@ public class VerificationCodeResource {
     @Consumes({APPLICATION_JSON, APPLICATION_FORM_URLENCODED})
     public Response unsetUserPhoneNumber(){
         try {
+            HashMap<String, Object> response = new HashMap<>();
+            ConfigService config = session.getProvider(ConfigService.class);
+            if (!config.isAllowUnset()){
+                response.put("status", -3);
+                response.put("error", "Not allowed to unset phone number");
+                response.put("errormsg", "unsetPhoneNumberNotAllowed");
+                return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
+            }
             try {
                 if (auth == null) throw new NotAuthorizedException("Bearer");
 
                 UserModel user = auth.getUser();
                 if (!user.isEmailVerified()) {
-                    return Response.ok().entity("{\"status\":-2, \"error\": \"Email Unverified.\"}").build();
+                    response.put("status", -2);
+                    response.put("error", "Email Unverified.");
+                    response.put("errormsg", "needVerifiedEmail");
+                    return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
                 } else {
                     user.removeAttribute("phoneNumber");
-                    return Response.ok().entity("{\"status\":1}").build();
+                    return Response.ok().entity(ENTITY_SUCCESS).build();
                 }
             } catch (BadRequestException | NotAuthorizedException e) {
-                HashMap<String, Object> response = new HashMap<>();
                 response.put("status", -1);
                 response.put("error", e.getMessage());
                 response.put("errormsg", "needAuth");

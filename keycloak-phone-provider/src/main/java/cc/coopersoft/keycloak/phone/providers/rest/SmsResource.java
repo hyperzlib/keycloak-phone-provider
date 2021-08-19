@@ -35,6 +35,7 @@ public class SmsResource {
         retData.put("tokenExpires", config.getTokenExpires());
         retData.put("defaultAreaCode", config.getDefaultAreaCode());
         retData.put("areaLocked", config.isAreaLocked());
+        retData.put("allowUnset", config.isAllowUnset());
         try {
             JsonUtils.getInstance().encode(retData);
             return Response.ok(retData).build();

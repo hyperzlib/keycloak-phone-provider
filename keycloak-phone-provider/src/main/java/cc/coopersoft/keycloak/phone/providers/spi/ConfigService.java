@@ -12,6 +12,7 @@ public class ConfigService implements Provider {
     public final int defaultAreaCode;
     public final String areaCodeConfig;
     public final boolean areaLocked;
+    public final boolean allowUnset;
 
     public ConfigService(Config.Scope config){
         this.senderService = config.get("senderService", "dummy");
@@ -19,6 +20,7 @@ public class ConfigService implements Provider {
         this.defaultAreaCode = config.getInt("defaultAreacode", 86);
         this.areaCodeConfig = config.get("areacodeConfig");
         this.areaLocked = config.getBoolean("areaLocked", false);
+        this.allowUnset = config.getBoolean("allowUnset", true);
     }
 
     @Override
