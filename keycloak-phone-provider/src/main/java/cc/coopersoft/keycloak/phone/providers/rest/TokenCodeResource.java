@@ -2,12 +2,14 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
+import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeService;
 import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import org.jboss.logging.Logger;
@@ -25,6 +27,7 @@ import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.util.Date;
+import java.util.HashMap;
 import java.util.Iterator;
 import java.util.Map;
 
@@ -48,7 +51,7 @@ public class TokenCodeResource {
     @Path("")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_JSON)
-    public Response getTokenCodeJson(String reqBody) {
+    public Response sendTokenCodeJson(String reqBody) {
         try {
             JsonNode jsonObject = JsonLoader.fromString(reqBody);
             MultivaluedHashMap<String, String> formData = new MultivaluedHashMap<>();
@@ -56,7 +59,7 @@ public class TokenCodeResource {
                 Map.Entry<String, JsonNode> node = it.next();
                 formData.addAll(node.getKey(), node.getValue().asText());
             }
-            return this.getTokenCode(formData);
+            return this.sendTokenCode(formData);
         } catch (IOException e) {
             e.printStackTrace();
         }
@@ -68,36 +71,51 @@ public class TokenCodeResource {
     @Path("")
     @Produces(APPLICATION_JSON)
     @Consumes(APPLICATION_FORM_URLENCODED)
-    public Response getTokenCode(MultivaluedMap<String, String> formData) {
+    public Response sendTokenCode(MultivaluedMap<String, String> formData) {
         PhoneNumber phoneNumber = new PhoneNumber(formData);
-        String response;
+        HashMap<String, Object> retData = new HashMap<>();
 
-        if (phoneNumber.isEmpty()){
-            response = "{\"status\":0,\"error\":\"phoneNumberEmpty\",\"message\":\"Must inform a phone number.\"}";
-            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+        if (phoneNumber.isEmpty()) {
+            retData.put("status", 0);
+            retData.put("error", "Must inform a cellphone number.");
+            retData.put("errormsg", "phoneNumberEmpty");
+            return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
-        if (!this.session.getProvider(CaptchaService.class).verify(formData, this.auth) &&
-                !this.isTrustedClient(formData.getFirst("client_id"), formData.getFirst("client_secret"))){
-            response = "{\"status\":0,\"error\":\"captchaNotCompleted\",\"message\":\"Captcha not completed.\"}";
-            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+        // 验证码
+        if (!session.getProvider(CaptchaService.class).verify(formData, this.auth) &&
+                !isTrustedClient(formData.getFirst("client_id"), formData.getFirst("client_secret"))) {
+            retData.put("status", -1);
+            retData.put("error", "Captcha not completed.");
+            retData.put("errormsg", "captchaNotCompleted");
+            return Response.ok(retData, APPLICATION_JSON_TYPE).build();
+        }
+        // 区号
+        AreaCodeService areaCodeService = session.getProvider(AreaCodeService.class);
+        if (!areaCodeService.isAreaCodeAllowed(phoneNumber.getAreaCodeInt())) {
+            retData.put("status", -2);
+            retData.put("error", "This area is not supported");
+            retData.put("errormsg", "areaNotSupported");
+            return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
 
-        if (tokenCodeType != TokenCodeType.REGISTRATION && tokenCodeType != TokenCodeType.VERIFY){
-            //需要检测用户是否存在
+        if (tokenCodeType != TokenCodeType.REGISTRATION && tokenCodeType != TokenCodeType.VERIFY) {
+            // 需要检测用户是否存在
             UserModel user = UserUtils.findUserByPhone(session.users(), session.getContext().getRealm(), phoneNumber);
-            if(user == null){
-                response = "{\"status\":0,\"error\":\"userNotExists\",\"message\":\"User not exists.\"}";
-                return Response.ok(response, APPLICATION_JSON_TYPE).build();
+            if (user == null) {
+                retData.put("status", 0);
+                retData.put("error", "This user not exists");
+                retData.put("errormsg", "userNotExists");
+                return Response.ok(retData, APPLICATION_JSON_TYPE).build();
             }
         }
 
-        logger.info(String.format("Requested %s code to %s",tokenCodeType.getLabel(), phoneNumber.getFullPhoneNumber()));
+        logger.info(String.format("Requested %s code to %s", tokenCodeType.getLabel(), phoneNumber.getFullPhoneNumber()));
         MessageSendResult result = session.getProvider(PhoneMessageService.class).sendTokenCode(phoneNumber, tokenCodeType);
 
-        response = String.format("{\"status\":1,\"expires_in\":%d,\"resend_expires\":%d}",
-                result.getExpiresTime(), result.getResendExpiresTime());
-
-        return Response.ok(response, APPLICATION_JSON_TYPE).build();
+        retData.put("status", 1);
+        retData.put("expires_in", result.getExpiresTime());
+        retData.put("resend_expires", result.getResendExpiresTime());
+        return Response.ok(retData, APPLICATION_JSON_TYPE).build();
     }
 
     @POST
@@ -132,22 +150,28 @@ public class TokenCodeResource {
     @Produces(APPLICATION_JSON)
     public Response getResendExpire(@QueryParam(PhoneConstants.FIELD_AREA_CODE) String areaCode,
                                     @QueryParam(PhoneConstants.FIELD_PHONE_NUMBER) String phoneNumberStr) {
-        String response;
+        HashMap<String, Object> retData = new HashMap<>();
         PhoneNumber phoneNumber = new PhoneNumber(areaCode, phoneNumberStr);
         if (phoneNumber.isEmpty()){
-            response = "{\"status\":0,\"error\":\"phoneNumberEmpty\",\"message\":\"Must inform a phone number.\"}";
-            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+            retData.put("status", 0);
+            retData.put("error", "Must inform a phone number.");
+            retData.put("errormsg", "phoneNumberEmpty");
+            return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
 
         TokenCodeService tokenCodeService = session.getProvider(TokenCodeService.class);
         try {
             Date resendExpireDate = tokenCodeService.getResendExpires(phoneNumber, tokenCodeType);
             long resendExpire = resendExpireDate.getTime();
-            response = String.format("{\"status\":1,\"resend_expire\":%d}", resendExpire);
-            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+
+            retData.put("status", 1);
+            retData.put("resend_expire", resendExpire);
+            return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         } catch(BadRequestException e){
-            response = String.format("{\"status\":-1,\"message\":\"%s\"}", e.getMessage());
-            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+            retData.put("status", 0);
+            retData.put("error", e.getMessage());
+            retData.put("errormsg", "serverError");
+            return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
     }
 

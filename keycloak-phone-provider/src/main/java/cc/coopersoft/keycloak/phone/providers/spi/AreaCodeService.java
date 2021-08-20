@@ -1,8 +1,8 @@
 package cc.coopersoft.keycloak.phone.providers.spi;
 
-import cc.coopersoft.keycloak.phone.providers.spi.impl.TokenCodeServiceImpl;
 import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
+import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JavaType;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import lombok.AllArgsConstructor;
@@ -12,6 +12,7 @@ import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.Provider;
 
+import java.io.File;
 import java.io.FileInputStream;
 import java.io.IOException;
 import java.io.InputStream;
@@ -30,9 +31,11 @@ public class AreaCodeService implements Provider {
         this.config = session.getProvider(ConfigService.class);
     }
 
-    public static List<AreaCodeData> getAreaCodeList(String areaCodeConfigPath) throws IOException {
+    public List<AreaCodeData> getAreaCodeList() throws IOException {
         if(areaCodeList != null) return areaCodeList;
-        InputStream fs = new FileInputStream(areaCodeConfigPath);
+
+        File configFile = new File(config.getAreaCodeConfig());
+        InputStream fs = new FileInputStream(configFile);
         try {
             ObjectMapper objectMapper = new ObjectMapper();
             JavaType listType = objectMapper.getTypeFactory().constructParametricType(List.class, AreaCodeData.class);
@@ -50,26 +53,30 @@ public class AreaCodeService implements Provider {
 
     }
 
-    public Stream<AreaCodeData> getStream(){
+    public Stream<AreaCodeData> getStream() {
         try {
-            return getAreaCodeList(config.getAreaCodeConfig()).stream();
+            return getAreaCodeList().stream();
         } catch (IOException ex){
             logger.error(ex);
         }
         return Collections.EMPTY_LIST.stream();
     }
 
+    public boolean isAreaCodeAllowed(int areaCode) {
+        return this.getStream().anyMatch(x -> x.getAreaCode() == areaCode);
+    }
+
     @Data
     @AllArgsConstructor
     @NoArgsConstructor
-    public class AreaCodeData {
-        @JsonAlias("areaCode")
+    public static class AreaCodeData {
+        @JsonProperty("areaCode")
         public int areaCode;
 
-        @JsonAlias("countryCode")
+        @JsonProperty("countryCode")
         public String countryCode;
 
-        @JsonAlias("name")
+        @JsonProperty("name")
         public HashMap<String, String> countryNameMessages;
 
         @JsonIgnore

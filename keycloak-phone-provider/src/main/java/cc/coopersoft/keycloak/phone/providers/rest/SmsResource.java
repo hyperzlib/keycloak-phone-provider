@@ -1,6 +1,7 @@
 package cc.coopersoft.keycloak.phone.providers.rest;
 
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
+import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeService;
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
 import cc.coopersoft.keycloak.phone.utils.JsonUtils;
 import com.fasterxml.jackson.core.JsonProcessingException;
@@ -12,9 +13,12 @@ import javax.ws.rs.Path;
 import javax.ws.rs.Produces;
 import javax.ws.rs.core.Response;
 
+import java.io.IOException;
 import java.util.HashMap;
+import java.util.List;
 
 import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
 
 public class SmsResource {
 
@@ -37,12 +41,13 @@ public class SmsResource {
         retData.put("areaLocked", config.isAreaLocked());
         retData.put("allowUnset", config.isAllowUnset());
         try {
-            JsonUtils.getInstance().encode(retData);
-            return Response.ok(retData).build();
-        } catch (JsonProcessingException e) {
+            AreaCodeService areaCodeService = session.getProvider(AreaCodeService.class);
+            List<AreaCodeService.AreaCodeData> areaCodeList = areaCodeService.getAreaCodeList();
+            retData.put("areaCodeList", areaCodeList);
+        } catch (IOException e){
             logger.error(e);
         }
-        return Response.serverError().build();
+        return Response.ok(retData, APPLICATION_JSON_TYPE).build();
     }
 
     @Path("verification-code")

@@ -18,7 +18,7 @@ public class ConfigService implements Provider {
         this.senderService = config.get("senderService", "dummy");
         this.tokenExpires = config.getInt("tokenExpires", 300);
         this.defaultAreaCode = config.getInt("defaultAreacode", 86);
-        this.areaCodeConfig = config.get("areacodeConfig");
+        this.areaCodeConfig = config.get("areacodeConfig", "./areacode.json");
         this.areaLocked = config.getBoolean("areaLocked", false);
         this.allowUnset = config.getBoolean("allowUnset", true);
     }

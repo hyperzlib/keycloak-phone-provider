@@ -21,8 +21,7 @@ import javax.ws.rs.core.Response;
 import java.io.IOException;
 import java.util.HashMap;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_FORM_URLENCODED;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
+import static javax.ws.rs.core.MediaType.*;
 
 public class VerificationCodeResource {
 
@@ -100,12 +99,7 @@ public class VerificationCodeResource {
             response.put("status", -1);
             response.put("error", e.getMessage());
             response.put("errormsg", "needAuth");
-            try {
-                return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
-            } catch (JsonProcessingException jsonProcessingException) {
-                logger.error("Serialize JSON Error", jsonProcessingException);
-            }
-            return Response.serverError().build();
+            return Response.ok(response, APPLICATION_JSON_TYPE).build();
         }
     }
 
@@ -115,37 +109,32 @@ public class VerificationCodeResource {
     @Produces(APPLICATION_JSON)
     @Consumes({APPLICATION_JSON, APPLICATION_FORM_URLENCODED})
     public Response unsetUserPhoneNumber(){
+        HashMap<String, Object> response = new HashMap<>();
+        ConfigService config = session.getProvider(ConfigService.class);
+        if (!config.isAllowUnset()){
+            response.put("status", -3);
+            response.put("error", "Not allowed to unset phone number");
+            response.put("errormsg", "unsetPhoneNumberNotAllowed");
+            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+        }
         try {
-            HashMap<String, Object> response = new HashMap<>();
-            ConfigService config = session.getProvider(ConfigService.class);
-            if (!config.isAllowUnset()){
-                response.put("status", -3);
-                response.put("error", "Not allowed to unset phone number");
-                response.put("errormsg", "unsetPhoneNumberNotAllowed");
-                return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
-            }
-            try {
-                if (auth == null) throw new NotAuthorizedException("Bearer");
+            if (auth == null) throw new NotAuthorizedException("Bearer");
 
-                UserModel user = auth.getUser();
-                if (!user.isEmailVerified()) {
-                    response.put("status", -2);
-                    response.put("error", "Email Unverified.");
-                    response.put("errormsg", "needVerifiedEmail");
-                    return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
-                } else {
-                    user.removeAttribute("phoneNumber");
-                    return Response.ok().entity(ENTITY_SUCCESS).build();
-                }
-            } catch (BadRequestException | NotAuthorizedException e) {
-                response.put("status", -1);
-                response.put("error", e.getMessage());
-                response.put("errormsg", "needAuth");
-                return Response.ok().entity(JsonUtils.getInstance().encode(response)).build();
+            UserModel user = auth.getUser();
+            if (!user.isEmailVerified()) {
+                response.put("status", -2);
+                response.put("error", "Email Unverified.");
+                response.put("errormsg", "needVerifiedEmail");
+                return Response.ok(response, APPLICATION_JSON_TYPE).build();
+            } else {
+                user.removeAttribute("phoneNumber");
+                return Response.ok().entity(ENTITY_SUCCESS).build();
             }
-        } catch (JsonProcessingException jsonProcessingException){
-            logger.error("Serialize JSON Error", jsonProcessingException);
-            return Response.serverError().build();
+        } catch (BadRequestException | NotAuthorizedException e) {
+            response.put("status", -1);
+            response.put("error", e.getMessage());
+            response.put("errormsg", "needAuth");
+            return Response.ok(response, APPLICATION_JSON_TYPE).build();
         }
     }
 }
