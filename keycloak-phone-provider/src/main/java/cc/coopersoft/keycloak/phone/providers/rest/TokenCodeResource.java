@@ -78,7 +78,7 @@ public class TokenCodeResource {
         if (phoneNumber.isEmpty()) {
             retData.put("status", 0);
             retData.put("error", "Must inform a cellphone number.");
-            retData.put("errormsg", "phoneNumberEmpty");
+            retData.put("errormsg", "phoneNumberCannotBeEmpty");
             return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
         // 验证码
@@ -155,7 +155,7 @@ public class TokenCodeResource {
         if (phoneNumber.isEmpty()){
             retData.put("status", 0);
             retData.put("error", "Must inform a phone number.");
-            retData.put("errormsg", "phoneNumberEmpty");
+            retData.put("errormsg", "phoneNumberCannotBeEmpty");
             return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
 

@@ -83,24 +83,34 @@ public class VerificationCodeResource {
     @Consumes(APPLICATION_FORM_URLENCODED)
     public Response setUserPhoneNumber(@FormParam(PhoneConstants.FIELD_AREA_CODE) String areaCode,
                                        @FormParam(PhoneConstants.FIELD_PHONE_NUMBER) String phoneNumberStr,
-                                       @FormParam(PhoneConstants.FIELD_VERIFICATION_CODE) String code){
-        try {
-            PhoneNumber phoneNumber = new PhoneNumber(areaCode, phoneNumberStr);
-            if (auth == null) throw new NotAuthorizedException("Bearer");
-            if (phoneNumber.isEmpty()) throw new BadRequestException("Must inform a phone number");
-            if (code == null) throw new BadRequestException("Must inform a token code");
+                                       @FormParam(PhoneConstants.FIELD_VERIFICATION_CODE) String code) {
 
-            UserModel user = auth.getUser();
-            getTokenCodeService().setUserPhoneNumberByCode(user, phoneNumber, code);
+        HashMap<String, Object> response = new HashMap<>();
 
-            return Response.ok().entity(ENTITY_SUCCESS).build();
-        } catch(BadRequestException | NotAuthorizedException e){
-            HashMap<String, Object> response = new HashMap<>();
+        PhoneNumber phoneNumber = new PhoneNumber(areaCode, phoneNumberStr);
+        if (auth == null) {
             response.put("status", -1);
-            response.put("error", e.getMessage());
+            response.put("error", "Please login.");
             response.put("errormsg", "needAuth");
             return Response.ok(response, APPLICATION_JSON_TYPE).build();
         }
+        if (phoneNumber.isEmpty()) {
+            response.put("status", 0);
+            response.put("error", "Must inform a phone number");
+            response.put("errormsg", "phoneNumberCannotBeEmpty");
+            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+        }
+        if (code == null) {
+            response.put("status", 0);
+            response.put("error", "Token code cannot be empty");
+            response.put("errormsg", "smsCodeCannotBeEmpty");
+            return Response.ok(response, APPLICATION_JSON_TYPE).build();
+        }
+
+        UserModel user = auth.getUser();
+        getTokenCodeService().setUserPhoneNumberByCode(user, phoneNumber, code);
+
+        return Response.ok().entity(ENTITY_SUCCESS).build();
     }
 
     @POST
