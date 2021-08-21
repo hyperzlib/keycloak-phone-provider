@@ -69,12 +69,12 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
         try {
             result = session.getProvider(MessageSenderService.class, service)
                     .sendSmsMessage(type, phoneNumber, token.getCode(), tokenExpiresIn);
-            getTokenCodeService().persistCode(token, type, result);
         } catch (MessageSendException e) {
             result = new MessageSendResult(-1).setError(e.getErrorCode(), e.getErrorMessage());
         }
 
         if(result.ok()){
+            getTokenCodeService().persistCode(token, type, result);
             logger.info(String.format("Sent %s code to %s over %s", type.getLabel(), phoneNumber.getFullPhoneNumber(),
                     service));
         } else {

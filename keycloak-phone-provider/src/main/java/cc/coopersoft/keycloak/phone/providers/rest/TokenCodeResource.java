@@ -112,9 +112,15 @@ public class TokenCodeResource {
         logger.info(String.format("Requested %s code to %s", tokenCodeType.getLabel(), phoneNumber.getFullPhoneNumber()));
         MessageSendResult result = session.getProvider(PhoneMessageService.class).sendTokenCode(phoneNumber, tokenCodeType);
 
-        retData.put("status", 1);
-        retData.put("expires_in", result.getExpiresTime());
-        retData.put("resend_expires", result.getResendExpiresTime());
+        if (result.ok()){
+            retData.put("status", 1);
+            retData.put("expires_in", result.getExpiresTime());
+            retData.put("resend_expires", result.getResendExpiresTime());
+        } else {
+            retData.put("status", 0);
+            retData.put("error", result.getErrorMessage());
+            retData.put("errormsg", "serverError");
+        }
         return Response.ok(retData, APPLICATION_JSON_TYPE).build();
     }
 
