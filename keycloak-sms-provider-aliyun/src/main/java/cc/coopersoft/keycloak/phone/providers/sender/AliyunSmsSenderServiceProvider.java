@@ -67,6 +67,7 @@ public class AliyunSmsSenderServiceProvider implements MessageSenderService {
             e.printStackTrace();
             return new MessageSendResult(-1).setError(e.getErrCode(), e.getErrMsg());
         } catch (ClientException e) {
+            e.printStackTrace();
             return new MessageSendResult(-1).setError(e.getErrCode(), e.getErrMsg());
         }
     }
