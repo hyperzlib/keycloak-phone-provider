@@ -8,6 +8,7 @@ import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import org.keycloak.authentication.AbstractFormAuthenticator;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
@@ -23,11 +24,11 @@ import javax.ws.rs.core.MultivaluedHashMap;
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
 
-public class PhoneLoginForm extends AbstractFormAuthenticator implements Authenticator {
+public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
     protected static ServicesLogger log = ServicesLogger.LOGGER;
 
-    public static final String PHONE_LOGIN_FORM_TPL = "login-with-phone.ftl";
+    public static final String PHONE_LOGIN_FORM_TPL = "login.ftl";
 
     public static final String FIELD_LOGIN_TYPE = "loginType";
 
@@ -103,7 +104,9 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
     public void action(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
         if (!formData.containsKey(FIELD_LOGIN_TYPE) || !formData.getFirst(FIELD_LOGIN_TYPE).equals("phone")){
-            context.attempted();
+            if(validateUserAndPassword(context, formData)){
+                context.success();
+            }
             return;
         }
 

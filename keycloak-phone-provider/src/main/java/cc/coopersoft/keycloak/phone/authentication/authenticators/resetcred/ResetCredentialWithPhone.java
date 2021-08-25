@@ -33,6 +33,8 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
 
     public static final String NOT_SEND_EMAIL = "should-send-email";
 
+    public static final String PHONE_RESET_CREDENTIAL_TPL = "login-reset-password-with-phone.ftl";
+
     protected PhoneNumber getPhoneNumber(AuthenticationFlowContext context){
         return new PhoneNumber(context.getHttpRequest().getDecodedFormParameters());
     }
@@ -42,9 +44,8 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         super.authenticate(context);
 
         Response challenge = context.form()
-//                .setAttribute("captchaKey", siteKey)
                 .setAttribute("verificationCodeKind", VERIFICATION_CODE_KIND)
-                .createForm("login-reset-password-with-phone.ftl");
+                .createForm(PHONE_RESET_CREDENTIAL_TPL);
         context.challenge(challenge);
     }
 
@@ -60,7 +61,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
             Response challenge = context.form()
                     .setError(Messages.MISSING_USERNAME)
                     .setAttribute("verificationCodeKind", VERIFICATION_CODE_KIND)
-                    .createForm("login-reset-password-with-phone.ftl");
+                    .createForm(PHONE_RESET_CREDENTIAL_TPL);
             context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
             return;
         }
@@ -79,7 +80,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
                         .setError(Messages.INVALID_USER)
 //                        .setAttribute("captchaKey", siteKey)
                         .setAttribute("verificationCodeKind", VERIFICATION_CODE_KIND)
-                        .createForm("login-reset-password-with-phone.ftl");
+                        .createForm(PHONE_RESET_CREDENTIAL_TPL);
                 context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
                 return;
             }

@@ -63,9 +63,6 @@ public class AliyunSmsSenderServiceProvider implements MessageSenderService {
             CommonResponse response = client.getCommonResponse(request);
             System.out.println(response.getData());
             return new MessageSendResult(1).setResendExpires(120).setExpires(expires);
-        } catch (ServerException e) {
-            e.printStackTrace();
-            return new MessageSendResult(-1).setError(e.getErrCode(), e.getErrMsg());
         } catch (ClientException e) {
             e.printStackTrace();
             return new MessageSendResult(-1).setError(e.getErrCode(), e.getErrMsg());
