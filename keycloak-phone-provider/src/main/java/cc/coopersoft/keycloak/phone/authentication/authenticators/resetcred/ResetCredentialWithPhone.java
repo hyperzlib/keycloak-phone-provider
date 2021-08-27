@@ -9,6 +9,7 @@ import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
+import org.keycloak.authentication.actiontoken.DefaultActionTokenKey;
 import org.keycloak.authentication.authenticators.browser.AbstractUsernameFormAuthenticator;
 import org.keycloak.authentication.authenticators.resetcred.ResetCredentialChooseUser;
 import org.keycloak.events.Details;
@@ -21,6 +22,7 @@ import org.keycloak.services.messages.Messages;
 
 import javax.ws.rs.core.MultivaluedMap;
 import javax.ws.rs.core.Response;
+import java.util.Objects;
 import java.util.Optional;
 
 public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
@@ -42,6 +44,12 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         super.authenticate(context);
+
+        String actionTokenUserId = context.getAuthenticationSession().getAuthNote(DefaultActionTokenKey.ACTION_TOKEN_USER_ID);
+        if (actionTokenUserId != null) {
+            context.success();
+            return;
+        }
 
         Response challenge = context.form()
                 .setAttribute("verificationCodeKind", VERIFICATION_CODE_KIND)

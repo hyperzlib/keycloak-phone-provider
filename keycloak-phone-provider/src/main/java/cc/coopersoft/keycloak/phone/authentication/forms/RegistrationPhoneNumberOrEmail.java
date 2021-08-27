@@ -1,8 +1,7 @@
-/**
- * add by zhangzhl
- * 2020-07-27
- * 注册页手机号码必填验证
- *
+/*
+  add by zhangzhl
+  2020-07-27
+  注册页手机号码必填验证
  */
 package cc.coopersoft.keycloak.phone.authentication.forms;
 
@@ -24,6 +23,8 @@ import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
 import org.keycloak.models.*;
 import org.keycloak.models.utils.FormMessage;
+import org.keycloak.policy.PasswordPolicyManagerProvider;
+import org.keycloak.policy.PolicyError;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
@@ -39,8 +40,8 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 	public static final String PROVIDER_ID = "registration-phone-or-email";
 
 	public static final String MISSING_PHONE_NUMBER_OR_EMAIL = "requiredPhoneNumberOrEmail";
-
-	public static final String PHONE_IN_USE = "phone-in-use";
+	public static final String PHONE_IN_USE = "phone_in_use";
+	public static final String INVALID_SMS_CODE = "invalid_sms_code";
 
 	@Override
 	public String getHelpText() {
@@ -122,8 +123,10 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 		String eventError = Errors.INVALID_REGISTRATION;
 		KeycloakSession session = context.getSession();
 		PhoneNumber phoneNumber = new PhoneNumber(formData);
+		String credentialType = formData.getFirst(PhoneConstants.FIELD_CREDENTIAL_TYPE);
 
-		if(!phoneNumber.isEmpty()){
+		logger.info("credentialType: " + credentialType);
+		if(credentialType != null && credentialType.equals(PhoneConstants.CREDENTIAL_TYPE_PHONE)){
 			//使用手机号注册
 			formData.remove(PhoneConstants.FIELD_EMAIL);
 			context.getEvent().detail(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber());
@@ -141,15 +144,14 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 						.currentProcess(phoneNumber, TokenCodeType.REGISTRATION);
 				if (Validation.isBlank(verificationCode) || tokenCode == null ||
 						!tokenCode.getCode().equals(verificationCode)){
-					context.error(Errors.INVALID_REGISTRATION);
+					context.error(INVALID_SMS_CODE);
 					context.getEvent().detail(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber());
 					errors.add(new FormMessage(PhoneConstants.FIELD_VERIFICATION_CODE,
 							PhoneConstants.SMS_CODE_MISMATCH));
 				}
 				context.getSession().setAttribute(PhoneConstants.FIELD_TOKEN_ID, tokenCode.getId());
 			}
-		} else if(formData.containsKey(PhoneConstants.FIELD_EMAIL) &&
-				!Validation.isBlank(formData.getFirst(PhoneConstants.FIELD_EMAIL))) {
+		} else if(credentialType != null && credentialType.equals(PhoneConstants.CREDENTIAL_TYPE_EMAIL)) {
 			//使用邮箱注册，验证电子邮箱
 			formData.remove(PhoneConstants.FIELD_AREA_CODE);
 			formData.remove(PhoneConstants.FIELD_PHONE_NUMBER);
@@ -180,6 +182,17 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 					errors.add(new FormMessage(RegistrationPage.FIELD_EMAIL, Messages.EMAIL_EXISTS));
 				}
 			}
+			//验证密码
+			if (Validation.isBlank(formData.getFirst(RegistrationPage.FIELD_PASSWORD))) {
+				errors.add(new FormMessage(RegistrationPage.FIELD_PASSWORD, Messages.MISSING_PASSWORD));
+			} else if (!formData.getFirst(RegistrationPage.FIELD_PASSWORD).equals(formData.getFirst(RegistrationPage.FIELD_PASSWORD_CONFIRM))) {
+				errors.add(new FormMessage(RegistrationPage.FIELD_PASSWORD_CONFIRM, Messages.INVALID_PASSWORD_CONFIRM));
+			}
+			if (formData.getFirst(RegistrationPage.FIELD_PASSWORD) != null) {
+				PolicyError err = context.getSession().getProvider(PasswordPolicyManagerProvider.class).validate(context.getRealm().isRegistrationEmailAsUsername() ? formData.getFirst(RegistrationPage.FIELD_EMAIL) : formData.getFirst(RegistrationPage.FIELD_USERNAME), formData.getFirst(RegistrationPage.FIELD_PASSWORD));
+				if (err != null)
+					errors.add(new FormMessage(RegistrationPage.FIELD_PASSWORD, err.getMessage(), err.getParameters()));
+			}
 		} else {
 			//缺少参数
 			eventError = Errors.INVALID_INPUT;
@@ -187,6 +200,8 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 		}
 		if (errors.size() > 0) {
 			context.error(eventError);
+			formData.remove(RegistrationPage.FIELD_PASSWORD);
+			formData.remove(RegistrationPage.FIELD_PASSWORD_CONFIRM);
 			context.validationError(formData, errors);
 		} else {
 			context.success();
@@ -197,10 +212,14 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 	public void success(FormContext context) {
 		UserModel user = context.getUser();
 		MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+		String credentialType = formData.getFirst(PhoneConstants.FIELD_CREDENTIAL_TYPE);
 
-		user.setFirstName(formData.getFirst(RegistrationPage.FIELD_FIRST_NAME));
-		user.setLastName(formData.getFirst(RegistrationPage.FIELD_LAST_NAME));
-		if(formData.containsKey(PhoneConstants.FIELD_PHONE_NUMBER)) {
+		if (formData.getFirst(RegistrationPage.FIELD_FIRST_NAME) != null)
+			user.setFirstName(formData.getFirst(RegistrationPage.FIELD_FIRST_NAME));
+		if (formData.getFirst(RegistrationPage.FIELD_LAST_NAME) != null)
+			user.setLastName(formData.getFirst(RegistrationPage.FIELD_LAST_NAME));
+
+		if(credentialType != null && credentialType.equals(PhoneConstants.CREDENTIAL_TYPE_PHONE)) {
 			PhoneNumber phoneNumber = new PhoneNumber(formData);
 			String tokenId = context.getSession().getAttribute(PhoneConstants.FIELD_TOKEN_ID, String.class);
 
@@ -209,12 +228,19 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 		} else {
 			logger.info(String.format("registration user %s by email success.", user.getId()));
 			user.setEmail(formData.getFirst(RegistrationPage.FIELD_EMAIL));
+
+			try {
+				context.getSession().userCredentialManager().updateCredential(context.getRealm(), user, UserCredentialModel.password(formData.getFirst("password"), false));
+			} catch (Exception me) {
+				user.addRequiredAction(UserModel.RequiredAction.UPDATE_PASSWORD);
+			}
 		}
 	}
 
 	@Override
 	public void buildPage(FormContext context, LoginFormsProvider form) {
 		form.setAttribute("phoneNumberRequired", true);
+		form.setAttribute("passwordRequired", true);
 	}
 
 	@Override
