@@ -1,8 +1,6 @@
 package cc.coopersoft.keycloak.phone.authentication.requiredactions;
 
-import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
-import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.keycloak.authentication.InitiatedActionSupport;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;

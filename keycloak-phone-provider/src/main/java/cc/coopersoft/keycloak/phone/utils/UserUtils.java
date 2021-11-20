@@ -46,6 +46,6 @@ public class UserUtils {
 
     public static boolean isDuplicatePhoneAllowed(){
         //TODO isDuplicatePhoneAllowed
-        return true;
+        return false;
     }
 }
