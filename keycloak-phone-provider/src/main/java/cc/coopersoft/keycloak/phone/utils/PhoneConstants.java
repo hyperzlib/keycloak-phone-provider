@@ -20,4 +20,6 @@ public class PhoneConstants {
     public static final String MISSING_VERIFY_CODE = "requireSmsCode";
     public static final String PHONE_EXISTS = "phoneNumberExists";
     public static final String SMS_CODE_MISMATCH = "smsCodeMismatch";
+
+    public static final String USER_ATTRIBUTE_FIELD_PHONE_NUMBER = "phoneNumber";
 }

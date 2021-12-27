@@ -144,7 +144,6 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         LoginFormsProvider form = context.form().setExecution(context.getExecution().getId());
-
         context.challenge(makeForm(form));
     }
 
