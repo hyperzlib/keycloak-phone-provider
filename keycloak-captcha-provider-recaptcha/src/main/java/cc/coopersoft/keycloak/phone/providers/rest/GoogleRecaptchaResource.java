@@ -1,6 +1,6 @@
 package cc.coopersoft.keycloak.phone.providers.rest;
 
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
 import cc.coopersoft.keycloak.phone.utils.RegexUtils;
 import org.jboss.logging.Logger;
 import org.jboss.resteasy.annotations.cache.NoCache;
@@ -58,7 +58,7 @@ public class GoogleRecaptchaResource {
     public Response getVerificationCodes( @HeaderParam("Access-Control-Request-Method") final String requestMethod,
                                           @HeaderParam("Access-Control-Request-Headers") final String requestHeaders,
                                           @HeaderParam("Origin") final String origin ) {
-        CaptchaService captcha = this.session.getProvider(CaptchaService.class);
+        PhoneProviderCaptchaService captcha = this.session.getProvider(PhoneProviderCaptchaService.class);
 
         String geetestCode = captcha.getFrontendKey(this.auth);
         Response.ResponseBuilder response = Response.status(Response.Status.OK);

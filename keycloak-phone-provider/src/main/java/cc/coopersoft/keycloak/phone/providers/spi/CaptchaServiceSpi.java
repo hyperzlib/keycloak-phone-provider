@@ -17,11 +17,11 @@ public class CaptchaServiceSpi implements Spi {
 
     @Override
     public Class<? extends Provider> getProviderClass() {
-        return CaptchaService.class;
+        return PhoneProviderCaptchaService.class;
     }
 
     @Override
     public Class<? extends ProviderFactory> getProviderFactoryClass() {
-        return CaptchaServiceProviderFactory.class;
+        return PhoneProviderCaptchaServiceProviderFactory.class;
     }
 }

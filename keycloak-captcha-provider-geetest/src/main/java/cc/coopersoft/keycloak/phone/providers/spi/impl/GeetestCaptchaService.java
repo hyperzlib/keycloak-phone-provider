@@ -1,24 +1,55 @@
 package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaServiceProviderFactory;
 import com.geetest.sdk.GeetestLib;
 import com.geetest.sdk.GeetestLibResult;
+import com.google.auto.service.AutoService;
+import jakarta.ws.rs.core.MultivaluedMap;
+import lombok.Getter;
+import lombok.Setter;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.managers.AuthenticationManager;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GeetestCaptchaService implements CaptchaService {
+@AutoService(PhoneProviderCaptchaServiceProviderFactory.class)
+public class GeetestCaptchaService implements PhoneProviderCaptchaService, PhoneProviderCaptchaServiceProviderFactory {
     private static final Logger log = Logger.getLogger(GeetestCaptchaService.class);
     private static int serverStatus = 1;
 
     private final KeycloakSession session;
+
+    @Getter
+    @Setter
     private Config.Scope config;
+
+    @Override
+    public PhoneProviderCaptchaService create(KeycloakSession session) {
+        GeetestCaptchaService geetestCaptchaService = new GeetestCaptchaService(session);
+        geetestCaptchaService.setConfig(this.config);
+        return geetestCaptchaService;
+    }
+
+    @Override
+    public void init(Config.Scope config) {
+        this.config = config;
+    }
+
+    @Override
+    public void postInit(KeycloakSessionFactory factory) {
+
+    }
+
+    @Override
+    public String getId() {
+        return "geetest-captcha";
+    }
 
     public GeetestCaptchaService(KeycloakSession session) {
         this.session = session;
@@ -39,7 +70,7 @@ public class GeetestCaptchaService implements CaptchaService {
 
     @Override
     public boolean verify(final MultivaluedMap<String, String> formParams, String user) {
-        if(user == null) user = "unknow";
+        if(user == null) user = "unknown";
 
         String geetestId = this.config.get("id");
         String geetestKey = this.config.get("key");
@@ -103,10 +134,6 @@ public class GeetestCaptchaService implements CaptchaService {
         GeetestLibResult result = gtLib.register(digestmod, paramMap);
         serverStatus = result.getStatus();
         return result.getData();
-    }
-
-    public void setConfig(Config.Scope config){
-        this.config = config;
     }
 
     @Override

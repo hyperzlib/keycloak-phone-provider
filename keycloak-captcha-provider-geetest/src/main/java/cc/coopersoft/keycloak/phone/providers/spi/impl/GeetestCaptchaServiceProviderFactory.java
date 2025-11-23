@@ -1,16 +1,16 @@
 package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaServiceProviderFactory;
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaServiceProviderFactory;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-public class GeetestCaptchaServiceProviderFactory implements CaptchaServiceProviderFactory {
+public class GeetestCaptchaServiceProviderFactory implements PhoneProviderCaptchaServiceProviderFactory {
     private Config.Scope config;
 
     @Override
-    public CaptchaService create(KeycloakSession session) {
+    public PhoneProviderCaptchaService create(KeycloakSession session) {
         GeetestCaptchaService geetestCaptchaService = new GeetestCaptchaService(session);
         geetestCaptchaService.setConfig(this.config);
         return geetestCaptchaService;
@@ -33,6 +33,6 @@ public class GeetestCaptchaServiceProviderFactory implements CaptchaServiceProvi
 
     @Override
     public String getId() {
-        return "geetest";
+        return "geetest-captcha";
     }
 }

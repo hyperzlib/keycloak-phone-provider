@@ -3,13 +3,12 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeService;
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import org.jboss.logging.Logger;
@@ -82,7 +81,7 @@ public class TokenCodeResource {
             return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
         // 验证码
-        if (!session.getProvider(CaptchaService.class).verify(formData, this.auth) &&
+        if (!session.getProvider(PhoneProviderCaptchaService.class).verify(formData, this.auth) &&
                 !isTrustedClient(formData.getFirst("client_id"), formData.getFirst("client_secret"))) {
             retData.put("status", -1);
             retData.put("error", "Captcha not completed.");

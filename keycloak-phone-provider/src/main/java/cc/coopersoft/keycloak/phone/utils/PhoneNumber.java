@@ -1,13 +1,10 @@
 package cc.coopersoft.keycloak.phone.utils;
 
 import com.fasterxml.jackson.databind.JsonNode;
-import lombok.AllArgsConstructor;
-import lombok.Data;
-import lombok.NoArgsConstructor;
+import jakarta.ws.rs.core.MultivaluedMap;
+import lombok.*;
 import org.keycloak.services.validation.Validation;
 
-import javax.persistence.criteria.CriteriaBuilder;
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.Optional;
 
 @Data
@@ -43,16 +40,24 @@ public class PhoneNumber {
         return Integer.parseInt(areaCode);
     }
 
-    public String getFullPhoneNumber() {
-        return "+" + areaCode + " " + phoneNumber;
+    public void setPhonemeNumber(long phoneNumber) {
+        this.phoneNumber = String.valueOf(phoneNumber);
     }
 
-    public String getFullPhoneNumber(boolean noSpace) {
-        if(noSpace) {
+    public long getPhoneNumberLong() {
+        return Long.parseLong(phoneNumber);
+    }
+
+    public String getFullPhoneNumber(boolean withoutSpace) {
+        if (withoutSpace) {
             return "+" + areaCode + phoneNumber;
         } else {
-            return getFullPhoneNumber();
+            return "+" + areaCode + " " + phoneNumber;
         }
+    }
+
+    public String getFullPhoneNumber() {
+        return getFullPhoneNumber(false);
     }
 
     public boolean setFullPhoneNumber(String fullPhoneNumber) {

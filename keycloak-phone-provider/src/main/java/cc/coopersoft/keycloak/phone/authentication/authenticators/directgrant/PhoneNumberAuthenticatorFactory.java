@@ -42,7 +42,7 @@ public class PhoneNumberAuthenticatorFactory implements AuthenticatorFactory, Co
         return SINGLETON;
     }
 
-    private static AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
     };
 

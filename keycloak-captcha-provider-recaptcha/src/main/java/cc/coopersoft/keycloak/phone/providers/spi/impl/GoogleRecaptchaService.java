@@ -1,7 +1,11 @@
 package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
 
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaServiceProviderFactory;
+import com.google.auto.service.AutoService;
+import jakarta.ws.rs.core.MultivaluedMap;
+import lombok.Setter;
 import org.apache.http.NameValuePair;
 import org.apache.http.client.entity.UrlEncodedFormEntity;
 import org.apache.http.client.methods.HttpPost;
@@ -12,21 +16,46 @@ import org.apache.http.util.EntityUtils;
 import org.keycloak.Config;
 import org.keycloak.connections.httpclient.HttpClientProvider;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.util.JsonSerialization;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.io.InputStream;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Map;
 
-public class GoogleRecaptchaService implements CaptchaService {
+@AutoService(PhoneProviderCaptchaServiceProviderFactory.class)
+public class GoogleRecaptchaService implements PhoneProviderCaptchaService, PhoneProviderCaptchaServiceProviderFactory {
+    @Setter
+    private Config.Scope config;
+
     public static final String G_RECAPTCHA_RESPONSE = "g-recaptcha-response";
 
     private final KeycloakSession session;
-    private Config.Scope config;
+
+    @Override
+    public PhoneProviderCaptchaService create(KeycloakSession session) {
+        GoogleRecaptchaService recaptchaService = new GoogleRecaptchaService(session);
+        recaptchaService.setConfig(config);
+        return recaptchaService;
+    }
+
+    @Override
+    public void init(Config.Scope config) {
+        this.config = config;
+    }
+
+    @Override
+    public void postInit(KeycloakSessionFactory factory) {
+
+    }
+
+    @Override
+    public String getId() {
+        return "recaptcha";
+    }
 
     public GoogleRecaptchaService(KeycloakSession session) {
         this.session = session;
@@ -81,10 +110,6 @@ public class GoogleRecaptchaService implements CaptchaService {
     @Override
     public String getFrontendKey(String user){
         return "";
-    }
-
-    public void setConfig(Config.Scope config){
-        this.config = config;
     }
 
     @Override
