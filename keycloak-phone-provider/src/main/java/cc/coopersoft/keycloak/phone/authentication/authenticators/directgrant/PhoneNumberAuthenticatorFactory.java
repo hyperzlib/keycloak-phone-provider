@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -9,11 +10,10 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderConfigProperty;
 
-import java.util.ArrayList;
 import java.util.List;
 
+@AutoService(AuthenticatorFactory.class)
 public class PhoneNumberAuthenticatorFactory implements AuthenticatorFactory, ConfigurableAuthenticatorFactory {
-
     public static final String PROVIDER_ID = "phone-number-authenticator";
     private static final PhoneNumberAuthenticator SINGLETON = new PhoneNumberAuthenticator();
 
@@ -58,10 +58,8 @@ public class PhoneNumberAuthenticatorFactory implements AuthenticatorFactory, Co
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
+        return null;
     }
-
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<ProviderConfigProperty>();
 
     @Override
     public String getDisplayType() {
@@ -80,7 +78,7 @@ public class PhoneNumberAuthenticatorFactory implements AuthenticatorFactory, Co
 
     @Override
     public boolean isConfigurable() {
-        return true;
+        return false;
     }
 }
 

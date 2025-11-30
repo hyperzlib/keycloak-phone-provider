@@ -5,24 +5,31 @@ import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.jboss.logging.Logger;
+import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.common.util.Time;
 import org.keycloak.credential.*;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.models.credential.dto.OTPSecretData;
+import org.keycloak.util.JsonSerialization;
 
+import java.io.IOException;
+import java.util.Optional;
+
+/**
+ *  证书使用 CredentialValidator 来认证，例如 password 证书 使用登录认证，本例中使用 phone OTP 认证
+ *   //not have credential , SmsOtpMfaAuthenticator setRequiredActions will add
+ *   ConfigSmsOtpRequiredAction to add an OPT credential
+ *   -> OTP
+ */
 public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCredentialModel>, CredentialInputValidator {
-
     private final static Logger logger = Logger.getLogger(PhoneOtpCredentialProvider.class);
     private final KeycloakSession session;
 
     public PhoneOtpCredentialProvider(KeycloakSession session) {
         this.session = session;
-    }
-
-    private UserCredentialStore getCredentialStore() {
-        return session.userCredentialManager();
     }
 
     private TokenCodeService getTokenCodeService() {
@@ -37,21 +44,61 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
     @Override
     public boolean isConfiguredFor(RealmModel realm, UserModel user, String credentialType) {
         if (!supportsCredentialType(credentialType)) return false;
-        return getCredentialStore().getStoredCredentialsByTypeStream(realm, user, credentialType).count() > 0;
+        return user.credentialManager().getStoredCredentialsByTypeStream(credentialType).findAny().isPresent();
     }
 
     @Override
     public boolean isValid(RealmModel realm, UserModel user, CredentialInput input) {
+        logger.info("---------------begin valid otp sms");
 
-        PhoneNumber phoneNumber = new PhoneNumber(user.getFirstAttribute("phoneNumber"));
+        String phoneNumberString = user.getFirstAttribute("phoneNumber");
+
+
         String code = input.getChallengeResponse();
 
         if (!(input instanceof UserCredentialModel)) return false;
         if (!input.getType().equals(getType())) return false;
-        if (phoneNumber.isEmpty()) return false;
+        if (phoneNumberString == null) return false;
         if (code == null) return false;
 
-        return getTokenCodeService().validateCode(user, phoneNumber, code, TokenCodeType.OTP);
+        PhoneNumber phoneNumber = new PhoneNumber(phoneNumberString);
+
+        if (ObjectUtil.isBlank(input.getCredentialId())) {
+            logger.debugf("CredentialId is null when validating credential of user %s", user.getUsername());
+            return false;
+        }
+
+        CredentialModel credential = user.credentialManager().getStoredCredentialById(input.getCredentialId());
+        var invalid = Optional.ofNullable(user.credentialManager().getStoredCredentialById(input.getCredentialId()))
+                .map(credentialModel -> {
+                    try {
+                        return JsonSerialization.readValue(credentialModel.getCredentialData(), PhoneOtpCredentialModel.SmsOtpCredentialData.class);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException(e);
+                    }
+                })
+                .map(PhoneOtpCredentialModel.SmsOtpCredentialData::isSecretInvalid)
+                .filter(invalidSecret -> invalidSecret)
+                .orElse(false);
+        if (invalid){
+            try {
+                getTokenCodeService().validateCode(user, phoneNumber, code, TokenCodeType.OTP);
+                return true;
+            } catch (Exception e) {
+                return false;
+            }
+        }
+        return Optional.ofNullable(credential.getSecretData())
+                .map(secretData -> {
+                    try {
+                        return JsonSerialization.readValue(secretData, OTPSecretData.class);
+                    } catch (IOException e) {
+                        throw new IllegalArgumentException(e);
+                    }
+                })
+                .flatMap(secretData -> Optional.ofNullable(secretData.getValue()))
+                .map(CredentialCode -> CredentialCode.equals(code))
+                .orElse(false);
     }
 
     @Override
@@ -64,12 +111,13 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
         if (credential.getCreatedDate() == null) {
             credential.setCreatedDate(Time.currentTimeMillis());
         }
-        return getCredentialStore().createCredential(realm, user, credential);
+        return user.credentialManager().createStoredCredential(credential);
     }
 
     @Override
     public boolean deleteCredential(RealmModel realm, UserModel user, String credentialId) {
-        return getCredentialStore().removeStoredCredential(realm, user, credentialId);
+        return user.credentialManager().removeStoredCredentialById(credentialId);
+//        return getCredentialStore().removeStoredCredential(realm, user, credentialId);
     }
 
     @Override

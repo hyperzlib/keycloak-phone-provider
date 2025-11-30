@@ -2,12 +2,14 @@ package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
 import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeService;
 import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeServiceProviderFactory;
+import com.google.auto.service.AutoService;
 import org.checkerframework.checker.units.qual.A;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.provider.ProviderFactory;
 
+@AutoService(AreaCodeServiceProviderFactory.class)
 public class AreaCodeServiceProviderFactoryImpl implements AreaCodeServiceProviderFactory {
     private AreaCodeService instance;
 

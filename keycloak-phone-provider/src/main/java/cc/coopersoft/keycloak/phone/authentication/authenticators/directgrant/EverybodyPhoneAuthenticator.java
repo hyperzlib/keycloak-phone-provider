@@ -9,17 +9,19 @@ import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.models.KeycloakSession;
+import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
-import org.keycloak.services.validation.Validation;
 
 
-public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator{
+public class EverybodyPhoneAuthenticator extends BaseDirectGrantAuthenticator {
 
   private static final Logger logger = Logger.getLogger(EverybodyPhoneAuthenticator.class);
 
   public EverybodyPhoneAuthenticator(KeycloakSession session) {
-    super(session);
+    if (session.getContext().getRealm() == null) {
+      throw new IllegalStateException("The service cannot accept a session without a realm in its context.");
+    }
   }
 
   @Override
@@ -28,44 +30,49 @@ public class EverybodyPhoneAuthenticator extends AuthenticationCodeAuthenticator
   }
 
   @Override
-  public void authenticate(AuthenticationFlowContext context){
-    PhoneNumber phoneNumber = getPhoneNumber(context);
+  public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
 
-    if (phoneNumber.isEmpty()){
-      invalidCredentials(context);
-      return;
-    }
+  }
 
-    String code = getAuthenticationCode(context);
+  @Override
+  public void authenticate(AuthenticationFlowContext context) {
+    getPhoneNumber(context)
+            .ifPresentOrElse(phoneNumber -> getAuthenticationCode(context)
+                            .ifPresentOrElse(code -> authToUser(context, phoneNumber, code),
+                                    ()-> invalidCredentials(context)),
+                    () -> invalidCredentials(context));
+  }
 
-    if (Validation.isBlank(code)){
-      invalidCredentials(context);
-      return;
-    }
-
+  private void authToUser(AuthenticationFlowContext context, PhoneNumber phoneNumber, String code) {
     TokenCodeService tokenCodeService = context.getSession().getProvider(TokenCodeService.class);
-    TokenCodeRepresentation tokenCode = tokenCodeService.currentProcess(phoneNumber, TokenCodeType.OTP);
-
-    if(tokenCode == null || !tokenCode.getCode().equals(code)){
+    if (!phoneNumber.isValid()) {
       invalidCredentials(context);
       return;
     }
 
-    UserModel user = UserUtils.findUserByPhone(context.getSession().users(),
-            context.getRealm(), phoneNumber);
-    if (user == null){
-      if (context.getSession().users().getUserByUsername(context.getRealm(), phoneNumber.getPhoneNumber()) != null){
-        invalidCredentials(context,AuthenticationFlowError.USER_CONFLICT);
-        return;
-      }
-      user = context.getSession().users().addUser(context.getRealm(), phoneNumber.getPhoneNumber());
-      user.setEnabled(true);
-      context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, phoneNumber.getPhoneNumber());
+    TokenCodeRepresentation tokenCode = tokenCodeService.currentProcess(phoneNumber, TokenCodeType.AUTH);
+
+    if (tokenCode == null || !tokenCode.getCode().equals(code)) {
+      invalidCredentials(context);
+      return;
     }
-    context.setUser(user);
 
-    tokenCodeService.tokenValidated(user,phoneNumber, tokenCode.getId());
+    UserModel user = UserUtils.findUserByPhone(context.getSession(), context.getRealm(), phoneNumber)
+            .orElseGet(() -> {
+              if (context.getSession().users().getUserByUsername(context.getRealm(), phoneNumber.toString()) != null) {
+                invalidCredentials(context, AuthenticationFlowError.USER_CONFLICT);
+                return null;
+              }
+              UserModel newUser = context.getSession().users().addUser(context.getRealm(), phoneNumber.toString());
 
-    context.success();
+              newUser.setEnabled(true);
+              context.getAuthenticationSession().setClientNote(OIDCLoginProtocol.LOGIN_HINT_PARAM, phoneNumber.toString());
+              return newUser;
+            });
+    if (user != null) {
+      context.setUser(user);
+      tokenCodeService.tokenValidated(user, phoneNumber, tokenCode.getId(), false);
+      context.success();
+    }
   }
 }

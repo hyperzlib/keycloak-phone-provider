@@ -1,6 +1,10 @@
 package cc.coopersoft.keycloak.phone.authentication.requiredactions;
 
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
+import com.google.auto.service.AutoService;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.keycloak.authentication.InitiatedActionSupport;
 import org.keycloak.authentication.RequiredActionContext;
 import org.keycloak.authentication.RequiredActionProvider;
@@ -10,11 +14,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-
 public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
-
     public static final String PROVIDER_ID = "UPDATE_PHONE_NUMBER";
 
     @Override
@@ -42,10 +42,10 @@ public class UpdatePhoneNumberRequiredAction implements RequiredActionProvider {
         KeycloakSession session = context.getSession();
         RealmModel realm = context.getRealm();
 
-        String newPhoneNumber = formData.getFirst(PhoneConstants.FIELD_PHONE_NUMBER);
+        PhoneNumber newPhoneNumber = new PhoneNumber(formData);
         String oldPhoneNumber = user.getFirstAttribute(PhoneConstants.FIELD_PHONE_NUMBER);
 
-        if (!newPhoneNumber.equals(oldPhoneNumber)) {
+        if (newPhoneNumber.toString().equals(oldPhoneNumber)) {
             Response challenge = context.form()
                     .setError("User cannot change phone number via rest api")
                     .setFormData(formData)

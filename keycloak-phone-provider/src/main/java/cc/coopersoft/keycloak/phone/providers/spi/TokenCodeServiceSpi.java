@@ -1,9 +1,11 @@
 package cc.coopersoft.keycloak.phone.providers.spi;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.provider.Provider;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.provider.Spi;
 
+@AutoService(Spi.class)
 public class TokenCodeServiceSpi implements Spi {
 
     @Override

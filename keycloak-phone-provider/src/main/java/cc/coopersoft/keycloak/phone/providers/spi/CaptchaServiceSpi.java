@@ -1,9 +1,11 @@
 package cc.coopersoft.keycloak.phone.providers.spi;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.provider.Provider;
 import org.keycloak.provider.ProviderFactory;
 import org.keycloak.provider.Spi;
 
+@AutoService(Spi.class)
 public class CaptchaServiceSpi implements Spi {
     @Override
     public boolean isInternal() {
@@ -21,7 +23,7 @@ public class CaptchaServiceSpi implements Spi {
     }
 
     @Override
-    public Class<? extends ProviderFactory> getProviderFactoryClass() {
+    public Class<? extends ProviderFactory<?>> getProviderFactoryClass() {
         return PhoneProviderCaptchaServiceProviderFactory.class;
     }
 }

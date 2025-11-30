@@ -32,6 +32,8 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
 
     public static final String USER_NOT_EXISTS = "userNotExists";
 
+    public static final String VERIFIED_PHONE_NUMBER = "LOGIN_BY_PHONE_VERIFY";
+
     private TokenCodeService getTokenCodeService(KeycloakSession session) {
         return session.getProvider(TokenCodeService.class);
     }
@@ -120,7 +122,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
             context.challenge(challenge(context, PhoneConstants.MISSING_PHONE_NUMBER, formData));
             return;
         }
-        UserModel user = UserUtils.findUserByPhone(session.users(), context.getRealm(), phoneNumber);
+        UserModel user = UserUtils.findUserByPhone(session, context.getRealm(), phoneNumber).orElse(null);
         if(user == null) { //用户不存在
             context.challenge(challenge(context, USER_NOT_EXISTS, formData));
             return;

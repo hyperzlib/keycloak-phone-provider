@@ -19,25 +19,16 @@ public class PhoneNumberAuthenticator extends BaseDirectGrantAuthenticator {
 
     @Override
     public void setRequiredActions(KeycloakSession session, RealmModel realm, UserModel user) {
-        user.addRequiredAction("PHONE_NUMBER_GRANT_CONFIG");
     }
 
     @Override
     public void authenticate(AuthenticationFlowContext context) {
-        PhoneNumber phoneNumber = getPhoneNumber(context);
-
-        if (phoneNumber.isEmpty()){
-            invalidCredentials(context);
-            return;
-        }
-        UserModel user = UserUtils.findUserByPhone(context.getSession().users(), context.getRealm(), phoneNumber);
-        if (user == null) {
-            invalidCredentials(context);
-            return;
-        }
-
-        logger.info("Grant authenticator valid phone success");
-        context.setUser(user);
-        context.success();
+        context.clearUser();
+        getPhoneNumber(context).ifPresentOrElse(phoneNumber -> UserUtils.findUserByPhone(context.getSession(), context.getRealm(), phoneNumber)
+                    .ifPresentOrElse(user -> {
+                        context.setUser(user);
+                        context.success();
+                    }, () -> invalidCredentials(context)),
+                () -> invalidCredentials(context));
     }
 }

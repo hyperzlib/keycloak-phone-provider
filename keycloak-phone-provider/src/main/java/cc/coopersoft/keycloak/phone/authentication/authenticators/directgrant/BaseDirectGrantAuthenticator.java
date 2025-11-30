@@ -1,9 +1,7 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 
-import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
+import cc.coopersoft.keycloak.phone.utils.OptionalUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import jakarta.ws.rs.core.MediaType;
-import jakarta.ws.rs.core.Response;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
 import org.keycloak.authentication.Authenticator;
@@ -13,6 +11,10 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.representations.idm.OAuth2ErrorRepresentation;
 
+import jakarta.ws.rs.core.MediaType;
+import jakarta.ws.rs.core.Response;
+import java.util.Optional;
+
 public abstract class BaseDirectGrantAuthenticator implements Authenticator {
 
     public Response errorResponse(int status, String error, String errorDescription) {
@@ -20,12 +22,16 @@ public abstract class BaseDirectGrantAuthenticator implements Authenticator {
         return Response.status(status).entity(errorRep).type(MediaType.APPLICATION_JSON_TYPE).build();
     }
 
-    protected PhoneNumber getPhoneNumber(AuthenticationFlowContext context){
-        return new PhoneNumber(context.getHttpRequest().getDecodedFormParameters());
+    protected Optional<PhoneNumber> getPhoneNumber(AuthenticationFlowContext context) {
+        PhoneNumber phoneNumber = new PhoneNumber(context.getHttpRequest().getDecodedFormParameters());
+        if (!phoneNumber.isValid()) {
+            return Optional.empty();
+        }
+        return Optional.of(phoneNumber);
     }
 
-    protected String getAuthenticationCode(AuthenticationFlowContext context){
-        return context.getHttpRequest().getDecodedFormParameters().getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
+    protected Optional<String> getAuthenticationCode(AuthenticationFlowContext context){
+        return OptionalUtils.ofBlank(context.getHttpRequest().getDecodedFormParameters().getFirst("code"));
     }
 
     protected void invalidCredentials(AuthenticationFlowContext context,AuthenticationFlowError error){

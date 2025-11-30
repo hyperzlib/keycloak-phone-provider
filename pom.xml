@@ -13,6 +13,7 @@
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
         <maven.compiler.source>17</maven.compiler.source>
         <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
         <version.keycloak>26.0.0</version.keycloak>
         <version.phone.provider>1.1</version.phone.provider>
         <quarkus-resteasy.version>3.27.0</quarkus-resteasy.version>
@@ -81,6 +82,7 @@
             <plugin>
                 <inherited>false</inherited>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>

@@ -10,6 +10,7 @@ public class PhoneConstants {
     public static final String FIELD_VERIFICATION_CODE = "smsCode";
     public static final String FIELD_EMAIL = RegistrationPage.FIELD_EMAIL;
     public static final String FIELD_TOKEN_ID = "tokenId";
+    public static final String FIELD_CREDENTIAL_ID = "credentialId";
     public static final String FIELD_CREDENTIAL_TYPE = "credentialType";
 
     public static final String CREDENTIAL_TYPE_PHONE = "phone";

@@ -2,7 +2,7 @@ package cc.coopersoft.keycloak.phone.providers.jpa;
 
 import lombok.*;
 
-import javax.persistence.*;
+import jakarta.persistence.*;
 import java.util.Date;
 import java.util.Objects;
 

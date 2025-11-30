@@ -2,10 +2,12 @@ package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigServiceProviderFactory;
+import com.google.auto.service.AutoService;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
+@AutoService(ConfigServiceProviderFactory.class)
 public class ConfigServiceProviderFactoryImpl implements ConfigServiceProviderFactory {
     private ConfigService instance;
 

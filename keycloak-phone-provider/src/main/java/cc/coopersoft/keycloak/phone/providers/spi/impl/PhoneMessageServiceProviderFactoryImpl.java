@@ -2,10 +2,12 @@ package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageServiceProviderFactory;
+import com.google.auto.service.AutoService;
 import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
+@AutoService(PhoneMessageServiceProviderFactory.class)
 public class PhoneMessageServiceProviderFactoryImpl implements PhoneMessageServiceProviderFactory {
     @Override
     public PhoneMessageService create(KeycloakSession session) {

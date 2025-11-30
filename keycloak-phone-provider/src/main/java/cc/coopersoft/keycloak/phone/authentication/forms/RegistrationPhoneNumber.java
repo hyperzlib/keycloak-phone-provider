@@ -6,12 +6,15 @@
 package cc.coopersoft.keycloak.phone.authentication.forms;
 
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
+import cc.coopersoft.keycloak.phone.utils.ConfigUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import com.google.auto.service.AutoService;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
@@ -26,10 +29,10 @@ import org.keycloak.models.utils.FormMessage;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.validation.Validation;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
 
+@AutoService(FormActionFactory.class)
 public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 
 	private static final Logger logger = Logger.getLogger(RegistrationPhoneNumber.class);
@@ -121,7 +124,8 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 			return;
 		}
 
-		if (!UserUtils.isDuplicatePhoneAllowed() && UserUtils.findUserByPhone(session.users(),context.getRealm(), phoneNumber) != null) {
+		if (!ConfigUtils.isDuplicatePhoneAllowed(session) &&
+				UserUtils.findUserByPhone(session, context.getRealm(), phoneNumber).isPresent()) {
 			formData.remove(PhoneConstants.FIELD_PHONE_NUMBER);
 			context.getEvent().detail(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber());
 			errors.add(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, PhoneConstants.PHONE_EXISTS));
@@ -155,7 +159,7 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 		String tokenId = context.getSession().getAttribute(PhoneConstants.FIELD_TOKEN_ID, String.class);
 
 		logger.info(String.format("registration user %s phone success, tokenId is: %s", user.getId(), tokenId));
-		getTokenCodeService(context.getSession()).tokenValidated(user, phoneNumber, tokenId);
+		getTokenCodeService(context.getSession()).tokenValidated(user, phoneNumber, tokenId, false);
 	}
 
 	@Override

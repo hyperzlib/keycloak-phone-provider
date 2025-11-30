@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.browser;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.Config;
 import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
@@ -11,6 +12,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 
 import java.util.List;
 
+@AutoService(AuthenticatorFactory.class)
 public class PhoneOrPasswordLoginFormFactory implements AuthenticatorFactory {
 
     public static final String PROVIDER_ID = "auth-phone-password-login-form";

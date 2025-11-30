@@ -17,7 +17,7 @@ public interface TokenCodeService extends Provider {
 
     boolean canResend(PhoneNumber phoneNumber, TokenCodeType tokenCodeType);
 
-    boolean isAbusing(PhoneNumber phoneNumber, TokenCodeType tokenCodeType);
+    boolean isAbusing(PhoneNumber phoneNumber, TokenCodeType tokenCodeType, String sourceAddr);
 
     void persistCode(TokenCodeRepresentation tokenCode, TokenCodeType tokenCodeType, MessageSendResult sendResult);
 
@@ -31,9 +31,9 @@ public interface TokenCodeService extends Provider {
 
     void setUserPhoneNumberByCode(UserModel user, PhoneNumber phoneNumber, String code);
 
-    void cleanUpAction(UserModel user);
+    void tokenValidated(UserModel user, PhoneNumber phoneNumber, String tokenCodeId, boolean isOTP);
 
-    void tokenValidated(UserModel user, PhoneNumber phoneNumber, String tokenCodeId);
+    void validateProcess(String tokenCodeId, UserModel user);
 
     Date getResendExpires(PhoneNumber phoneNumber, TokenCodeType tokenCodeType);
 }

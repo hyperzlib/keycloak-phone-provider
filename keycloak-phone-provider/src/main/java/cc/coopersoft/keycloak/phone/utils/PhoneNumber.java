@@ -5,6 +5,7 @@ import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.*;
 import org.keycloak.services.validation.Validation;
 
+import java.util.Objects;
 import java.util.Optional;
 
 @Data
@@ -13,6 +14,13 @@ import java.util.Optional;
 public class PhoneNumber {
     public String areaCode;
     public String phoneNumber;
+
+    public PhoneNumber(String fullPhoneNumber, boolean throwIfInvalid) {
+        boolean result = this.setFullPhoneNumber(fullPhoneNumber);
+        if (throwIfInvalid && !result) {
+            throw new IllegalArgumentException("Invalid phone number format: " + fullPhoneNumber);
+        }
+    }
 
     public PhoneNumber(String fullPhoneNumber) {
         this.setFullPhoneNumber(fullPhoneNumber);
@@ -70,7 +78,40 @@ public class PhoneNumber {
         return false;
     }
 
+    public boolean isValid() {
+        return !Validation.isBlank(phoneNumber) && !Validation.isBlank(areaCode);
+    }
+
+    @Override
+    public String toString() {
+        return getFullPhoneNumber();
+    }
+
+    @Override
+    public boolean equals(Object obj) {
+        if (this == obj) return true;
+        if (obj == null) return false;
+
+        PhoneNumber that = null;
+        if (getClass() == obj.getClass()) {
+            that = (PhoneNumber) obj;
+        } else if (obj instanceof String) {
+            that = new PhoneNumber((String) obj);
+        } else {
+            return false;
+        }
+
+        if (!that.isValid()) return false;
+
+        return Objects.equals(this.areaCode, that.areaCode) &&
+                Objects.equals(this.phoneNumber, that.phoneNumber);
+    }
+
     public boolean isEmpty() {
         return Validation.isBlank(phoneNumber) || Validation.isBlank(areaCode);
+    }
+
+    public int hashCode() {
+        return Objects.hash(toString());
     }
 }

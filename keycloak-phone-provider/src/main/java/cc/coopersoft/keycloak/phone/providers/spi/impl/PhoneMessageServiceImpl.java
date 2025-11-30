@@ -9,14 +9,13 @@ import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresent
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
+import com.google.auto.service.AutoService;
 import org.jboss.logging.Logger;
-import org.keycloak.Config.Scope;
 import org.keycloak.models.KeycloakSession;
 
-import javax.ws.rs.ForbiddenException;
+import jakarta.ws.rs.ForbiddenException;
 
 public class PhoneMessageServiceImpl implements PhoneMessageService {
-
     private static final Logger logger = Logger.getLogger(PhoneMessageServiceImpl.class);
     private final KeycloakSession session;
     private final String service;
@@ -45,14 +44,14 @@ public class PhoneMessageServiceImpl implements PhoneMessageService {
     }
 
     @Override
-    public MessageSendResult sendTokenCode(PhoneNumber phoneNumber, TokenCodeType type){
-        if (getTokenCodeService().isAbusing(phoneNumber, type)) {
+    public MessageSendResult sendTokenCode(PhoneNumber phoneNumber, String sourceAddr, TokenCodeType type, String kind) {
+        if (getTokenCodeService().isAbusing(phoneNumber, type, sourceAddr)) {
             throw new ForbiddenException("You requested the maximum number of messages the last hour");
         }
 
         MessageSendResult result;
 
-        if(!getTokenCodeService().canResend(phoneNumber, type)){
+        if(!getTokenCodeService().canResend(phoneNumber, type)) {
             TokenCodeRepresentation current = getTokenCodeService().currentProcess(phoneNumber, type);
             result = new MessageSendResult(-2).setError("RATE_LIMIT", "Please wait for minutes.");
             if(current != null && current.getResendExpiresAt() != null){

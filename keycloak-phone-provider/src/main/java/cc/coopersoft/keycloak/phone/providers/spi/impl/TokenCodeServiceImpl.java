@@ -9,27 +9,34 @@ import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.jpa.TokenCodeEntity;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.ConfigUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import jakarta.persistence.EntityManager;
+import jakarta.persistence.NoResultException;
+import jakarta.persistence.TemporalType;
+import jakarta.ws.rs.BadRequestException;
+import jakarta.ws.rs.ForbiddenException;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
+import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialModel;
 import org.keycloak.credential.CredentialProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
+import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
+import org.keycloak.services.validation.Validation;
+import org.keycloak.util.JsonSerialization;
 
-import javax.persistence.EntityManager;
-import javax.persistence.NoResultException;
-import javax.persistence.TemporalType;
-import javax.ws.rs.BadRequestException;
-import javax.ws.rs.ForbiddenException;
+import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
 import java.util.Optional;
 import java.util.concurrent.TimeUnit;
+import java.util.stream.Collectors;
 
 public class TokenCodeServiceImpl implements TokenCodeService {
 
@@ -132,7 +139,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
     }
 
     @Override
-    public boolean isAbusing(PhoneNumber phoneNumber, TokenCodeType tokenCodeType) {
+    public boolean isAbusing(PhoneNumber phoneNumber, TokenCodeType tokenCodeType, String sourceAddr) {
 
         Date oneHourAgo = new Date(System.currentTimeMillis() - TimeUnit.HOURS.toMillis(1));
 
@@ -216,55 +223,70 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         logger.info(String.format("User %s correctly answered the %s code", user.getId(), tokenCodeType.getLabel()));
 
         removeCode(phoneNumber, tokenCodeType);
-        session.users()
-                .searchForUserByUserAttributeStream(session.getContext().getRealm(), "phoneNumber",
-                        phoneNumber.getFullPhoneNumber())
-                .filter(u -> !u.getId().equals(user.getId()))
-                .forEach(u -> {
-                    logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(),
-                            phoneNumber.getFullPhoneNumber()));
-                    u.setSingleAttribute("phoneNumberVerified", "false");
-                });
 
-        user.setSingleAttribute("phoneNumberVerified", "true");
-        user.setSingleAttribute("phoneNumber", phoneNumber.getFullPhoneNumber());
-
-        cleanUpAction(user);
+        tokenValidated(user, phoneNumber, tokenCode.getId(), false);
     }
 
     @Override
-    public void tokenValidated(UserModel user, PhoneNumber phoneNumber, String tokenCodeId) {
-        if(!UserUtils.isDuplicatePhoneAllowed()) { //解绑重复的手机号
-            session.users().searchForUserByUserAttributeStream(session.getContext().getRealm(), "phoneNumber",
-                    phoneNumber.getFullPhoneNumber()).filter(u -> !u.getId().equals(user.getId()))
-                    .forEach(u -> {
-                        logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(),
-                                phoneNumber.getFullPhoneNumber()));
-                        u.setSingleAttribute("phoneNumberVerified", "false");
-                    });
+    public void tokenValidated(UserModel user, PhoneNumber phoneNumber, String tokenCodeId, boolean isOTP) {
+        boolean updateUserPhoneNumber = !isOTP;
+        String fullPhoneNumberString = phoneNumber.getFullPhoneNumber();
+
+        // 检测是否为 OTP 验证，如果是，则检查用户的 OTP 凭据中的电话号码是否与提供的电话号码匹配
+        if (isOTP) {
+            updateUserPhoneNumber = PhoneOtpCredentialModel.getSmsOtpCredentialData(user)
+                    .map(PhoneOtpCredentialModel.SmsOtpCredentialData::getPhoneNumber)
+                    .map(fullPhoneNumberString::equals)
+                    .orElse(false);
         }
 
-        user.setSingleAttribute("phoneNumberVerified", "true");
-        user.setSingleAttribute("phoneNumber", phoneNumber.getFullPhoneNumber());
+        if (updateUserPhoneNumber) {
+            if (!ConfigUtils.isDuplicatePhoneAllowed(session)) {
+                session.users()
+                        .searchForUserByUserAttributeStream(session.getContext().getRealm(),"phoneNumber", phoneNumber.toString())
+                        .filter(u -> !u.getId().equals(user.getId()))
+                        .forEach(u -> {
+                            logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
+                            u.setSingleAttribute("phoneNumberVerified", "false");
 
-        cleanUpAction(user);
-    }
+                            u.addRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
 
-    @Override
-    public void cleanUpAction(UserModel user) {
-        user.removeRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
-        PhoneOtpCredentialProvider socp = (PhoneOtpCredentialProvider)
-                session.getProvider(CredentialProvider.class, PhoneOtpCredentialProviderFactory.PROVIDER_ID);
-        if (socp.isConfiguredFor(getRealm(), user, PhoneOtpCredentialModel.TYPE)) {
-            Optional<CredentialModel> credentialOptional = session.userCredentialManager()
-                    .getStoredCredentialsByTypeStream(getRealm(), user, PhoneOtpCredentialModel.TYPE).findFirst();
-            if(credentialOptional.isPresent()) {
-                CredentialModel credential = credentialOptional.get();
-                credential.setCredentialData("{\"phoneNumber\":\"" + user.getFirstAttribute("phoneNumber") + "\"}");
-                PhoneOtpCredentialModel credentialModel = PhoneOtpCredentialModel.createFromCredentialModel(credential);
-                session.userCredentialManager().updateCredential(getRealm(), user, credentialModel);
+                            //remove otp Credentials
+                            u.credentialManager()
+                                    .getStoredCredentialsByTypeStream(PhoneOtpCredentialModel.TYPE)
+                                    .filter(c -> {
+                                        try {
+                                            PhoneOtpCredentialModel.SmsOtpCredentialData credentialData =
+                                                    JsonSerialization.readValue(c.getCredentialData(), PhoneOtpCredentialModel.SmsOtpCredentialData.class);
+                                            if (Validation.isBlank(credentialData.getPhoneNumber())){
+                                                return true;
+                                            }
+                                            return credentialData.getPhoneNumber().equals(user.getFirstAttribute("phoneNumber"));
+                                        } catch (IOException e) {
+                                            logger.warn("Unknown format Otp Credential", e);
+                                            return true;
+                                        }
+                                    })
+                                    .map(CredentialModel::getId)
+                                    .collect(Collectors.toList())
+                                    .forEach(id -> u.credentialManager().removeStoredCredentialById(id));
+                        });
             }
+            user.setSingleAttribute("phoneNumberVerified", "true");
+            user.setSingleAttribute("phoneNumber", phoneNumber.toString());
+
+            user.removeRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
         }
+
+        validateProcess(tokenCodeId, user);
+    }
+
+    @Override
+    public void validateProcess(String tokenCodeId, UserModel user) {
+        TokenCodeEntity entity = getEntityManager().find(TokenCodeEntity.class, tokenCodeId);
+        entity.setConfirmed(true);
+        entity.setByWhom(user.getId());
+        getEntityManager().persist(entity);
     }
 
     @Override

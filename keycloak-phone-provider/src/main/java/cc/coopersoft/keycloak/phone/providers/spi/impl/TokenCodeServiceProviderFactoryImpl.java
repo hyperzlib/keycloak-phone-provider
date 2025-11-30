@@ -2,10 +2,12 @@ package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeServiceProviderFactory;
+import com.google.auto.service.AutoService;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
+@AutoService(TokenCodeServiceProviderFactory.class)
 public class TokenCodeServiceProviderFactoryImpl implements TokenCodeServiceProviderFactory {
     private Config.Scope config;
 

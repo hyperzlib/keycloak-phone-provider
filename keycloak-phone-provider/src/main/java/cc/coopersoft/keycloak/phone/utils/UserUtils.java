@@ -3,6 +3,7 @@ package cc.coopersoft.keycloak.phone.utils;
 import org.keycloak.models.*;
 
 import java.util.List;
+import java.util.Optional;
 import java.util.stream.Collectors;
 import java.util.stream.Stream;
 
@@ -12,40 +13,37 @@ import java.util.stream.Stream;
  *
  */
 public class UserUtils {
-
-    private static UserModel singleUser(List<UserModel> users){
+    private static Optional<UserModel> singleUser(List<UserModel> users){
         if (users.isEmpty()) {
-            return null;
+            return Optional.empty();
         } else if (users.size() > 1){
             return users.stream()
                     .filter(u -> u.getAttributeStream("phoneNumberVerified")
                             .anyMatch("true"::equals))
-                    .findFirst().orElse(null);
+                    .findFirst();
         } else {
-            return users.get(0);
+            return Optional.ofNullable(users.get(0));
         }
     }
 
-    private static UserModel singleUser(Stream<UserModel> users){
+    private static Optional<UserModel> singleUser(Stream<UserModel> users){
         return users.filter(u -> u.getAttributeStream("phoneNumberVerified")
-                        .anyMatch("true"::equals)).findFirst().orElse(null);
+                        .anyMatch("true"::equals))
+                .findFirst();
     }
 
-    public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm, PhoneNumber phoneNumber){
+    public static Optional<UserModel> findUserByPhone(KeycloakSession session, RealmModel realm, PhoneNumber phoneNumber){
+        UserProvider userProvider = session.users();
         Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
                 realm, "phoneNumber", phoneNumber.getFullPhoneNumber());
         return singleUser(users);
     }
 
-    public static UserModel findUserByPhone(UserProvider userProvider, RealmModel realm,
-                                            PhoneNumber phoneNumber, String notIs){
+    public static Optional<UserModel> findUserByPhone(KeycloakSession session, RealmModel realm,
+                                                      PhoneNumber phoneNumber, String notIs){
+        UserProvider userProvider = session.users();
         Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
                 realm, "phoneNumber", phoneNumber.getFullPhoneNumber());
-        return singleUser(users.filter(u -> !u.getId().equals(notIs)).collect(Collectors.toList()));
-    }
-
-    public static boolean isDuplicatePhoneAllowed(){
-        //TODO isDuplicatePhoneAllowed
-        return false;
+        return singleUser(users.filter(u -> !u.getId().equals(notIs)));
     }
 }

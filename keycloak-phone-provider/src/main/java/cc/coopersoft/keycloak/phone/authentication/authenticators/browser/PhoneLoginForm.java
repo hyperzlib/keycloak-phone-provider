@@ -5,6 +5,7 @@ import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import com.google.auto.service.AutoService;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -21,6 +22,8 @@ import org.keycloak.models.UserModel;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
+
+import java.util.Optional;
 
 public class PhoneLoginForm extends AbstractFormAuthenticator implements Authenticator {
 
@@ -118,8 +121,8 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
             context.challenge(challenge(context, PhoneConstants.MISSING_PHONE_NUMBER, formData));
             return;
         }
-        UserModel user = UserUtils.findUserByPhone(session.users(), context.getRealm(), phoneNumber);
-        if(user == null) { //用户不存在
+        Optional<UserModel> user = UserUtils.findUserByPhone(session, context.getRealm(), phoneNumber);
+        if(user.isEmpty()) { //用户不存在
             context.challenge(challenge(context, USER_NOT_EXISTS, formData));
             return;
         }
@@ -129,13 +132,13 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
             return;
         }
         TokenCodeService tokenCodeService = getTokenCodeService(session);
-        if(!tokenCodeService.validateCode(user, phoneNumber, code, TokenCodeType.LOGIN)){ //验证码错误
+        if(!tokenCodeService.validateCode(user.get(), phoneNumber, code, TokenCodeType.LOGIN)){ //验证码错误
             context.challenge(challenge(context, PhoneConstants.SMS_CODE_MISMATCH, formData));
             return;
         }
 
         //一切OK，返回最终值
-        if(validateUser(context, user, formData)){
+        if(validateUser(context, user.get(), formData)){
             context.success();
         }
     }

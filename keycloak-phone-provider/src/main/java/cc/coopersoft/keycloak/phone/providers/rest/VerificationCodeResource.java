@@ -9,19 +9,19 @@ import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager.AuthResult;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-import static javax.ws.rs.core.MediaType.*;
+import static jakarta.ws.rs.core.MediaType.*;
 
 public class VerificationCodeResource {
 
@@ -71,7 +71,7 @@ public class VerificationCodeResource {
                     jsonObject.get(PhoneConstants.FIELD_PHONE_NUMBER).asText(),
                     jsonObject.get(PhoneConstants.FIELD_VERIFICATION_CODE).asText());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error parsing JSON", e);
         }
         return Response.serverError().build();
     }

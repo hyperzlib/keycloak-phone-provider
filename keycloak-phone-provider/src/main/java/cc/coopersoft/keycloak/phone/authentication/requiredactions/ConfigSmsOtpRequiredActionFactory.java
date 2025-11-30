@@ -1,11 +1,13 @@
 package cc.coopersoft.keycloak.phone.authentication.requiredactions;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.Config.Scope;
 import org.keycloak.authentication.RequiredActionFactory;
 import org.keycloak.authentication.RequiredActionProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
+@AutoService(RequiredActionFactory.class)
 public class ConfigSmsOtpRequiredActionFactory implements RequiredActionFactory {
 
     private static final ConfigSmsOtpRequiredAction instance = new ConfigSmsOtpRequiredAction();
