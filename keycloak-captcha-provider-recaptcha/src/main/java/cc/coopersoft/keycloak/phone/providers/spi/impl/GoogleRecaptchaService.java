@@ -89,7 +89,7 @@ public class GoogleRecaptchaService implements PhoneProviderCaptchaService, Phon
             try (CloseableHttpResponse response = httpClient.execute(post)) {
                 InputStream content = response.getEntity().getContent();
                 try {
-                    Map json = JsonSerialization.readValue(content, Map.class);
+                    Map<?, ?> json = JsonSerialization.readValue(content, Map.class);
                     Object val = json.get("success");
                     success = Boolean.TRUE.equals(val);
                 } finally {

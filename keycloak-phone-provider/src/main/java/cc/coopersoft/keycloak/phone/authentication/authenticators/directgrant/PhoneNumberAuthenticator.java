@@ -1,6 +1,5 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 
-import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;

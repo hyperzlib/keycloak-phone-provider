@@ -2,7 +2,6 @@ package cc.coopersoft.keycloak.phone.providers.spi;
 
 import lombok.Getter;
 import org.keycloak.Config;
-import org.keycloak.models.KeycloakSession;
 import org.keycloak.provider.Provider;
 
 @Getter

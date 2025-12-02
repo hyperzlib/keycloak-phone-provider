@@ -11,9 +11,7 @@ import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
-import io.vertx.core.http.HttpServerRequest;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -53,9 +51,10 @@ public class TokenCodeResource {
         try {
             JsonNode jsonObject = JsonLoader.fromString(reqBody);
             MultivaluedHashMap<String, String> formData = new MultivaluedHashMap<>();
-            for (Iterator<Map.Entry<String, JsonNode>> it = jsonObject.fields(); it.hasNext(); ) {
-                Map.Entry<String, JsonNode> node = it.next();
-                formData.addAll(node.getKey(), node.getValue().asText());
+            Iterator<String> fieldNames = jsonObject.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                formData.addAll(fieldName, jsonObject.get(fieldName).asText());
             }
             return this.sendTokenCode(formData);
         } catch (IOException e) {

@@ -15,7 +15,7 @@ import org.keycloak.services.managers.AuthenticationManager;
 import java.util.Set;
 
 public class GeetestResource {
-    private static final Logger log = Logger.getLogger(GeetestResource.class);
+    private static final Logger logger = Logger.getLogger(GeetestResource.class);
 
     private final KeycloakSession session;
     private AuthenticationManager.AuthResult auth;

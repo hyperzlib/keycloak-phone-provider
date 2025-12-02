@@ -4,7 +4,6 @@ import br.com.totalvoice.TotalVoiceClient;
 import br.com.totalvoice.api.Sms;
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
-import cc.coopersoft.keycloak.phone.providers.spi.FullSmsSenderAbstractService;
 import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;

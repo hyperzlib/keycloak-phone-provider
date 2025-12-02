@@ -2,7 +2,6 @@ package cc.coopersoft.keycloak.phone.providers.sender;
 
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
-import cc.coopersoft.keycloak.phone.providers.exception.MessageSendException;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import org.apache.http.HttpHeaders;

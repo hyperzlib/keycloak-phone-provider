@@ -3,8 +3,6 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeService;
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
-import cc.coopersoft.keycloak.phone.utils.JsonUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import jakarta.ws.rs.GET;
 import jakarta.ws.rs.Path;
 import jakarta.ws.rs.Produces;

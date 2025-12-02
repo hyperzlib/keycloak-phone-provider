@@ -2,10 +2,8 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
-import cc.coopersoft.keycloak.phone.utils.JsonUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.github.fge.jackson.JsonLoader;
 import org.jboss.logging.Logger;
