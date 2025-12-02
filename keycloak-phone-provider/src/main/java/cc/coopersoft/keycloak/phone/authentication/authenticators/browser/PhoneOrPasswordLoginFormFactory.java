@@ -2,25 +2,27 @@ package cc.coopersoft.keycloak.phone.authentication.authenticators.browser;
 
 import com.google.auto.service.AutoService;
 import org.keycloak.Config;
-import org.keycloak.OAuth2Constants;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
+import org.keycloak.authentication.authenticators.browser.WebAuthnConditionalUIAuthenticator;
 import org.keycloak.models.AuthenticationExecutionModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
+import org.keycloak.models.credential.WebAuthnCredentialModel;
 import org.keycloak.provider.ProviderConfigProperty;
 
+import java.util.Collections;
 import java.util.List;
+import java.util.Set;
 
 @AutoService(AuthenticatorFactory.class)
 public class PhoneOrPasswordLoginFormFactory implements AuthenticatorFactory {
 
     public static final String PROVIDER_ID = "auth-phone-password-login-form";
-    public static final PhoneOrPasswordLoginForm SINGLETON = new PhoneOrPasswordLoginForm();
 
     @Override
     public Authenticator create(KeycloakSession session) {
-        return SINGLETON;
+        return new PhoneOrPasswordLoginForm(session);
     }
 
     @Override
@@ -49,6 +51,13 @@ public class PhoneOrPasswordLoginFormFactory implements AuthenticatorFactory {
     }
 
     @Override
+    public Set<String> getOptionalReferenceCategories(KeycloakSession session) {
+        return WebAuthnConditionalUIAuthenticator.isPasskeysEnabled(session)
+                ? Collections.singleton(WebAuthnCredentialModel.TYPE_PASSWORDLESS)
+                : AuthenticatorFactory.super.getOptionalReferenceCategories(session);
+    }
+
+    @Override
     public boolean isConfigurable() {
         return false;
     }
@@ -63,12 +72,12 @@ public class PhoneOrPasswordLoginFormFactory implements AuthenticatorFactory {
 
     @Override
     public String getDisplayType() {
-        return "Phone or Password Login Form";
+        return "Phone or Username Password Login Form";
     }
 
     @Override
     public String getHelpText() {
-        return "Validates phone credit or password from login form.";
+        return "Validates phone sms-code or username password from login form.";
     }
 
     @Override
