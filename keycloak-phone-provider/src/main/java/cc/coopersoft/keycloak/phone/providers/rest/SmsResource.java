@@ -74,7 +74,7 @@ public class SmsResource {
     }
 
     @Path("update-profile")
-    public VerificationCodeResource getVerificateCodeResource(){
-        return new VerificationCodeResource(session);
+    public TokenCodeResource getUpdateProfileResource(){
+        return new TokenCodeResource(session, TokenCodeType.VERIFY);
     }
 }

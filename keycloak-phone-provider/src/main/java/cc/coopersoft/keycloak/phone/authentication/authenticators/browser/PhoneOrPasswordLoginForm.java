@@ -17,11 +17,11 @@ import org.keycloak.authentication.authenticators.browser.WebAuthnConditionalUIA
 import org.keycloak.events.Details;
 import org.keycloak.events.Errors;
 import org.keycloak.forms.login.LoginFormsProvider;
-import org.keycloak.forms.login.freemarker.model.LoginBean;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.credential.PasswordCredentialModel;
+import org.keycloak.models.credential.WebAuthnCredentialModel;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
@@ -50,6 +50,12 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
     public PhoneOrPasswordLoginForm(KeycloakSession session) {
         webauthnAuth = new WebAuthnConditionalUIAuthenticator(session, (context) -> createLoginForm(context.form()));
     }
+
+    // Copied from WebAuthnConditionalUIAuthenticator
+    protected String webauthnAuth_getCredentialType() {
+        return WebAuthnCredentialModel.TYPE_PASSWORDLESS;
+    }
+
 
     private TokenCodeService getTokenCodeService(KeycloakSession session) {
         return session.getProvider(TokenCodeService.class);
@@ -177,7 +183,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
     protected boolean alreadyAuthenticatedUsingPasswordlessCredential(AuthenticationSessionModel authSession) {
         // check if the authentication was already done using passwordless via passkeys
         return webauthnAuth != null && webauthnAuth.isPasskeysEnabled()
-                && AuthenticatorUtil.getAuthnCredentials(authSession).contains(webauthnAuth.getCredentialType());
+                && AuthenticatorUtil.getAuthnCredentials(authSession).contains(webauthnAuth_getCredentialType());
     }
 
 
@@ -268,6 +274,6 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
 
     protected boolean isConditionalPasskeysEnabled(UserModel currentUser) {
         return webauthnAuth != null && webauthnAuth.isPasskeysEnabled() &&
-                (currentUser == null || currentUser.credentialManager().isConfiguredFor(webauthnAuth.getCredentialType()));
+                (currentUser == null || currentUser.credentialManager().isConfiguredFor(webauthnAuth_getCredentialType()));
     }
 }

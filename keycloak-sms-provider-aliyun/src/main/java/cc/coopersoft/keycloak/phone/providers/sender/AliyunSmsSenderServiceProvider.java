@@ -63,7 +63,7 @@ public class AliyunSmsSenderServiceProvider implements MessageSenderService {
             System.out.println(response.getData());
             return new MessageSendResult(1).setResendExpires(120).setExpires(expires);
         } catch (ClientException e) {
-            e.printStackTrace();
+            logger.error("Send SMS message error", e);
             return new MessageSendResult(-1).setError(e.getErrCode(), e.getErrMsg());
         }
     }
