@@ -1,7 +1,8 @@
 package cc.coopersoft.keycloak.phone.authentication.forms;
 
 import com.google.auto.service.AutoService;
-import okhttp3.HttpUrl;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
@@ -13,6 +14,9 @@ import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.validation.Validation;
 
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
 import java.util.*;
 import java.util.regex.Matcher;
 import java.util.regex.Pattern;
@@ -118,12 +122,20 @@ public class RegistrationRedirectParametersReader implements FormActionFactory, 
             return;
         }
 
-        HttpUrl url = HttpUrl.parse(redirectUri);
-        if (url == null) {
-            logger.error("redirectUri is null");
+        URI uri;
+        try {
+            uri = new URI(redirectUri);
+        } catch (URISyntaxException e) {
+            logger.error("Invalid redirectUri: " + redirectUri, e);
             return;
         }
-        //url.queryParameterNames().forEach(s -> logger.info("redirect param name ->" + s));
+
+        List<NameValuePair> queryParams = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
+        if (queryParams.isEmpty()) {
+            logger.warn("no query parameters found");
+            return;
+        }
+
         UserModel user = context.getUser();
         AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
 
@@ -154,10 +166,17 @@ public class RegistrationRedirectParametersReader implements FormActionFactory, 
             return;
         }
 
-        url.queryParameterNames()
+        // Group parameters by name to handle multiple values
+        Map<String, List<String>> parameterMap = new HashMap<>();
+        for (NameValuePair param : queryParams) {
+            parameterMap.computeIfAbsent(param.getName(), k -> new ArrayList<>())
+                      .add(param.getValue());
+        }
+
+        parameterMap.entrySet()
                 .stream()
-                .filter(finalParamNames::contains)
-                .forEach(v -> user.setAttribute(v, url.queryParameterValues(v)));
+                .filter(entry -> finalParamNames.contains(entry.getKey()))
+                .forEach(entry -> user.setAttribute(entry.getKey(), entry.getValue()));
 
     }
 

@@ -2,8 +2,6 @@ package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
 import cc.coopersoft.keycloak.phone.authentication.requiredactions.UpdatePhoneNumberRequiredAction;
 import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialModel;
-import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProvider;
-import cc.coopersoft.keycloak.phone.credential.PhoneOtpCredentialProviderFactory;
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.jpa.TokenCodeEntity;
@@ -11,7 +9,6 @@ import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresent
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.ConfigUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
 import jakarta.persistence.TemporalType;
@@ -20,12 +17,9 @@ import jakarta.ws.rs.ForbiddenException;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
-import org.keycloak.credential.CredentialInput;
 import org.keycloak.credential.CredentialModel;
-import org.keycloak.credential.CredentialProvider;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
-import org.keycloak.models.UserCredentialModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.validation.Validation;
 import org.keycloak.util.JsonSerialization;
@@ -34,7 +28,6 @@ import java.io.IOException;
 import java.time.Instant;
 import java.util.Date;
 import java.util.List;
-import java.util.Optional;
 import java.util.concurrent.TimeUnit;
 import java.util.stream.Collectors;
 

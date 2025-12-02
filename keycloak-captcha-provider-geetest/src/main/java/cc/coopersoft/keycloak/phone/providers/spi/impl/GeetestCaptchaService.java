@@ -1,10 +1,8 @@
 package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
-import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaServiceProviderFactory;
 import com.geetest.sdk.GeetestLib;
 import com.geetest.sdk.GeetestLibResult;
-import com.google.auto.service.AutoService;
 import jakarta.ws.rs.core.MultivaluedMap;
 import lombok.Getter;
 import lombok.Setter;
@@ -12,15 +10,13 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
-import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.managers.AuthenticationManager;
 
 import java.util.HashMap;
 import java.util.Map;
 
-@AutoService(PhoneProviderCaptchaServiceProviderFactory.class)
-public class GeetestCaptchaService implements PhoneProviderCaptchaService, PhoneProviderCaptchaServiceProviderFactory {
-    private static final Logger log = Logger.getLogger(GeetestCaptchaService.class);
+public class GeetestCaptchaService implements PhoneProviderCaptchaService {
+    private static final Logger logger = Logger.getLogger(GeetestCaptchaService.class);
     private static int serverStatus = 1;
 
     private final KeycloakSession session;
@@ -28,28 +24,6 @@ public class GeetestCaptchaService implements PhoneProviderCaptchaService, Phone
     @Getter
     @Setter
     private Config.Scope config;
-
-    @Override
-    public PhoneProviderCaptchaService create(KeycloakSession session) {
-        GeetestCaptchaService geetestCaptchaService = new GeetestCaptchaService(session);
-        geetestCaptchaService.setConfig(this.config);
-        return geetestCaptchaService;
-    }
-
-    @Override
-    public void init(Config.Scope config) {
-        this.config = config;
-    }
-
-    @Override
-    public void postInit(KeycloakSessionFactory factory) {
-
-    }
-
-    @Override
-    public String getId() {
-        return "geetest-captcha";
-    }
 
     public GeetestCaptchaService(KeycloakSession session) {
         this.session = session;
@@ -118,7 +92,7 @@ public class GeetestCaptchaService implements PhoneProviderCaptchaService, Phone
         String geetestId = this.config.get("id");
         String geetestKey = this.config.get("key");
         if(geetestId == null || geetestKey == null){
-            return "{\"success\":0,\"message\": \"unset geetest id or key in your config.\"}";
+            return "{\"success\":0,\"message\": \"geetest id or key not set in your config.\"}";
         }
 
         KeycloakContext context = session.getContext();

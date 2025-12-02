@@ -6,6 +6,9 @@ import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
+import com.google.auto.service.AutoService;
+
+@AutoService(PhoneProviderCaptchaServiceProviderFactory.class)
 public class GeetestCaptchaServiceProviderFactory implements PhoneProviderCaptchaServiceProviderFactory {
     private Config.Scope config;
 
