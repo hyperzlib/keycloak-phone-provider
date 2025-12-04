@@ -35,7 +35,7 @@ public class GeetestResource {
         if(client != null) {
             Set<String> allowedOrigins = client.getWebOrigins();
             for (String allowedOrigin : allowedOrigins) {
-                if (RegexUtils.matchGlob(origin, allowedOrigin)) { //当前origin符合要求
+                if (RegexUtils.matchGlob(origin, allowedOrigin)) { // 当前origin符合要求
                     if (requestHeaders != null)
                         response.header("Access-Control-Allow-Headers", requestHeaders);
                     if (requestMethod != null)

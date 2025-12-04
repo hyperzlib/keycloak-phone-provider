@@ -33,7 +33,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
 
     protected static ServicesLogger log = ServicesLogger.LOGGER;
 
-    public static final String PHONE_LOGIN_FORM_TPL = "login.ftl";
+    public static final String PHONE_LOGIN_FORM_TPL = "login-phone-or-password.ftl";
 
     public static final String FIELD_LOGIN_TYPE = "loginType";
 
