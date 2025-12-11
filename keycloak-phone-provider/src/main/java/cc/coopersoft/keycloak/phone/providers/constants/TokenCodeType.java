@@ -7,7 +7,7 @@ public enum TokenCodeType {
     VERIFY("verification"),
     AUTH("authentication"),
     OTP("one-time password"),
-    RESET("reset credential"),
+    RESET_CREDENTIAL("reset credential"),
     REGISTRATION("registration"),
     LOGIN("login");
 

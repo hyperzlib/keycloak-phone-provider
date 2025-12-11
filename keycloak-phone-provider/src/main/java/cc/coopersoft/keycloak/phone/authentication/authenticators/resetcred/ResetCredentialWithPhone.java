@@ -6,6 +6,7 @@ import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import cc.coopersoft.keycloak.phone.providers.constants.PhoneProviderMessages;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import jakarta.ws.rs.core.MultivaluedHashMap;
 import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticationFlowError;
@@ -30,7 +31,9 @@ import com.google.auto.service.AutoService;
 
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
-import java.util.Objects;
+import org.keycloak.sessions.AuthenticationSessionModel;
+
+import java.util.*;
 
 @AutoService(AuthenticatorFactory.class)
 public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
@@ -52,7 +55,16 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         return new PhoneNumber(context.getHttpRequest().getDecodedFormParameters());
     }
 
-    private Response createResetCredentialForm(LoginFormsProvider form) {
+    private Response createResetCredentialForm(LoginFormsProvider form, MultivaluedMap<String, String> formData) {
+        Map<String, String> formDataMap = new HashMap<>();
+        if (formData != null && !formData.isEmpty()) {
+            form.setFormData(formData);
+
+            for (Map.Entry<String, List<String>> entry : formData.entrySet()) {
+                formDataMap.put(entry.getKey(), entry.getValue().get(0));
+            }
+        }
+        form.setAttribute("form", formDataMap);
         return form.createForm(PHONE_RESET_CREDENTIAL_TPL);
     }
 
@@ -66,10 +78,10 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
 
             logger.debugf("Forget-password triggered when reauthenticating user after first broker login. Prefilling reset-credential-choose-user screen with user '%s' ", existingUser.getUsername());
             context.setUser(existingUser);
+            MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             LoginFormsProvider form = context.form()
-                    .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND)
-                    .setAttribute("prefilledUsername", existingUser.getUsername());
-            Response challenge = createResetCredentialForm(form);
+                    .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
+            Response challenge = createResetCredentialForm(form, null);
             context.challenge(challenge);
             return;
         }
@@ -88,7 +100,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         
         LoginFormsProvider form = context.form()
                 .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
-        Response challenge = createResetCredentialForm(form);
+        Response challenge = createResetCredentialForm(form, null);
 
         context.challenge(challenge);
     }
@@ -97,76 +109,87 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
     public void action(AuthenticationFlowContext context) {
         EventBuilder event = context.getEvent();
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
+
+        MultivaluedMap<String, String> resFormData = new MultivaluedHashMap<>();
         
         boolean isPhone = Objects.equals(formData.getFirst(FIELD_VALIDATION_TYPE), "phone");
+        logger.infof("Reset credential action, isPhone: %s", isPhone);
         
         String username = formData.getFirst("username");
         PhoneNumber phoneNumber = new PhoneNumber(formData);
 
-        if (isPhone && phoneNumber.isEmpty()) {
-            event.error(Errors.USERNAME_MISSING);
-            LoginFormsProvider form = context.form()
-                    .setError(PhoneProviderMessages.MISSING_PHONE_NUMBER)
-                    .addError(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, PhoneProviderMessages.MISSING_PHONE_NUMBER))
-                    .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND)
-                    .setAttribute(FIELD_VALIDATION_TYPE, "phone");
-            Response challenge = createResetCredentialForm(form);
-            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
-            return;
-        } else if (Validation.isBlank(username)) {
-            event.error(Errors.USERNAME_MISSING);
-            LoginFormsProvider form = context.form()
-                    .setError(Messages.MISSING_USERNAME)
-                    .addError(new FormMessage(Validation.FIELD_USERNAME, Messages.MISSING_USERNAME))
-                    .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
-            Response challenge = createResetCredentialForm(form);
-            context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
-            return;
-        }
-
         UserModel user = null;
         if (isPhone) {
+            if (phoneNumber.isEmpty()) {
+                event.error(Errors.USERNAME_MISSING);
+                resFormData.add(FIELD_VALIDATION_TYPE, "phone");
+                LoginFormsProvider form = context.form()
+                        .addError(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, PhoneProviderMessages.MISSING_PHONE_NUMBER))
+                        .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
+                Response challenge = createResetCredentialForm(form, resFormData);
+                context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
+                return;
+            }
+
             // 通过手机号重置密码，并验证验证码
             user = UserUtils.findUserByPhone(context.getSession(), context.getRealm(), phoneNumber)
-                .orElse(null);
+                    .orElse(null);
             if (user == null) {
                 // 用户不存在
                 event.error(Errors.USER_NOT_FOUND);
+
+                resFormData.add(FIELD_VALIDATION_TYPE, "phone");
+                resFormData.add(PhoneConstants.FIELD_AREA_CODE, phoneNumber.areaCode);
+                resFormData.add(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.phoneNumber);
+
                 LoginFormsProvider form = context.form()
-                        .setError(Messages.INVALID_USER)
-                        .addError(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, Messages.INVALID_USER))
-                        .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND)
-                        .setAttribute(FIELD_VALIDATION_TYPE, "phone");
-                Response challenge = createResetCredentialForm(form);
+                        .addError(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, PhoneProviderMessages.PHONE_USER_NOT_FOUND))
+                        .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
+                Response challenge = createResetCredentialForm(form, resFormData);
                 context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
                 return;
             } else if (!validateVerificationCode(context, user)) {
                 // 验证码错误
                 event.error(Errors.INVALID_CODE);
+                resFormData.add(FIELD_VALIDATION_TYPE, "phone");
+                resFormData.add(PhoneConstants.FIELD_AREA_CODE, phoneNumber.areaCode);
+                resFormData.add(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.phoneNumber);
                 LoginFormsProvider form = context.form()
-                        .setError(PhoneProviderMessages.INVALID_VERIFICATION_CODE)
-                        .addError(new FormMessage(PhoneConstants.FIELD_VERIFICATION_CODE, PhoneProviderMessages.INVALID_VERIFICATION_CODE))
-                        .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND)
-                        .setAttribute(FIELD_VALIDATION_TYPE, "phone");
-                Response challenge = createResetCredentialForm(form);
+                        .addError(new FormMessage(PhoneConstants.FIELD_VERIFICATION_CODE, PhoneProviderMessages.INVALID_SMS_VERIFICATION_CODE))
+                        .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
+                Response challenge = createResetCredentialForm(form, resFormData);
                 context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
                 return;
             }
             context.getAuthenticationSession().setAuthNote(SHOULD_SEND_EMAIL, "false");
         } else {
+            if (Validation.isBlank(username)) {
+                event.error(Errors.USERNAME_MISSING);
+                resFormData.add(FIELD_VALIDATION_TYPE, "email");
+                LoginFormsProvider form = context.form()
+                        .addError(new FormMessage(Validation.FIELD_USERNAME, Messages.MISSING_USERNAME))
+                        .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
+                Response challenge = createResetCredentialForm(form, resFormData);
+                context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
+                return;
+            }
+
             // 通过用户名重置密码，仅查找用户
             // 需要配置 Send Reset Email If Not Phone 进行邮件发送
             user = getUserByUsername(context, username);
             if (user == null) {
                 event.error(Errors.USER_NOT_FOUND);
+                resFormData.add(FIELD_VALIDATION_TYPE, "email");
+                resFormData.add("username", username);
                 LoginFormsProvider form = context.form()
-                        .setError(Messages.INVALID_USER)
                         .addError(new FormMessage(Validation.FIELD_USERNAME, Messages.INVALID_USER))
+                        .setFormData(resFormData)
                         .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
-                Response challenge = createResetCredentialForm(form);
+                Response challenge = createResetCredentialForm(form, resFormData);
                 context.failureChallenge(AuthenticationFlowError.INVALID_USER, challenge);
                 return;
             }
+
             context.getAuthenticationSession().setAuthNote(AbstractUsernameFormAuthenticator.ATTEMPTED_USERNAME, username);
             context.getAuthenticationSession().setAuthNote(SHOULD_SEND_EMAIL, "true");
         }
@@ -201,7 +224,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         String code = context.getHttpRequest().getDecodedFormParameters()
                 .getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
         return context.getSession().getProvider(TokenCodeService.class)
-                .validateCode(user, phoneNumber, code, TokenCodeType.RESET);
+                .validateCode(user, phoneNumber, code, TokenCodeType.RESET_CREDENTIAL);
     }
 
     @Override

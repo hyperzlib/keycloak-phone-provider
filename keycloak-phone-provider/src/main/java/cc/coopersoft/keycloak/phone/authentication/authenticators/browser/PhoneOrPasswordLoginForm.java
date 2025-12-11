@@ -22,12 +22,17 @@ import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
 import org.keycloak.models.credential.PasswordCredentialModel;
 import org.keycloak.models.credential.WebAuthnCredentialModel;
+import org.keycloak.models.utils.FormMessage;
 import org.keycloak.sessions.AuthenticationSessionModel;
 import org.keycloak.protocol.oidc.OIDCLoginProtocol;
 import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
+
+import java.util.HashMap;
+import java.util.List;
+import java.util.Map;
 
 public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator implements Authenticator {
 
@@ -65,10 +70,29 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
         return form.createForm(PHONE_LOGIN_FORM_TPL);
     }
 
+    protected void fillFormData(LoginFormsProvider forms, MultivaluedMap<String, String> formData) {
+        Map<String, String> formDataMap = new HashMap<>();
+        if (!formData.isEmpty()) {
+            forms.setFormData(formData);
+
+            for (Map.Entry<String, List<String>> entry : formData.entrySet()) {
+                if (entry.getKey().equals(PhoneConstants.FIELD_VERIFICATION_CODE) ||
+                        entry.getKey().equals(Validation.FIELD_PASSWORD)) {
+                    // do not put verification code into form data map
+                    continue;
+                }
+                formDataMap.put(entry.getKey(), entry.getValue().get(0));
+            }
+        }
+        forms.setAttribute("form", formDataMap);
+    }
+
     protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
         LoginFormsProvider forms = context.form();
 
         if (!formData.isEmpty()) forms.setFormData(formData);
+
+        fillFormData(forms, formData);
 
         return createLoginForm(forms);
     }
@@ -87,7 +111,19 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
             // setup webauthn data when possible
             webauthnAuth.fillContextForm(context);
         }
-        return super.challenge(context, error, field);
+
+        LoginFormsProvider form = context.form().setExecution(context.getExecution().getId());
+        if (error != null) {
+            if (field != null) {
+                form.addError(new FormMessage(field, error));
+            } else {
+                form.setError(error, new Object[0]);
+            }
+        }
+
+        fillFormData(form, context.getHttpRequest().getDecodedFormParameters());
+
+        return createLoginForm(form);
     }
 
     protected boolean validateForm(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {

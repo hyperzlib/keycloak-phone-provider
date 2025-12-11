@@ -66,9 +66,9 @@ public class SmsResource {
         return new TokenCodeResource(session, TokenCodeType.REGISTRATION);
     }
 
-    @Path("reset-code")
+    @Path("reset-credential-code")
     public TokenCodeResource getResetCodeResource() {
-        return new TokenCodeResource(session, TokenCodeType.RESET);
+        return new TokenCodeResource(session, TokenCodeType.RESET_CREDENTIAL);
     }
 
     @Path("update-profile")
