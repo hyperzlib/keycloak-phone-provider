@@ -13,10 +13,10 @@ import java.util.stream.Stream;
  *
  */
 public class UserUtils {
-    private static Optional<UserModel> singleUser(List<UserModel> users){
+    private static Optional<UserModel> singleUser(List<UserModel> users) {
         if (users.isEmpty()) {
             return Optional.empty();
-        } else if (users.size() > 1){
+        } else if (users.size() > 1) {
             return users.stream()
                     .filter(u -> u.getAttributeStream("phoneNumberVerified")
                             .anyMatch("true"::equals))
@@ -26,13 +26,14 @@ public class UserUtils {
         }
     }
 
-    private static Optional<UserModel> singleUser(Stream<UserModel> users){
+    private static Optional<UserModel> singleUser(Stream<UserModel> users) {
         return users.filter(u -> u.getAttributeStream("phoneNumberVerified")
-                        .anyMatch("true"::equals))
+                .anyMatch("true"::equals))
                 .findFirst();
     }
 
-    public static Optional<UserModel> findUserByPhone(KeycloakSession session, RealmModel realm, PhoneNumber phoneNumber){
+    public static Optional<UserModel> findUserByPhone(KeycloakSession session, RealmModel realm,
+            PhoneNumber phoneNumber) {
         UserProvider userProvider = session.users();
         Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
                 realm, "phoneNumber", phoneNumber.getFullPhoneNumber());
@@ -40,7 +41,7 @@ public class UserUtils {
     }
 
     public static Optional<UserModel> findUserByPhone(KeycloakSession session, RealmModel realm,
-                                                      PhoneNumber phoneNumber, String notIs){
+            PhoneNumber phoneNumber, String notIs) {
         UserProvider userProvider = session.users();
         Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
                 realm, "phoneNumber", phoneNumber.getFullPhoneNumber());
