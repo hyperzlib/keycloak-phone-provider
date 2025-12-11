@@ -10,10 +10,8 @@ import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
-import io.vertx.core.http.HttpServerRequest;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import jakarta.ws.rs.*;
-import jakarta.ws.rs.core.Context;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -51,11 +49,13 @@ public class TokenCodeResource {
     @Consumes(APPLICATION_JSON)
     public Response sendTokenCodeJson(String reqBody) {
         try {
-            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonObject = mapper.readTree(reqBody);
             MultivaluedHashMap<String, String> formData = new MultivaluedHashMap<>();
-            for (Iterator<Map.Entry<String, JsonNode>> it = jsonObject.fields(); it.hasNext(); ) {
-                Map.Entry<String, JsonNode> node = it.next();
-                formData.addAll(node.getKey(), node.getValue().asText());
+            Iterator<String> fieldNames = jsonObject.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                formData.addAll(fieldName, jsonObject.get(fieldName).asText());
             }
             return this.sendTokenCode(formData);
         } catch (IOException e) {
@@ -133,7 +133,8 @@ public class TokenCodeResource {
     @Consumes(APPLICATION_JSON)
     public Response getResendExpireJson(String reqBody) {
         try {
-            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonObject = mapper.readTree(reqBody);
             return this.getResendExpire(jsonObject.get(PhoneConstants.FIELD_AREA_CODE).asText(),
                     jsonObject.get(PhoneConstants.FIELD_PHONE_NUMBER).asText());
         } catch (IOException e) {

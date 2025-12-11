@@ -72,6 +72,7 @@ public class CloopenSmsSenderServiceProvider implements MessageSenderService {
         //Map<String, Object> result = client.sendTemplateSMS(phoneNumber,templateId,datas,subAppend,reqId);
         if("000000".equals(result.get("statusCode"))){
             //正常返回输出data包体信息（map）
+            @SuppressWarnings("unchecked")
             Map<String, Object> data = (Map<String, Object>) result.get("data");
             logger.info("cloopen send message result: " + data.toString());
 //            Set<String> keySet = data.keySet();

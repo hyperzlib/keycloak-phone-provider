@@ -32,7 +32,7 @@ public class GoogleRecaptchaResource {
         }
     }
 
-    private void setCrosHeader(Response.ResponseBuilder response,
+    private void setCorsHeader(Response.ResponseBuilder response,
                                final String requestMethod,
                                final String requestHeaders, final String origin){
         ClientModel client = this.session.getContext().getClient();
@@ -62,7 +62,7 @@ public class GoogleRecaptchaResource {
 
         String geetestCode = captcha.getFrontendKey(this.auth);
         Response.ResponseBuilder response = Response.status(Response.Status.OK);
-        this.setCrosHeader(response, requestMethod, requestHeaders, origin);
+        this.setCorsHeader(response, requestMethod, requestHeaders, origin);
         return Response.status(Response.Status.OK).entity(geetestCode).build();
     }
 
@@ -73,7 +73,7 @@ public class GoogleRecaptchaResource {
             @HeaderParam("Access-Control-Request-Headers") final String requestHeaders,
             @HeaderParam("Origin") final String origin ) {
         final Response.ResponseBuilder response = Response.ok();
-        this.setCrosHeader(response, requestMethod, requestHeaders, origin);
+        this.setCorsHeader(response, requestMethod, requestHeaders, origin);
         return response.build();
     }
 }

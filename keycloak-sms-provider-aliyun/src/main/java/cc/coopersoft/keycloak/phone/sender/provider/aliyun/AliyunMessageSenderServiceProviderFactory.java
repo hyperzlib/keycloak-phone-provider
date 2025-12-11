@@ -1,23 +1,24 @@
-package cc.coopersoft.keycloak.phone.providers.sender;
+package cc.coopersoft.keycloak.phone.sender.provider.aliyun;
 
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderServiceProviderFactory;
+import com.google.auto.service.AutoService;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 
-import com.google.auto.service.AutoService;
-
 @AutoService(MessageSenderServiceProviderFactory.class)
-public class DummyMessageSenderServiceProviderFactory implements MessageSenderServiceProviderFactory {
+public class AliyunMessageSenderServiceProviderFactory implements MessageSenderServiceProviderFactory {
+    private Config.Scope config;
 
     @Override
     public MessageSenderService create(KeycloakSession keycloakSession) {
-        return new DummySmsSenderService(keycloakSession.getContext().getRealm().getDisplayName());
+        return new AliyunMessageSenderServiceProvider(config, keycloakSession.getContext().getRealm());
     }
 
     @Override
-    public void init(Config.Scope scope) {
+    public void init(Config.Scope config) {
+        this.config = config;
     }
 
     @Override
@@ -30,6 +31,6 @@ public class DummyMessageSenderServiceProviderFactory implements MessageSenderSe
 
     @Override
     public String getId() {
-        return "dummy";
+        return "aliyun";
     }
 }

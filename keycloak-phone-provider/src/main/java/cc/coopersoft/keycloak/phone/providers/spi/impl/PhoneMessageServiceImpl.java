@@ -9,7 +9,6 @@ import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresent
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import com.google.auto.service.AutoService;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
 

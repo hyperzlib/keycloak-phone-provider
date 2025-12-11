@@ -15,7 +15,7 @@ import org.keycloak.services.managers.AuthenticationManager;
 import java.util.Set;
 
 public class GeetestResource {
-    private static final Logger log = Logger.getLogger(GeetestResource.class);
+    private static final Logger logger = Logger.getLogger(GeetestResource.class);
 
     private final KeycloakSession session;
     private AuthenticationManager.AuthResult auth;
@@ -35,7 +35,7 @@ public class GeetestResource {
         if(client != null) {
             Set<String> allowedOrigins = client.getWebOrigins();
             for (String allowedOrigin : allowedOrigins) {
-                if (RegexUtils.matchGlob(origin, allowedOrigin)) { //当前origin符合要求
+                if (RegexUtils.matchGlob(origin, allowedOrigin)) { // 当前origin符合要求
                     if (requestHeaders != null)
                         response.header("Access-Control-Allow-Headers", requestHeaders);
                     if (requestMethod != null)

@@ -1,4 +1,4 @@
-package cc.coopersoft.keycloak.phone.providers.sender;
+package cc.coopersoft.keycloak.phone.sender.provider.aliyun;
 
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
@@ -15,13 +15,13 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.models.RealmModel;
 
-public class AliyunSmsSenderServiceProvider implements MessageSenderService {
-    private static final Logger logger = Logger.getLogger(AliyunSmsSenderServiceProvider.class);
+public class AliyunMessageSenderServiceProvider implements MessageSenderService {
+    private static final Logger logger = Logger.getLogger(AliyunMessageSenderServiceProvider.class);
     private final Config.Scope config;
     private final RealmModel realm;
     private final IAcsClient client;
 
-    public AliyunSmsSenderServiceProvider(Config.Scope config, RealmModel realm) {
+    public AliyunMessageSenderServiceProvider(Config.Scope config, RealmModel realm) {
         this.config = config;
         this.realm = realm;
         DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", config.get("accessKeyId"), config.get("accessSecret"));

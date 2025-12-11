@@ -2,7 +2,6 @@ package cc.coopersoft.keycloak.phone.authentication.requiredactions;
 
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import com.google.auto.service.AutoService;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
 import org.keycloak.authentication.InitiatedActionSupport;

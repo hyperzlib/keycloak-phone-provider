@@ -50,7 +50,6 @@ public class GeetestCaptchaService implements PhoneProviderCaptchaService {
         String geetestKey = this.config.get("key");
         if(geetestId == null || geetestKey == null){
             //如果没有设置key就直接通过
-            //出事了别怪我
             return true;
         }
 
