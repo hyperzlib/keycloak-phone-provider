@@ -36,6 +36,6 @@ public class GeetestCaptchaServiceProviderFactory implements PhoneProviderCaptch
 
     @Override
     public String getId() {
-        return "geetest-captcha";
+        return GeetestCaptchaService.ID;
     }
 }

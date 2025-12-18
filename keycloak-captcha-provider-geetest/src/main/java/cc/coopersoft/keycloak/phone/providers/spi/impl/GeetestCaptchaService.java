@@ -16,6 +16,7 @@ import java.util.HashMap;
 import java.util.Map;
 
 public class GeetestCaptchaService implements PhoneProviderCaptchaService {
+    public static final String ID = "geetest-captcha";
     private static final Logger logger = Logger.getLogger(GeetestCaptchaService.class);
     private static int serverStatus = 1;
 
@@ -44,7 +45,7 @@ public class GeetestCaptchaService implements PhoneProviderCaptchaService {
 
     @Override
     public boolean verify(final MultivaluedMap<String, String> formParams, String user) {
-        if(user == null) user = "unknown";
+        if (user == null) user = "unknown";
 
         String geetestId = this.config.get("id");
         String geetestKey = this.config.get("key");
