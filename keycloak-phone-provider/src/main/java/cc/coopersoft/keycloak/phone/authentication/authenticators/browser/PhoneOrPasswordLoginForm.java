@@ -4,6 +4,7 @@ import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
+import cc.coopersoft.keycloak.phone.utils.ServiceUtils;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
@@ -40,8 +41,6 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
 
     public static final String PHONE_LOGIN_FORM_TPL = "login-phone-or-password.ftl";
 
-    public static final String FIELD_LOGIN_TYPE = "loginType";
-
     public static final String USER_NOT_EXISTS = "userNotExists";
 
     public static final String VERIFIED_PHONE_NUMBER = "LOGIN_BY_PHONE_VERIFY";
@@ -59,11 +58,6 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
     // Copied from WebAuthnConditionalUIAuthenticator
     protected String webauthnAuth_getCredentialType() {
         return WebAuthnCredentialModel.TYPE_PASSWORDLESS;
-    }
-
-
-    private TokenCodeService getTokenCodeService(KeycloakSession session) {
-        return session.getProvider(TokenCodeService.class);
     }
 
     protected Response createLoginForm(LoginFormsProvider form) {
@@ -128,7 +122,8 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
 
     protected boolean validateForm(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
         // Check if it's phone login or password login
-        if (formData.containsKey(FIELD_LOGIN_TYPE) && formData.getFirst(FIELD_LOGIN_TYPE).equals("phone")) {
+        if (formData.containsKey(PhoneConstants.FIELD_CREDENTIAL_TYPE) &&
+                formData.getFirst(PhoneConstants.FIELD_CREDENTIAL_TYPE).equals("phone")) {
             return validatePhoneLogin(context, formData);
         } else {
             return validateUserAndPassword(context, formData);
@@ -159,7 +154,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
             return false;
         }
 
-        TokenCodeService tokenCodeService = getTokenCodeService(session);
+        TokenCodeService tokenCodeService = ServiceUtils.getTokenCodeService(session);
         if (!tokenCodeService.validateCode(user, phoneNumber, code, TokenCodeType.LOGIN)) { //验证码错误
             Response challengeResponse = challenge(context, PhoneConstants.SMS_CODE_MISMATCH, formData);
             context.challenge(challengeResponse);
@@ -241,7 +236,8 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
         }
         
         // Success - determine credential type based on login method
-        if (formData.containsKey(FIELD_LOGIN_TYPE) && formData.getFirst(FIELD_LOGIN_TYPE).equals("phone")) {
+        if (formData.containsKey(PhoneConstants.FIELD_CREDENTIAL_TYPE) &&
+                formData.getFirst(PhoneConstants.FIELD_CREDENTIAL_TYPE).equals("phone")) {
             context.success(); // Phone authentication doesn't specify credential type
         } else {
             context.success(PasswordCredentialModel.TYPE);
@@ -265,6 +261,16 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
             LoginFormsProvider form = context.form();
             form.setAttribute(LoginFormsProvider.USERNAME_HIDDEN, true);
             form.setAttribute(LoginFormsProvider.REGISTRATION_DISABLED, true);
+
+            String phoneNumberStr = context.getUser().getFirstAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER);
+            if (!Validation.isBlank(phoneNumberStr)) {
+                PhoneNumber phoneNumber = new PhoneNumber(phoneNumberStr);
+                formData.putSingle(PhoneConstants.FIELD_AREA_CODE, phoneNumber.getAreaCode());
+                formData.putSingle(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.getPhoneNumber());
+            } else {
+                form.setAttribute("phoneNumberNotBound", true);
+            }
+
             context.getAuthenticationSession().setAuthNote(USER_SET_BEFORE_USERNAME_PASSWORD_AUTH, "true");
         } else {
             context.getAuthenticationSession().removeAuthNote(USER_SET_BEFORE_USERNAME_PASSWORD_AUTH);

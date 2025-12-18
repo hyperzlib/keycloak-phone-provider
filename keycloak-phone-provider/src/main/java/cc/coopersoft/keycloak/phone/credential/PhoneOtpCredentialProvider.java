@@ -3,7 +3,9 @@ package cc.coopersoft.keycloak.phone.credential;
 import cc.coopersoft.keycloak.phone.authentication.authenticators.browser.SmsOtpMfaAuthenticatorFactory;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
+import cc.coopersoft.keycloak.phone.utils.ServiceUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.common.util.ObjectUtil;
 import org.keycloak.common.util.Time;
@@ -32,10 +34,6 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
         this.session = session;
     }
 
-    private TokenCodeService getTokenCodeService() {
-        return session.getProvider(TokenCodeService.class);
-    }
-
     @Override
     public boolean supportsCredentialType(String credentialType) {
         return getType().equals(credentialType);
@@ -51,7 +49,7 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
     public boolean isValid(RealmModel realm, UserModel user, CredentialInput input) {
         logger.info("---------------begin valid otp sms");
 
-        String phoneNumberString = user.getFirstAttribute("phoneNumber");
+        String phoneNumberString = user.getFirstAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER);
 
 
         String code = input.getChallengeResponse();
@@ -82,7 +80,7 @@ public class PhoneOtpCredentialProvider implements CredentialProvider<PhoneOtpCr
                 .orElse(false);
         if (invalid){
             try {
-                getTokenCodeService().validateCode(user, phoneNumber, code, TokenCodeType.OTP);
+                ServiceUtils.getTokenCodeService(session).validateCode(user, phoneNumber, code, TokenCodeType.OTP);
                 return true;
             } catch (Exception e) {
                 return false;

@@ -1,4 +1,4 @@
-package cc.coopersoft.keycloak.phone.sender.provider.aliyun;
+package cc.coopersoft.keycloak.phone.sender.provider.aliyunPersonal;
 
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderService;
 import cc.coopersoft.keycloak.phone.providers.spi.MessageSenderServiceProviderFactory;
@@ -10,20 +10,21 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.validation.Validation;
 
 @AutoService(MessageSenderServiceProviderFactory.class)
-public class AliyunMessageSenderServiceProviderFactory implements MessageSenderServiceProviderFactory {
-    private static final Logger logger = Logger.getLogger(AliyunMessageSenderServiceProviderFactory.class);
+public class AliyunPersonalMessageSenderServiceProviderFactory implements MessageSenderServiceProviderFactory {
+    private static final Logger logger = Logger.getLogger(AliyunPersonalMessageSenderServiceProviderFactory.class);
     private Config.Scope config;
 
     @Override
     public MessageSenderService create(KeycloakSession keycloakSession) {
-        return new AliyunMessageSenderServiceProvider(config, keycloakSession.getContext().getRealm());
+        return new AliyunPersonalMessageSenderServiceProvider(config, keycloakSession.getContext().getRealm());
     }
 
     @Override
     public void init(Config.Scope config) {
         this.config = config;
+        logger.info("Initializing Aliyun Personal SMS Sender Provider Factory");
         if (Validation.isBlank(config.get("accessKeyId")) ||
-            Validation.isBlank(config.get("accessKeySecret"))) {
+                Validation.isBlank(config.get("accessKeySecret"))) {
             throw new IllegalStateException("Aliyun SMS Sender Provider requires accessKeyId and accessKeySecret configuration");
         }
     }
@@ -38,6 +39,6 @@ public class AliyunMessageSenderServiceProviderFactory implements MessageSenderS
 
     @Override
     public String getId() {
-        return "aliyun";
+        return "aliyunPersonal";
     }
 }

@@ -10,6 +10,7 @@ public class MessageSendResult {
     private final int status;
     private String errorCode;
     private String errorMessage;
+    private String smsCode = null;
     private Date resendExpires;
     private Date expires;
 
@@ -35,6 +36,11 @@ public class MessageSendResult {
     public MessageSendResult setResendExpires(int resendExpires) {
         Instant now = Instant.now();
         this.resendExpires = Date.from(now.plusSeconds(resendExpires));
+        return this;
+    }
+
+    public MessageSendResult setSmsCode(String smsCode) {
+        this.smsCode = smsCode;
         return this;
     }
 

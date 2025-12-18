@@ -5,10 +5,7 @@
  */
 package cc.coopersoft.keycloak.phone.authentication.forms;
 
-import cc.coopersoft.keycloak.phone.utils.ConfigUtils;
-import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
-import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import cc.coopersoft.keycloak.phone.utils.*;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
@@ -59,7 +56,7 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 	}
 	@Override
 	public String getDisplayType() {
-		return "Phone Validation";
+		return "Registration Phone Validation";
 	}
 
 	@Override
@@ -100,11 +97,6 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 		return PROVIDER_ID;
 	}
 
-	// FormAction
-	private TokenCodeService getTokenCodeService(KeycloakSession session){
-		return session.getProvider(TokenCodeService.class);
-	}
-
 	@Override
 	public void validate(ValidationContext context) {
 		MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
@@ -134,7 +126,7 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 		}
 
 		String verificationCode = formData.getFirst(PhoneConstants.FIELD_VERIFICATION_CODE);
-		TokenCodeRepresentation tokenCode =  getTokenCodeService(session).currentProcess(phoneNumber,
+		TokenCodeRepresentation tokenCode = ServiceUtils.getTokenCodeService(session).currentProcess(phoneNumber,
 				TokenCodeType.REGISTRATION);
 		if (Validation.isBlank(verificationCode) || tokenCode == null || !tokenCode.getCode().equals(verificationCode)){
 			context.error(Errors.INVALID_REGISTRATION);
@@ -158,7 +150,8 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 		String tokenId = context.getSession().getAttribute(PhoneConstants.FIELD_TOKEN_ID, String.class);
 
 		logger.info(String.format("registration user %s phone success, tokenId is: %s", user.getId(), tokenId));
-		getTokenCodeService(context.getSession()).tokenValidated(user, phoneNumber, tokenId, false);
+		ServiceUtils.getTokenCodeService(context.getSession())
+				.tokenValidated(user, phoneNumber, tokenId, false);
 	}
 
 	@Override

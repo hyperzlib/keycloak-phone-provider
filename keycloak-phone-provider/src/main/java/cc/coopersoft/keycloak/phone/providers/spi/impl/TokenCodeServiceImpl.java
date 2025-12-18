@@ -8,6 +8,7 @@ import cc.coopersoft.keycloak.phone.providers.jpa.TokenCodeEntity;
 import cc.coopersoft.keycloak.phone.providers.representations.TokenCodeRepresentation;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.ConfigUtils;
+import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import jakarta.persistence.EntityManager;
 import jakarta.persistence.NoResultException;
@@ -18,6 +19,9 @@ import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.connections.jpa.JpaConnectionProvider;
 import org.keycloak.credential.CredentialModel;
+import org.keycloak.events.Details;
+import org.keycloak.events.EventBuilder;
+import org.keycloak.events.EventType;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.RealmModel;
 import org.keycloak.models.UserModel;
@@ -51,6 +55,10 @@ public class TokenCodeServiceImpl implements TokenCodeService {
 
     private RealmModel getRealm() {
         return session.getContext().getRealm();
+    }
+
+    private EventBuilder createEvent() {
+        return new EventBuilder(session.getContext().getRealm(), session, session.getContext().getConnection());
     }
 
     @Override
@@ -192,7 +200,7 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         TokenCodeRepresentation tokenCode = currentProcess(phoneNumber, tokenCodeType);
         if (tokenCode == null) return false;
         if (!tokenCode.getCode().equals(code)) return false;
-        if (user.getAttributeStream("phoneNumber")
+        if (user.getAttributeStream(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER)
                 .noneMatch(p -> p.equals(phoneNumber.getFullPhoneNumber()))) return false;
 
         removeCode(phoneNumber, tokenCodeType);
@@ -236,11 +244,21 @@ public class TokenCodeServiceImpl implements TokenCodeService {
         if (updateUserPhoneNumber) {
             if (!ConfigUtils.isDuplicatePhoneAllowed(session)) {
                 session.users()
-                        .searchForUserByUserAttributeStream(session.getContext().getRealm(),"phoneNumber", phoneNumber.toString())
+                        .searchForUserByUserAttributeStream(session.getContext().getRealm(),
+                                PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER, phoneNumber.toString())
                         .filter(u -> !u.getId().equals(user.getId()))
                         .forEach(u -> {
                             logger.info(String.format("User %s also has phone number %s. Un-verifying.", u.getId(), phoneNumber));
-                            u.setSingleAttribute("phoneNumberVerified", "false");
+                            u.removeAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER);
+                            u.removeAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED);
+
+                            createEvent().event(EventType.UPDATE_PROFILE)
+                                    .user(u)
+                                    .detail(Details.PREF_PREVIOUS + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber())
+                                    .detail(Details.PREF_UPDATED + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER, "")
+                                    .detail(Details.PREF_PREVIOUS + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED, "true")
+                                    .detail(Details.PREF_UPDATED + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED, "")
+                                    .success();
 
                             u.addRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
 
@@ -254,21 +272,32 @@ public class TokenCodeServiceImpl implements TokenCodeService {
                                             if (Validation.isBlank(credentialData.getPhoneNumber())){
                                                 return true;
                                             }
-                                            return credentialData.getPhoneNumber().equals(user.getFirstAttribute("phoneNumber"));
+                                            return credentialData.getPhoneNumber().equals(user
+                                                            .getFirstAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER));
                                         } catch (IOException e) {
                                             logger.warn("Unknown format Otp Credential", e);
                                             return true;
                                         }
                                     })
                                     .map(CredentialModel::getId)
-                                    .collect(Collectors.toList())
+                                    .toList()
                                     .forEach(id -> u.credentialManager().removeStoredCredentialById(id));
                         });
             }
-            user.setSingleAttribute("phoneNumberVerified", "true");
-            user.setSingleAttribute("phoneNumber", phoneNumber.toString());
 
-            user.removeRequiredAction(UpdatePhoneNumberRequiredAction.PROVIDER_ID);
+            String oldPhoneNumber = user.getFirstAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER);
+            String oldPhoneNumberVerified = user.getFirstAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED);
+
+            user.setSingleAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber());
+            user.setSingleAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED, "true");
+
+            createEvent().event(EventType.UPDATE_PROFILE)
+                    .user(user)
+                    .detail(Details.PREF_PREVIOUS + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER, oldPhoneNumber)
+                    .detail(Details.PREF_UPDATED + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER, phoneNumber.getFullPhoneNumber())
+                    .detail(Details.PREF_PREVIOUS + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED, oldPhoneNumberVerified)
+                    .detail(Details.PREF_UPDATED + PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED, "true")
+                    .success();
         }
 
         validateProcess(tokenCodeId, user);

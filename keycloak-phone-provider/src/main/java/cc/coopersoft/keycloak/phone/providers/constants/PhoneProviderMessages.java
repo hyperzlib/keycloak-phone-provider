@@ -6,5 +6,7 @@ public class PhoneProviderMessages {
     public static final String PHONE_NUMBER_ALREADY_EXISTS = "phoneNumberAlreadyExists";
     public static final String PHONE_USER_NOT_FOUND = "phoneUserNotFound";
 
+    public static final String REQUIRE_PHONE_NUMBER_OR_EMAIL = "requirePhoneNumberOrEmail";
+
     public static final String INVALID_SMS_VERIFICATION_CODE = "invalidSmsCode";
 }

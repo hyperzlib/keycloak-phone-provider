@@ -24,7 +24,7 @@ public class AliyunMessageSenderServiceProvider implements MessageSenderService 
     public AliyunMessageSenderServiceProvider(Config.Scope config, RealmModel realm) {
         this.config = config;
         this.realm = realm;
-        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", config.get("accessKeyId"), config.get("accessSecret"));
+        DefaultProfile profile = DefaultProfile.getProfile("cn-hangzhou", config.get("accessKeyId"), config.get("accessKeySecret"));
         client = new DefaultAcsClient(profile);
     }
 
@@ -56,8 +56,8 @@ public class AliyunMessageSenderServiceProvider implements MessageSenderService 
         request.putQueryParameter("PhoneNumbers", phoneNumber.getPhoneNumber());
         request.putQueryParameter("SignName", signName);
         request.putQueryParameter("TemplateCode", templateId);
-
         request.putQueryParameter("TemplateParam", String.format("{\"code\":\"%s\"}", code));
+
         try {
             CommonResponse response = client.getCommonResponse(request);
             System.out.println(response.getData());

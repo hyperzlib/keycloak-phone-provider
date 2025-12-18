@@ -37,7 +37,7 @@ public class RegistrationRedirectParametersReader implements FormActionFactory, 
 
     @Override
     public String getDisplayType() {
-        return "Redirect parameter reader";
+        return "Registration Redirect parameter reader";
     }
 
     @Override

@@ -2,6 +2,7 @@ package cc.coopersoft.keycloak.phone.authentication.authenticators.resetcred;
 
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
+import cc.coopersoft.keycloak.phone.utils.TypeUtils;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
 import cc.coopersoft.keycloak.phone.providers.constants.PhoneProviderMessages;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
@@ -43,7 +44,6 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
     public static final String PROVIDER_ID = "reset-credentials-with-phone";
 
     public static final String FIELD_CODE_TYPE = "verificationCodeKind";
-    public static final String FIELD_VALIDATION_TYPE = "validationType";
 
     public static final String VERIFICATION_CODE_KIND = "reset-credential";
 
@@ -56,14 +56,10 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
     }
 
     private Response createResetCredentialForm(LoginFormsProvider form, MultivaluedMap<String, String> formData) {
-        Map<String, String> formDataMap = new HashMap<>();
-        if (formData != null && !formData.isEmpty()) {
-            form.setFormData(formData);
-
-            for (Map.Entry<String, List<String>> entry : formData.entrySet()) {
-                formDataMap.put(entry.getKey(), entry.getValue().get(0));
-            }
+        if (formData == null) {
+            formData = new MultivaluedHashMap<>();
         }
+        Map<String, String> formDataMap = TypeUtils.multivaluedMapToMap(formData);
         form.setAttribute("form", formDataMap);
         return form.createForm(PHONE_RESET_CREDENTIAL_TPL);
     }
@@ -81,7 +77,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
             MultivaluedMap<String, String> formData = new MultivaluedHashMap<>();
             LoginFormsProvider form = context.form()
                     .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
-            Response challenge = createResetCredentialForm(form, null);
+            Response challenge = createResetCredentialForm(form, formData);
             context.challenge(challenge);
             return;
         }
@@ -112,7 +108,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
 
         MultivaluedMap<String, String> resFormData = new MultivaluedHashMap<>();
         
-        boolean isPhone = Objects.equals(formData.getFirst(FIELD_VALIDATION_TYPE), "phone");
+        boolean isPhone = Objects.equals(formData.getFirst(PhoneConstants.FIELD_CREDENTIAL_TYPE), "phone");
         logger.infof("Reset credential action, isPhone: %s", isPhone);
         
         String username = formData.getFirst("username");
@@ -122,7 +118,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         if (isPhone) {
             if (phoneNumber.isEmpty()) {
                 event.error(Errors.USERNAME_MISSING);
-                resFormData.add(FIELD_VALIDATION_TYPE, "phone");
+                resFormData.add(PhoneConstants.FIELD_CREDENTIAL_TYPE, "phone");
                 LoginFormsProvider form = context.form()
                         .addError(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, PhoneProviderMessages.MISSING_PHONE_NUMBER))
                         .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
@@ -138,7 +134,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
                 // 用户不存在
                 event.error(Errors.USER_NOT_FOUND);
 
-                resFormData.add(FIELD_VALIDATION_TYPE, "phone");
+                resFormData.add(PhoneConstants.FIELD_CREDENTIAL_TYPE, "phone");
                 resFormData.add(PhoneConstants.FIELD_AREA_CODE, phoneNumber.areaCode);
                 resFormData.add(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.phoneNumber);
 
@@ -151,7 +147,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
             } else if (!validateVerificationCode(context, user)) {
                 // 验证码错误
                 event.error(Errors.INVALID_CODE);
-                resFormData.add(FIELD_VALIDATION_TYPE, "phone");
+                resFormData.add(PhoneConstants.FIELD_CREDENTIAL_TYPE, "phone");
                 resFormData.add(PhoneConstants.FIELD_AREA_CODE, phoneNumber.areaCode);
                 resFormData.add(PhoneConstants.FIELD_PHONE_NUMBER, phoneNumber.phoneNumber);
                 LoginFormsProvider form = context.form()
@@ -165,7 +161,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
         } else {
             if (Validation.isBlank(username)) {
                 event.error(Errors.USERNAME_MISSING);
-                resFormData.add(FIELD_VALIDATION_TYPE, "email");
+                resFormData.add(PhoneConstants.FIELD_CREDENTIAL_TYPE, "email");
                 LoginFormsProvider form = context.form()
                         .addError(new FormMessage(Validation.FIELD_USERNAME, Messages.MISSING_USERNAME))
                         .setAttribute(FIELD_CODE_TYPE, VERIFICATION_CODE_KIND);
@@ -179,7 +175,7 @@ public class ResetCredentialWithPhone extends ResetCredentialChooseUser {
             user = getUserByUsername(context, username);
             if (user == null) {
                 event.error(Errors.USER_NOT_FOUND);
-                resFormData.add(FIELD_VALIDATION_TYPE, "email");
+                resFormData.add(PhoneConstants.FIELD_CREDENTIAL_TYPE, "email");
                 resFormData.add("username", username);
                 LoginFormsProvider form = context.form()
                         .addError(new FormMessage(Validation.FIELD_USERNAME, Messages.INVALID_USER))

@@ -4,6 +4,7 @@ import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
+import cc.coopersoft.keycloak.phone.utils.ServiceUtils;
 import com.fasterxml.jackson.databind.JsonNode;
 import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
@@ -33,10 +34,6 @@ public class VerificationCodeResource {
     VerificationCodeResource(KeycloakSession session) {
         this.session = session;
         this.auth = new AppAuthManager().authenticateIdentityCookie(session, session.getContext().getRealm());
-    }
-
-    private TokenCodeService getTokenCodeService() {
-        return session.getProvider(TokenCodeService.class);
     }
 
     /*@POST
@@ -107,7 +104,7 @@ public class VerificationCodeResource {
         }
 
         UserModel user = auth.getUser();
-        getTokenCodeService().setUserPhoneNumberByCode(user, phoneNumber, code);
+        ServiceUtils.getTokenCodeService(session).setUserPhoneNumberByCode(user, phoneNumber, code);
 
         return Response.ok().entity(ENTITY_SUCCESS).build();
     }
@@ -136,7 +133,7 @@ public class VerificationCodeResource {
                 response.put("errormsg", "needVerifiedEmail");
                 return Response.ok(response, APPLICATION_JSON_TYPE).build();
             } else {
-                user.removeAttribute("phoneNumber");
+                user.removeAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER);
                 return Response.ok().entity(ENTITY_SUCCESS).build();
             }
         } catch (BadRequestException | NotAuthorizedException e) {

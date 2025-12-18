@@ -1,6 +1,7 @@
 package cc.coopersoft.keycloak.phone.utils;
 
 import org.keycloak.models.*;
+import org.keycloak.services.validation.Validation;
 
 import java.util.List;
 import java.util.Optional;
@@ -17,7 +18,7 @@ public class UserUtils {
             return Optional.empty();
         } else if (users.size() > 1) {
             return users.stream()
-                    .filter(u -> u.getAttributeStream("phoneNumberVerified")
+                    .filter(u -> u.getAttributeStream(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED)
                             .anyMatch("true"::equals))
                     .findFirst();
         } else {
@@ -26,7 +27,7 @@ public class UserUtils {
     }
 
     private static Optional<UserModel> singleUser(Stream<UserModel> users) {
-        return users.filter(u -> u.getAttributeStream("phoneNumberVerified")
+        return users.filter(u -> u.getAttributeStream(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED)
                 .anyMatch("true"::equals))
                 .findFirst();
     }
@@ -45,5 +46,11 @@ public class UserUtils {
         Stream<UserModel> users = userProvider.searchForUserByUserAttributeStream(
                 realm, "phoneNumber", phoneNumber.getFullPhoneNumber());
         return singleUser(users.filter(u -> !u.getId().equals(notIs)));
+    }
+
+    public static boolean isUserPhoneNumberVerified(UserModel user) {
+        String phoneNumber = user.getFirstAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER);
+        String phoneNumberVerified = user.getFirstAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER_VERIFIED);
+        return !Validation.isBlank(phoneNumber) && "true".equals(phoneNumberVerified);
     }
 }
