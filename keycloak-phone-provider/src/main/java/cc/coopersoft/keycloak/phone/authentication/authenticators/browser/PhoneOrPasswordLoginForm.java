@@ -2,10 +2,7 @@ package cc.coopersoft.keycloak.phone.authentication.authenticators.browser;
 
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
-import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
-import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import cc.coopersoft.keycloak.phone.utils.ServiceUtils;
-import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import cc.coopersoft.keycloak.phone.utils.*;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
@@ -52,16 +49,16 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
     }
 
     public PhoneOrPasswordLoginForm(KeycloakSession session) {
-        webauthnAuth = new WebAuthnConditionalUIAuthenticator(session, (context) -> createLoginForm(context.form()));
+        webauthnAuth = new WebAuthnConditionalUIAuthenticator(session, (context) -> {
+            LoginFormsProvider form = context.form();
+            fillFormData(form, context.getHttpRequest().getDecodedFormParameters());
+            return createLoginForm(form);
+        });
     }
 
     // Copied from WebAuthnConditionalUIAuthenticator
     protected String webauthnAuth_getCredentialType() {
         return WebAuthnCredentialModel.TYPE_PASSWORDLESS;
-    }
-
-    protected Response createLoginForm(LoginFormsProvider form) {
-        return form.createForm(PHONE_LOGIN_FORM_TPL);
     }
 
     protected void fillFormData(LoginFormsProvider forms, MultivaluedMap<String, String> formData) {
@@ -81,14 +78,16 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
         forms.setAttribute("form", formDataMap);
     }
 
+    protected Response createLoginForm(LoginFormsProvider form) {
+        return form.createForm(PHONE_LOGIN_FORM_TPL);
+    }
+
     protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
-        LoginFormsProvider forms = context.form();
+        LoginFormsProvider form = context.form();
 
-        if (!formData.isEmpty()) forms.setFormData(formData);
+        fillFormData(form, formData);
 
-        fillFormData(forms, formData);
-
-        return createLoginForm(forms);
+        return createLoginForm(form);
     }
 
     protected Response challenge(AuthenticationFlowContext context, String error,
