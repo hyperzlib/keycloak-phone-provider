@@ -205,6 +205,11 @@ public class RegistrationPhoneNumberOrEmail implements FormAction, FormActionFac
 			PhoneNumber phoneNumber = new PhoneNumber(formData);
 			String tokenId = context.getSession().getAttribute(PhoneConstants.FIELD_TOKEN_ID, String.class);
 
+			if (Validation.isBlank(tokenId)) {
+				logger.warnf("Token ID is missing in session for user %s after successful phone registration", user.getId());
+				return;
+			}
+
 			logger.info(String.format("registration user %s phone success, tokenId is: %s", user.getId(), tokenId));
 			ServiceUtils.getTokenCodeService(context.getSession())
 					.tokenValidated(user, phoneNumber, tokenId, false);

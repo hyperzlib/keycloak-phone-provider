@@ -149,6 +149,11 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 		PhoneNumber phoneNumber = new PhoneNumber(formData);
 		String tokenId = context.getSession().getAttribute(PhoneConstants.FIELD_TOKEN_ID, String.class);
 
+		if (Validation.isBlank(tokenId)) {
+			logger.warn("No tokenId found in session after successful phone validation");
+			return;
+		}
+
 		logger.info(String.format("registration user %s phone success, tokenId is: %s", user.getId(), tokenId));
 		ServiceUtils.getTokenCodeService(context.getSession())
 				.tokenValidated(user, phoneNumber, tokenId, false);
