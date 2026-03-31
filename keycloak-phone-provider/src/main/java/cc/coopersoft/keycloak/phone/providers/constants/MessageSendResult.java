@@ -1,76 +1,65 @@
 package cc.coopersoft.keycloak.phone.providers.constants;
 
+import lombok.Getter;
+
 import java.time.Instant;
 import java.util.Date;
 
+@Getter
 public class MessageSendResult {
     private final int status;
     private String errorCode;
     private String errorMessage;
+    private String smsCode = null;
     private Date resendExpires;
     private Date expires;
 
-    public MessageSendResult(int status){
+    public MessageSendResult(int status) {
         this.status = status;
     }
 
-    public int getStatus(){
-        return this.status;
-    }
-
-    public boolean ok(){
+    public boolean ok() {
         return this.status > 0;
     }
 
-    public MessageSendResult setError(String code, String message){
+    public MessageSendResult setError(String code, String message) {
         this.errorCode = code;
         this.errorMessage = message;
         return this;
     }
 
-    public String getErrorCode(){
-        return this.errorCode;
-    }
-
-    public String getErrorMessage(){
-        return this.errorMessage;
-    }
-
-    public MessageSendResult setResendExpires(Date resendExpires){
+    public MessageSendResult setResendExpires(Date resendExpires) {
         this.resendExpires = resendExpires;
         return this;
     }
 
-    public MessageSendResult setResendExpires(int resendExpires){
+    public MessageSendResult setResendExpires(int resendExpires) {
         Instant now = Instant.now();
         this.resendExpires = Date.from(now.plusSeconds(resendExpires));
         return this;
     }
 
-    public Date getResendExpires(){
-        return this.resendExpires;
+    public MessageSendResult setSmsCode(String smsCode) {
+        this.smsCode = smsCode;
+        return this;
     }
 
-    public long getResendExpiresTime(){
+    public long getResendExpiresTime() {
         return this.resendExpires != null ? this.resendExpires.getTime() : 0;
     }
 
-    public MessageSendResult setExpires(Date expires){
+    public MessageSendResult setExpires(Date expires) {
         this.expires = expires;
         return this;
     }
 
-    public MessageSendResult setExpires(int expires){
+    public MessageSendResult setExpires(int expires) {
         Instant now = Instant.now();
         this.expires = Date.from(now.plusSeconds(expires));
         return this;
     }
 
-    public Date getExpires(){
-        return this.expires;
-    }
-
-    public long getExpiresTime(){
+    public long getExpiresTime() {
         return this.expires != null ? this.expires.getTime() : 0;
     }
 }

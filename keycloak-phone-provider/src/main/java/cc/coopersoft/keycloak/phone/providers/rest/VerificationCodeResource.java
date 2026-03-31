@@ -2,26 +2,25 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
-import cc.coopersoft.keycloak.phone.utils.JsonUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import cc.coopersoft.keycloak.phone.utils.ServiceUtils;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
+import com.fasterxml.jackson.databind.ObjectMapper;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager.AuthResult;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.Response;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 
-import static javax.ws.rs.core.MediaType.*;
+import static jakarta.ws.rs.core.MediaType.*;
 
 public class VerificationCodeResource {
 
@@ -35,10 +34,6 @@ public class VerificationCodeResource {
     VerificationCodeResource(KeycloakSession session) {
         this.session = session;
         this.auth = new AppAuthManager().authenticateIdentityCookie(session, session.getContext().getRealm());
-    }
-
-    private TokenCodeService getTokenCodeService() {
-        return session.getProvider(TokenCodeService.class);
     }
 
     /*@POST
@@ -65,13 +60,14 @@ public class VerificationCodeResource {
     @Consumes(APPLICATION_JSON)
     public Response setUserPhoneNumberJson(String reqBody){
         try {
-            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonObject = mapper.readTree(reqBody);
 
             return this.setUserPhoneNumber(jsonObject.get(PhoneConstants.FIELD_AREA_CODE).asText(),
                     jsonObject.get(PhoneConstants.FIELD_PHONE_NUMBER).asText(),
                     jsonObject.get(PhoneConstants.FIELD_VERIFICATION_CODE).asText());
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error("Error parsing JSON", e);
         }
         return Response.serverError().build();
     }
@@ -108,7 +104,7 @@ public class VerificationCodeResource {
         }
 
         UserModel user = auth.getUser();
-        getTokenCodeService().setUserPhoneNumberByCode(user, phoneNumber, code);
+        ServiceUtils.getTokenCodeService(session).setUserPhoneNumberByCode(user, phoneNumber, code);
 
         return Response.ok().entity(ENTITY_SUCCESS).build();
     }
@@ -137,7 +133,7 @@ public class VerificationCodeResource {
                 response.put("errormsg", "needVerifiedEmail");
                 return Response.ok(response, APPLICATION_JSON_TYPE).build();
             } else {
-                user.removeAttribute("phoneNumber");
+                user.removeAttribute(PhoneConstants.USER_ATTRIBUTE_FIELD_PHONE_NUMBER);
                 return Response.ok().entity(ENTITY_SUCCESS).build();
             }
         } catch (BadRequestException | NotAuthorizedException e) {

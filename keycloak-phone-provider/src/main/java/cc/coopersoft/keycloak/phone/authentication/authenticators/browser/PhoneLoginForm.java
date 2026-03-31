@@ -4,7 +4,11 @@ import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
+import cc.coopersoft.keycloak.phone.utils.ServiceUtils;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.keycloak.authentication.AbstractFormAuthenticator;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.Authenticator;
@@ -19,9 +23,7 @@ import org.keycloak.services.ServicesLogger;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
+import java.util.Optional;
 
 public class PhoneLoginForm extends AbstractFormAuthenticator implements Authenticator {
 
@@ -29,13 +31,7 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
 
     public static final String PHONE_LOGIN_FORM_TPL = "login-with-phone.ftl";
 
-    public static final String FIELD_LOGIN_TYPE = "loginType";
-
     public static final String USER_NOT_EXISTS = "userNotExists";
-
-    private TokenCodeService getTokenCodeService(KeycloakSession session) {
-        return session.getProvider(TokenCodeService.class);
-    }
 
     protected Response challenge(AuthenticationFlowContext context, String error,
                                  MultivaluedMap<String, String> formData) {
@@ -102,10 +98,6 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
     @Override
     public void action(AuthenticationFlowContext context) {
         MultivaluedMap<String, String> formData = context.getHttpRequest().getDecodedFormParameters();
-        if (!formData.containsKey(FIELD_LOGIN_TYPE) || !formData.getFirst(FIELD_LOGIN_TYPE).equals("phone")){
-            context.attempted();
-            return;
-        }
 
         if (formData.containsKey("cancel")) {
             context.cancelLogin();
@@ -119,8 +111,8 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
             context.challenge(challenge(context, PhoneConstants.MISSING_PHONE_NUMBER, formData));
             return;
         }
-        UserModel user = UserUtils.findUserByPhone(session.users(), context.getRealm(), phoneNumber);
-        if(user == null) { //用户不存在
+        Optional<UserModel> user = UserUtils.findUserByPhone(session, context.getRealm(), phoneNumber);
+        if (user.isEmpty()) { // 用户不存在
             context.challenge(challenge(context, USER_NOT_EXISTS, formData));
             return;
         }
@@ -129,14 +121,14 @@ public class PhoneLoginForm extends AbstractFormAuthenticator implements Authent
             context.challenge(challenge(context, PhoneConstants.MISSING_VERIFY_CODE, formData));
             return;
         }
-        TokenCodeService tokenCodeService = getTokenCodeService(session);
-        if(!tokenCodeService.validateCode(user, phoneNumber, code, TokenCodeType.LOGIN)){ //验证码错误
+        TokenCodeService tokenCodeService = ServiceUtils.getTokenCodeService(session);
+        if (!tokenCodeService.validateCode(user.get(), phoneNumber, code, TokenCodeType.LOGIN)) { // 验证码错误
             context.challenge(challenge(context, PhoneConstants.SMS_CODE_MISMATCH, formData));
             return;
         }
 
-        //一切OK，返回最终值
-        if(validateUser(context, user, formData)){
+        // 一切OK，返回最终值
+        if (validateUser(context, user.get(), formData)) {
             context.success();
         }
     }

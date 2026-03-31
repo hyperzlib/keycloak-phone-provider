@@ -1,6 +1,8 @@
 package cc.coopersoft.keycloak.phone.authentication.forms;
 
-import okhttp3.HttpUrl;
+import com.google.auto.service.AutoService;
+import org.apache.http.NameValuePair;
+import org.apache.http.client.utils.URLEncodedUtils;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
@@ -12,52 +14,30 @@ import org.keycloak.models.*;
 import org.keycloak.provider.ProviderConfigProperty;
 import org.keycloak.services.validation.Validation;
 
-import java.util.ArrayList;
-import java.util.Arrays;
-import java.util.List;
-import java.util.Optional;
+import java.net.URI;
+import java.net.URISyntaxException;
+import java.nio.charset.StandardCharsets;
+import java.util.*;
+import java.util.regex.Matcher;
+import java.util.regex.Pattern;
 
-public class RegistrationRedirectParametersReader implements  FormActionFactory, FormAction {
+import static org.keycloak.provider.ProviderConfigProperty.MULTIVALUED_STRING_TYPE;
 
+@AutoService(FormActionFactory.class)
+public class RegistrationRedirectParametersReader implements FormActionFactory, FormAction {
     private static final Logger logger = Logger.getLogger(RegistrationRedirectParametersReader.class);
 
-    private static final List<ProviderConfigProperty> configProperties = new ArrayList<>();
-
     public static final String PROVIDER_ID = "registration-redirect-parameter";
+    public static final String PARAM_NAMES = "acceptParameter";
 
-    public static final String PARAM_NAMES = "registration.parameter.accept";
-
-    static {
-        ProviderConfigProperty acceptParamName;
-        acceptParamName = new ProviderConfigProperty();
-        acceptParamName.setName(PARAM_NAMES);
-        acceptParamName.setLabel("Accept query param");
-        acceptParamName.setType(ProviderConfigProperty.MULTIVALUED_STRING_TYPE);
-        acceptParamName.setHelpText("Registration query param accept names.");
-        configProperties.add(acceptParamName);
-    }
-
-    private static AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-            AuthenticationExecutionModel.Requirement.REQUIRED, AuthenticationExecutionModel.Requirement.DISABLED };
-
-    private static String[] QUERY_PARAM_BLACKLIST = {
-            "execution",
-            "session_code",
-            "client_id",
-            "tab_id",
-            "nonce",
-            "response_type",
-            "response_mode",
-            "scope",
-            "redirect_uri",
-            "state",
-            "phoneNumber",
-            "phoneNumberVerified"
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+            AuthenticationExecutionModel.Requirement.REQUIRED,
+            AuthenticationExecutionModel.Requirement.DISABLED
     };
 
     @Override
     public String getDisplayType() {
-        return "Redirect parameter reader";
+        return "Registration Redirect parameter reader";
     }
 
     @Override
@@ -72,7 +52,12 @@ public class RegistrationRedirectParametersReader implements  FormActionFactory,
 
     @Override
     public List<ProviderConfigProperty> getConfigProperties() {
-        return configProperties;
+        ProviderConfigProperty rep =
+                new ProviderConfigProperty(PARAM_NAMES,
+                        "Accept query param",
+                        "Registration query param accept names.",
+                        MULTIVALUED_STRING_TYPE, null);
+        return Collections.singletonList(rep);
     }
 
     @Override
@@ -130,32 +115,69 @@ public class RegistrationRedirectParametersReader implements  FormActionFactory,
     public void success(FormContext context) {
 
 
-
-
         String redirectUri = context.getAuthenticationSession().getRedirectUri();
         logger.info("add user attribute form redirectUri:" + redirectUri);
-        if (Validation.isBlank(redirectUri)){
+        if (Validation.isBlank(redirectUri)) {
             logger.error("no referer. cant get param in keycloak version");
             return;
         }
 
-        HttpUrl url = HttpUrl.parse(redirectUri);
-        if (url != null) {
-            UserModel user = context.getUser();
-            String[] paramNames = null;
-            AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
-            if (authenticatorConfig != null && authenticatorConfig.getConfig() != null) {
-                paramNames = Optional.ofNullable(context.getAuthenticatorConfig().getConfig().get(PARAM_NAMES)).orElse("").split("##");
-            }
-            String[] finalParamNames = paramNames;
-            logger.info("allow query param names:" + finalParamNames);
-            url.queryParameterNames()
-                    .stream()
-                    .filter(v -> (finalParamNames != null && finalParamNames.length > 0) ? Arrays.asList(finalParamNames).contains(v) : !Validation.isBlank(v) && v.length() < 32 && Arrays.stream(QUERY_PARAM_BLACKLIST).noneMatch(item -> item.equals(v)) )
-
-                    .forEach(v -> user.setAttribute(v, url.queryParameterValues(v)));
-
+        URI uri;
+        try {
+            uri = new URI(redirectUri);
+        } catch (URISyntaxException e) {
+            logger.error("Invalid redirectUri: " + redirectUri, e);
+            return;
         }
+
+        List<NameValuePair> queryParams = URLEncodedUtils.parse(uri, StandardCharsets.UTF_8);
+        if (queryParams.isEmpty()) {
+            logger.warn("no query parameters found");
+            return;
+        }
+
+        UserModel user = context.getUser();
+        AuthenticatorConfigModel authenticatorConfig = context.getAuthenticatorConfig();
+
+        if (authenticatorConfig == null || authenticatorConfig.getConfig() == null) {
+            logger.error("can't get config!");
+            return;
+        }
+
+        String params = authenticatorConfig.getConfig().get(PARAM_NAMES);
+
+        if (Validation.isBlank(params)) {
+            logger.warn("accept params is not configure.");
+            return;
+        }
+
+        logger.info("allow query param names:" + params);
+
+        List<String> finalParamNames = new ArrayList<>();
+
+        Pattern p = Pattern.compile("[A-Za-z_]\\w*");
+        Matcher m = p.matcher(params);
+        while (m.find()) {
+            finalParamNames.add(m.group());
+        }
+
+        if (finalParamNames.isEmpty()) {
+            logger.warn("accept params is not configure.");
+            return;
+        }
+
+        // Group parameters by name to handle multiple values
+        Map<String, List<String>> parameterMap = new HashMap<>();
+        for (NameValuePair param : queryParams) {
+            parameterMap.computeIfAbsent(param.getName(), k -> new ArrayList<>())
+                      .add(param.getValue());
+        }
+
+        parameterMap.entrySet()
+                .stream()
+                .filter(entry -> finalParamNames.contains(entry.getKey()))
+                .forEach(entry -> user.setAttribute(entry.getKey(), entry.getValue()));
+
     }
 
     @Override

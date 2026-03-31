@@ -1,6 +1,5 @@
 package cc.coopersoft.keycloak.phone.providers.spi;
 
-import com.fasterxml.jackson.annotation.JsonAlias;
 import com.fasterxml.jackson.annotation.JsonIgnore;
 import com.fasterxml.jackson.annotation.JsonProperty;
 import com.fasterxml.jackson.databind.JavaType;
@@ -59,7 +58,7 @@ public class AreaCodeService implements Provider {
         } catch (IOException ex){
             logger.error(ex);
         }
-        return Collections.EMPTY_LIST.stream();
+        return Stream.empty();
     }
 
     public boolean isAreaCodeAllowed(int areaCode) {

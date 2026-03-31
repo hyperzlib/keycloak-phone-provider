@@ -7,20 +7,20 @@
     <groupId>cc.coopersoft</groupId>
     <artifactId>keycloak-phone-provider-parent</artifactId>
     <packaging>pom</packaging>
-    <version>1.1</version>
+    <version>1.2</version>
 
     <properties>
         <project.build.sourceEncoding>UTF-8</project.build.sourceEncoding>
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-        <version.keycloak>15.0.1</version.keycloak>
-        <version.phone.provider>1.1</version.phone.provider>
-
-        <maven.compiler.source>1.8</maven.compiler.source>
-        <maven.compiler.target>1.8</maven.compiler.target>
-
+        <maven.compiler.source>17</maven.compiler.source>
+        <maven.compiler.target>17</maven.compiler.target>
+        <java.version>17</java.version>
+        <version.keycloak>26.4.0</version.keycloak>
+        <version.phone.provider>1.2</version.phone.provider>
+        <quarkus-resteasy.version>3.27.0</quarkus-resteasy.version>
+        <lombok.version>1.18.36</lombok.version>
+        <auto-service.version>1.0.1</auto-service.version>
+        
         <docker.image.name>coopersoft/keycloak-phone</docker.image.name>
-
     </properties>
 
     <modules>
@@ -32,6 +32,7 @@
         <module>keycloak-sms-provider-cloopen</module>
         <module>keycloak-sms-provider-yunxin</module>
         <module>keycloak-sms-provider-aliyun</module>
+        <module>keycloak-sms-provider-aliyun-personal</module>
         <module>keycloak-sms-provider-tencent</module>
         <module>keycloak-captcha-provider-geetest</module>
         <module>keycloak-captcha-provider-recaptcha</module>
@@ -41,7 +42,7 @@
         <dependency>
             <groupId>org.projectlombok</groupId>
             <artifactId>lombok</artifactId>
-            <version>1.18.20</version>
+            <version>${lombok.version}</version>
             <scope>provided</scope>
         </dependency>
         <dependency>
@@ -68,16 +69,43 @@
             <version>${version.keycloak}</version>
             <scope>provided</scope>
         </dependency>
+        <dependency>
+            <groupId>com.google.auto.service</groupId>
+            <artifactId>auto-service</artifactId>
+            <version>${auto-service.version}</version>
+            <scope>provided</scope>
+        </dependency>
     </dependencies>
 
 
     <build>
         <plugins>
+            <plugin>
+                <groupId>org.apache.maven.plugins</groupId>
+                <artifactId>maven-compiler-plugin</artifactId>
+                <version>3.10.1</version>
+                <configuration>
+                    <release>${maven.compiler.target}</release>
+                    <annotationProcessorPaths>
+                        <path>
+                            <groupId>org.projectlombok</groupId>
+                            <artifactId>lombok</artifactId>
+                            <version>${lombok.version}</version>
+                        </path>
+                        <path>
+                            <groupId>com.google.auto.service</groupId>
+                            <artifactId>auto-service</artifactId>
+                            <version>${auto-service.version}</version>
+                        </path>
+                    </annotationProcessorPaths>
+                </configuration>
+            </plugin>
             <!-- We use the Resources plugin to filer Dockerfile and run.sh, it inserts actual JAR filename -->
             <!-- The final Dockerfile will be created in target/dockerfile/Dockerfile -->
             <plugin>
                 <inherited>false</inherited>
                 <artifactId>maven-resources-plugin</artifactId>
+                <version>3.2.0</version>
                 <executions>
                     <execution>
                         <id>copy-resources</id>

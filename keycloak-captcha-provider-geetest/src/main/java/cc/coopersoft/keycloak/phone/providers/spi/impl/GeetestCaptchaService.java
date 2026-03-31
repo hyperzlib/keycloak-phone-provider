@@ -1,23 +1,29 @@
 package cc.coopersoft.keycloak.phone.providers.spi.impl;
 
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
 import com.geetest.sdk.GeetestLib;
 import com.geetest.sdk.GeetestLibResult;
+import jakarta.ws.rs.core.MultivaluedMap;
+import lombok.Getter;
+import lombok.Setter;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.models.KeycloakContext;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.managers.AuthenticationManager;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.HashMap;
 import java.util.Map;
 
-public class GeetestCaptchaService implements CaptchaService {
-    private static final Logger log = Logger.getLogger(GeetestCaptchaService.class);
+public class GeetestCaptchaService implements PhoneProviderCaptchaService {
+    public static final String ID = "geetest-captcha";
+    private static final Logger logger = Logger.getLogger(GeetestCaptchaService.class);
     private static int serverStatus = 1;
 
     private final KeycloakSession session;
+
+    @Getter
+    @Setter
     private Config.Scope config;
 
     public GeetestCaptchaService(KeycloakSession session) {
@@ -39,13 +45,12 @@ public class GeetestCaptchaService implements CaptchaService {
 
     @Override
     public boolean verify(final MultivaluedMap<String, String> formParams, String user) {
-        if(user == null) user = "unknow";
+        if (user == null) user = "unknown";
 
         String geetestId = this.config.get("id");
         String geetestKey = this.config.get("key");
         if(geetestId == null || geetestKey == null){
             //如果没有设置key就直接通过
-            //出事了别怪我
             return true;
         }
 
@@ -87,7 +92,7 @@ public class GeetestCaptchaService implements CaptchaService {
         String geetestId = this.config.get("id");
         String geetestKey = this.config.get("key");
         if(geetestId == null || geetestKey == null){
-            return "{\"success\":0,\"message\": \"unset geetest id or key in your config.\"}";
+            return "{\"success\":0,\"message\": \"geetest id or key not set in your config.\"}";
         }
 
         KeycloakContext context = session.getContext();
@@ -103,10 +108,6 @@ public class GeetestCaptchaService implements CaptchaService {
         GeetestLibResult result = gtLib.register(digestmod, paramMap);
         serverStatus = result.getStatus();
         return result.getData();
-    }
-
-    public void setConfig(Config.Scope config){
-        this.config = config;
     }
 
     @Override

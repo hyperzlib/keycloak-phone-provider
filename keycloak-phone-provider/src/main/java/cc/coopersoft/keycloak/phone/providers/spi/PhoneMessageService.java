@@ -7,9 +7,5 @@ import org.keycloak.provider.Provider;
 
 
 public interface PhoneMessageService extends Provider {
-
-    //TODO on key longin support
-    //boolean Verification(String phoneNumber, String token);
-
-    MessageSendResult sendTokenCode(PhoneNumber phoneNumber, TokenCodeType type);
+    MessageSendResult sendTokenCode(PhoneNumber phoneNumber, String sourceAddr, TokenCodeType type, String kind);
 }

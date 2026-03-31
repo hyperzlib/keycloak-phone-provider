@@ -1,12 +1,33 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.resetcred;
 
+import com.google.auto.service.AutoService;
+import org.jboss.logging.Logger;
 import org.keycloak.authentication.AuthenticationFlowContext;
+import org.keycloak.authentication.AuthenticatorFactory;
 import org.keycloak.authentication.authenticators.resetcred.ResetCredentialEmail;
 import org.keycloak.models.AuthenticationExecutionModel.Requirement;
 
+@AutoService(AuthenticatorFactory.class)
 public class ResetCredentialEmailWithPhone extends ResetCredentialEmail {
     public static final Requirement[] REQUIREMENT_CHOICES;
 
+    private static final Logger logger = Logger.getLogger(ResetCredentialEmail.class);
+
+    //TODO Requirement.CONDITIONAL or ALTERNATIVE ? configuredFor
+
+    /**
+     *  REQUIRED ignore configuredFor always execute
+     *  ALTERNATIVE same level multi item   check configuredFor choice one
+     *  CONDITIONAL check condition item And check configuredFor
+     *  DISABLED ignore all
+     */
+    static {
+        REQUIREMENT_CHOICES = new Requirement[]{
+                Requirement.CONDITIONAL,
+                Requirement.ALTERNATIVE,
+                Requirement.DISABLED
+        };
+    }
     @Override
     public void authenticate(AuthenticationFlowContext context) {
         if (context.getExecution().isRequired() ||
@@ -18,11 +39,11 @@ public class ResetCredentialEmailWithPhone extends ResetCredentialEmail {
         }
     }
 
+
     protected boolean configuredFor(AuthenticationFlowContext context) {
-        if (context.getAuthenticationSession().getAuthNote(ResetCredentialWithPhone.NOT_SEND_EMAIL) == null) {
-            return true;
-        }
-        return false;
+        String sendNote = context.getAuthenticationSession().getAuthNote(ResetCredentialWithPhone.SHOULD_SEND_EMAIL);
+        logger.info("call if no phone email configuredFor:" + sendNote);
+        return !"false".equalsIgnoreCase(sendNote);
     }
 
     @Override
@@ -40,14 +61,7 @@ public class ResetCredentialEmailWithPhone extends ResetCredentialEmail {
         return "Send email to user if not phone provided.";
     }
 
-    static {
-        REQUIREMENT_CHOICES = new Requirement[]{
-                Requirement.REQUIRED,
-                Requirement.ALTERNATIVE,
-                Requirement.CONDITIONAL,
-                Requirement.DISABLED
-        };
-    }
+
 
     @Override
     public Requirement[] getRequirementChoices() {

@@ -4,6 +4,7 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.services.resource.RealmResourceProvider;
 
 public class GeetestResourceProvider implements RealmResourceProvider {
+    public static final String ID = "geetest";
 
     private final KeycloakSession session;
 

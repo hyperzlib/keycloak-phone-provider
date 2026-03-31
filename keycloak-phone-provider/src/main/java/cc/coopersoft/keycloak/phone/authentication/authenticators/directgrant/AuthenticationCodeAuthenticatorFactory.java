@@ -1,5 +1,6 @@
 package cc.coopersoft.keycloak.phone.authentication.authenticators.directgrant;
 
+import com.google.auto.service.AutoService;
 import org.keycloak.Config;
 import org.keycloak.authentication.Authenticator;
 import org.keycloak.authentication.AuthenticatorFactory;
@@ -12,6 +13,7 @@ import org.keycloak.provider.ProviderConfigProperty;
 import java.util.ArrayList;
 import java.util.List;
 
+@AutoService(AuthenticatorFactory.class)
 public class AuthenticationCodeAuthenticatorFactory implements AuthenticatorFactory, ConfigurableAuthenticatorFactory {
     public static final String MAX_AGE = "verificationCode.max.age";
     public static final String KIND = "verificationCode.kind";
@@ -43,7 +45,7 @@ public class AuthenticationCodeAuthenticatorFactory implements AuthenticatorFact
         return new AuthenticationCodeAuthenticator(session);
     }
 
-    private static AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED,
             AuthenticationExecutionModel.Requirement.DISABLED
     };

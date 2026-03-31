@@ -3,22 +3,18 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeService;
 import cc.coopersoft.keycloak.phone.providers.spi.ConfigService;
-import cc.coopersoft.keycloak.phone.utils.JsonUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
+import jakarta.ws.rs.GET;
+import jakarta.ws.rs.Path;
+import jakarta.ws.rs.Produces;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
 import org.keycloak.models.KeycloakSession;
-
-import javax.ws.rs.GET;
-import javax.ws.rs.Path;
-import javax.ws.rs.Produces;
-import javax.ws.rs.core.Response;
 
 import java.io.IOException;
 import java.util.HashMap;
 import java.util.List;
 
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON;
-import static javax.ws.rs.core.MediaType.APPLICATION_JSON_TYPE;
+import static jakarta.ws.rs.core.MediaType.*;
 
 public class SmsResource {
 
@@ -70,13 +66,13 @@ public class SmsResource {
         return new TokenCodeResource(session, TokenCodeType.REGISTRATION);
     }
 
-    @Path("reset-code")
+    @Path("reset-credential-code")
     public TokenCodeResource getResetCodeResource() {
-        return new TokenCodeResource(session, TokenCodeType.RESET);
+        return new TokenCodeResource(session, TokenCodeType.RESET_CREDENTIAL);
     }
 
     @Path("update-profile")
-    public VerificationCodeResource getVerificateCodeResource(){
-        return new VerificationCodeResource(session);
+    public TokenCodeResource getUpdateProfileResource(){
+        return new TokenCodeResource(session, TokenCodeType.VERIFY);
     }
 }

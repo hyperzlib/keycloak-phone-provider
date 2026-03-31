@@ -6,8 +6,10 @@ import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.services.resource.RealmResourceProvider;
 import org.keycloak.services.resource.RealmResourceProviderFactory;
 
-public class GeetestResourceProviderFactory implements RealmResourceProviderFactory {
+import com.google.auto.service.AutoService;
 
+@AutoService(RealmResourceProviderFactory.class)
+public class GeetestResourceProviderFactory implements RealmResourceProviderFactory {
     public static final String ID = "geetest";
 
     @Override
@@ -31,5 +33,6 @@ public class GeetestResourceProviderFactory implements RealmResourceProviderFact
 
     @Override
     public void close() {
+        
     }
 }

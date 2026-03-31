@@ -1,8 +1,11 @@
 package cc.coopersoft.keycloak.phone.authentication.forms;
 
+import cc.coopersoft.keycloak.phone.utils.ConfigUtils;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
+import com.google.auto.service.AutoService;
+import jakarta.ws.rs.core.MultivaluedMap;
 import org.jboss.logging.Logger;
 import org.keycloak.Config;
 import org.keycloak.authentication.FormAction;
@@ -22,21 +25,22 @@ import org.keycloak.userprofile.UserProfile;
 import org.keycloak.userprofile.UserProfileContext;
 import org.keycloak.userprofile.UserProfileProvider;
 
-import javax.ws.rs.core.MultivaluedMap;
 import java.util.ArrayList;
 import java.util.List;
 
 /**
  * replace  org.keycloak.authentication.forms.RegistrationUserCreation.java
  */
+@AutoService(FormActionFactory.class)
 public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, FormAction {
-
     private static final Logger logger = Logger.getLogger(RegistrationPhoneAsUserNameCreation.class);
 
     public static final String PROVIDER_ID = "registration-phone-username-creation";
 
-    private static AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
-            AuthenticationExecutionModel.Requirement.REQUIRED, AuthenticationExecutionModel.Requirement.DISABLED };
+    private static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
+            AuthenticationExecutionModel.Requirement.REQUIRED,
+            AuthenticationExecutionModel.Requirement.DISABLED
+    };
 
 
     @Override
@@ -125,7 +129,8 @@ public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, F
             return;
         }
 
-        if (!UserUtils.isDuplicatePhoneAllowed() && UserUtils.findUserByPhone(context.getSession().users(),context.getRealm(),phoneNumber) != null) {
+        if (!ConfigUtils.isDuplicatePhoneAllowed(context.getSession()) &&
+                UserUtils.findUserByPhone(context.getSession(), context.getRealm(), phoneNumber).isPresent()) {
             context.error(Errors.INVALID_REGISTRATION);
             formData.remove(PhoneConstants.FIELD_PHONE_NUMBER);
             errors.add(new FormMessage(PhoneConstants.FIELD_PHONE_NUMBER, PhoneConstants.PHONE_EXISTS));
@@ -156,7 +161,7 @@ public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, F
         KeycloakSession session = context.getSession();
 
         UserProfileProvider profileProvider = session.getProvider(UserProfileProvider.class);
-        UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION_USER_CREATION, formData);
+        UserProfile profile = profileProvider.create(UserProfileContext.REGISTRATION, formData);
         UserModel user = profile.create();
 
         user.setEnabled(true);
@@ -175,7 +180,7 @@ public class RegistrationPhoneAsUserNameCreation implements FormActionFactory, F
         if (authType != null) {
             context.getEvent().detail(Details.AUTH_TYPE, authType);
         }
-        //logger.info(String.format("user: %s is created, user name is %s ",user.getId(), user.getUsername()));
+        //logger.info(String.format("user: %s is created, username is %s ",user.getId(), user.getUsername()));
     }
 
     @Override

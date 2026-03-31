@@ -3,35 +3,31 @@ package cc.coopersoft.keycloak.phone.providers.rest;
 import cc.coopersoft.keycloak.phone.providers.constants.MessageSendResult;
 import cc.coopersoft.keycloak.phone.providers.constants.TokenCodeType;
 import cc.coopersoft.keycloak.phone.providers.spi.AreaCodeService;
-import cc.coopersoft.keycloak.phone.providers.spi.CaptchaService;
+import cc.coopersoft.keycloak.phone.providers.spi.PhoneProviderCaptchaService;
 import cc.coopersoft.keycloak.phone.providers.spi.PhoneMessageService;
 import cc.coopersoft.keycloak.phone.providers.spi.TokenCodeService;
 import cc.coopersoft.keycloak.phone.utils.PhoneConstants;
 import cc.coopersoft.keycloak.phone.utils.PhoneNumber;
 import cc.coopersoft.keycloak.phone.utils.UserUtils;
-import com.fasterxml.jackson.core.JsonProcessingException;
 import com.fasterxml.jackson.databind.JsonNode;
-import com.github.fge.jackson.JsonLoader;
+import com.fasterxml.jackson.databind.ObjectMapper;
+import jakarta.ws.rs.*;
+import jakarta.ws.rs.core.MultivaluedHashMap;
+import jakarta.ws.rs.core.MultivaluedMap;
+import jakarta.ws.rs.core.Response;
 import org.jboss.logging.Logger;
-import org.jboss.resteasy.annotations.cache.NoCache;
+import org.jboss.resteasy.reactive.NoCache;
+import org.keycloak.common.ClientConnection;
 import org.keycloak.models.ClientModel;
 import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.UserModel;
 import org.keycloak.services.managers.AppAuthManager;
 import org.keycloak.services.managers.AuthenticationManager;
 
-import javax.ws.rs.*;
-import javax.ws.rs.core.MultivaluedHashMap;
-import javax.ws.rs.core.MultivaluedMap;
-import javax.ws.rs.core.Response;
-
 import java.io.IOException;
-import java.util.Date;
-import java.util.HashMap;
-import java.util.Iterator;
-import java.util.Map;
+import java.util.*;
 
-import static javax.ws.rs.core.MediaType.*;
+import static jakarta.ws.rs.core.MediaType.*;
 
 public class TokenCodeResource {
 
@@ -53,15 +49,17 @@ public class TokenCodeResource {
     @Consumes(APPLICATION_JSON)
     public Response sendTokenCodeJson(String reqBody) {
         try {
-            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonObject = mapper.readTree(reqBody);
             MultivaluedHashMap<String, String> formData = new MultivaluedHashMap<>();
-            for (Iterator<Map.Entry<String, JsonNode>> it = jsonObject.fields(); it.hasNext(); ) {
-                Map.Entry<String, JsonNode> node = it.next();
-                formData.addAll(node.getKey(), node.getValue().asText());
+            Iterator<String> fieldNames = jsonObject.fieldNames();
+            while (fieldNames.hasNext()) {
+                String fieldName = fieldNames.next();
+                formData.addAll(fieldName, jsonObject.get(fieldName).asText());
             }
             return this.sendTokenCode(formData);
         } catch (IOException e) {
-            e.printStackTrace();
+            logger.error(e);
         }
         return Response.serverError().build();
     }
@@ -74,6 +72,8 @@ public class TokenCodeResource {
     public Response sendTokenCode(MultivaluedMap<String, String> formData) {
         PhoneNumber phoneNumber = new PhoneNumber(formData);
         HashMap<String, Object> retData = new HashMap<>();
+        ClientConnection clientConnection = session.getContext().getConnection();
+        String remoteAddr = clientConnection.getRemoteAddr();
 
         if (phoneNumber.isEmpty()) {
             retData.put("status", 0);
@@ -82,7 +82,7 @@ public class TokenCodeResource {
             return Response.ok(retData, APPLICATION_JSON_TYPE).build();
         }
         // 验证码
-        if (!session.getProvider(CaptchaService.class).verify(formData, this.auth) &&
+        if (!session.getProvider(PhoneProviderCaptchaService.class).verify(formData, this.auth) &&
                 !isTrustedClient(formData.getFirst("client_id"), formData.getFirst("client_secret"))) {
             retData.put("status", -1);
             retData.put("error", "Captcha not completed.");
@@ -100,7 +100,8 @@ public class TokenCodeResource {
 
         if (tokenCodeType != TokenCodeType.REGISTRATION && tokenCodeType != TokenCodeType.VERIFY) {
             // 需要检测用户是否存在
-            UserModel user = UserUtils.findUserByPhone(session.users(), session.getContext().getRealm(), phoneNumber);
+            UserModel user = UserUtils.findUserByPhone(session, session.getContext().getRealm(), phoneNumber)
+                    .orElse(null);
             if (user == null) {
                 retData.put("status", 0);
                 retData.put("error", "This user not exists");
@@ -110,9 +111,10 @@ public class TokenCodeResource {
         }
 
         logger.info(String.format("Requested %s code to %s", tokenCodeType.getLabel(), phoneNumber.getFullPhoneNumber()));
-        MessageSendResult result = session.getProvider(PhoneMessageService.class).sendTokenCode(phoneNumber, tokenCodeType);
+        MessageSendResult result = session.getProvider(PhoneMessageService.class)
+                .sendTokenCode(phoneNumber, remoteAddr, tokenCodeType, null);
 
-        if (result.ok()){
+        if (result.ok()) {
             retData.put("status", 1);
             retData.put("expires_in", result.getExpiresTime());
             retData.put("resend_expires", result.getResendExpiresTime());
@@ -131,7 +133,8 @@ public class TokenCodeResource {
     @Consumes(APPLICATION_JSON)
     public Response getResendExpireJson(String reqBody) {
         try {
-            JsonNode jsonObject = JsonLoader.fromString(reqBody);
+            ObjectMapper mapper = new ObjectMapper();
+            JsonNode jsonObject = mapper.readTree(reqBody);
             return this.getResendExpire(jsonObject.get(PhoneConstants.FIELD_AREA_CODE).asText(),
                     jsonObject.get(PhoneConstants.FIELD_PHONE_NUMBER).asText());
         } catch (IOException e) {
@@ -158,7 +161,7 @@ public class TokenCodeResource {
                                     @QueryParam(PhoneConstants.FIELD_PHONE_NUMBER) String phoneNumberStr) {
         HashMap<String, Object> retData = new HashMap<>();
         PhoneNumber phoneNumber = new PhoneNumber(areaCode, phoneNumberStr);
-        if (phoneNumber.isEmpty()){
+        if (phoneNumber.isEmpty()) {
             retData.put("status", 0);
             retData.put("error", "Must inform a phone number.");
             retData.put("errormsg", "phoneNumberCannotBeEmpty");
@@ -181,7 +184,7 @@ public class TokenCodeResource {
         }
     }
 
-    private boolean isTrustedClient(String id, String secret){
+    private boolean isTrustedClient(String id, String secret) {
         if(id == null || secret == null) return false;
         ClientModel client = this.session.getContext().getRealm().getClientByClientId(id);
         return client != null && client.validateSecret(secret);
