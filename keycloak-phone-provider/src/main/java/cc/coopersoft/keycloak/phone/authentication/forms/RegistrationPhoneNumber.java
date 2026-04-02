@@ -161,6 +161,7 @@ public class RegistrationPhoneNumber implements FormAction, FormActionFactory {
 
 	@Override
 	public void buildPage(FormContext context, LoginFormsProvider form) {
+		form.setAttribute("phoneRegistration", true);
 		form.setAttribute("phoneNumberRequired", true);
 	}
 

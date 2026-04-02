@@ -6,6 +6,7 @@ import cc.coopersoft.keycloak.phone.utils.*;
 import jakarta.ws.rs.core.MultivaluedHashMap;
 import jakarta.ws.rs.core.MultivaluedMap;
 import jakarta.ws.rs.core.Response;
+import org.keycloak.Config;
 import org.keycloak.WebAuthnConstants;
 import org.keycloak.authentication.AuthenticationFlowContext;
 import org.keycloak.authentication.AuthenticatorUtil;
@@ -28,12 +29,12 @@ import org.keycloak.services.managers.AuthenticationManager;
 import org.keycloak.services.messages.Messages;
 import org.keycloak.services.validation.Validation;
 
+import java.util.Collections;
 import java.util.HashMap;
 import java.util.List;
 import java.util.Map;
 
 public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator implements Authenticator {
-
     protected static ServicesLogger log = ServicesLogger.LOGGER;
 
     public static final String PHONE_LOGIN_FORM_TPL = "login-phone-or-password.ftl";
@@ -41,6 +42,8 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
     public static final String USER_NOT_EXISTS = "userNotExists";
 
     public static final String VERIFIED_PHONE_NUMBER = "LOGIN_BY_PHONE_VERIFY";
+
+    private Config.Scope config;
 
     protected final WebAuthnConditionalUIAuthenticator webauthnAuth;
 
@@ -51,7 +54,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
     public PhoneOrPasswordLoginForm(KeycloakSession session) {
         webauthnAuth = new WebAuthnConditionalUIAuthenticator(session, (context) -> {
             LoginFormsProvider form = context.form();
-            fillFormData(form, context.getHttpRequest().getDecodedFormParameters());
+            fillFormData(form, context.getHttpRequest().getDecodedFormParameters(), "");
             return createLoginForm(form);
         });
     }
@@ -61,7 +64,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
         return WebAuthnCredentialModel.TYPE_PASSWORDLESS;
     }
 
-    protected void fillFormData(LoginFormsProvider forms, MultivaluedMap<String, String> formData) {
+    protected void fillFormData(LoginFormsProvider forms, MultivaluedMap<String, String> formData, String defaultLoginMethod) {
         Map<String, String> formDataMap = new HashMap<>();
         if (!formData.isEmpty()) {
             forms.setFormData(formData);
@@ -76,6 +79,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
             }
         }
         forms.setAttribute("form", formDataMap);
+        forms.setAttribute("defaultLoginMethod", defaultLoginMethod);
     }
 
     protected Response createLoginForm(LoginFormsProvider form) {
@@ -83,23 +87,40 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
     }
 
     protected Response challenge(AuthenticationFlowContext context, MultivaluedMap<String, String> formData) {
+        final Map<String, String> config = context.getAuthenticatorConfig() != null
+                ? context.getAuthenticatorConfig().getConfig()
+                : Collections.emptyMap();
+        String defaultLoginMethod = config.getOrDefault(PhoneOrPasswordLoginFormFactory.CONF_DEFAULT_LOGIN_METHOD, "username");
         LoginFormsProvider form = context.form();
 
-        fillFormData(form, formData);
+        fillFormData(form, formData, defaultLoginMethod);
 
         return createLoginForm(form);
     }
 
     protected Response challenge(AuthenticationFlowContext context, String error,
                                  MultivaluedMap<String, String> formData) {
+        final Map<String, String> config = context.getAuthenticatorConfig() != null
+                ? context.getAuthenticatorConfig().getConfig()
+                : Collections.emptyMap();
+        String defaultLoginMethod = config.getOrDefault(PhoneOrPasswordLoginFormFactory.CONF_DEFAULT_LOGIN_METHOD, "username");
         LoginFormsProvider form = context.form()
                 .setExecution(context.getExecution().getId());
+
         if (error != null) form.setError(error);
+
+        fillFormData(form, formData, defaultLoginMethod);
+
         return challenge(context, formData);
     }
 
     @Override
     protected Response challenge(AuthenticationFlowContext context, String error, String field) {
+        final Map<String, String> config = context.getAuthenticatorConfig() != null
+            ? context.getAuthenticatorConfig().getConfig()
+            : Collections.emptyMap();
+        String defaultLoginMethod = config.getOrDefault(PhoneOrPasswordLoginFormFactory.CONF_DEFAULT_LOGIN_METHOD, "username");
+
         if (isConditionalPasskeysEnabled(context.getUser())) {
             // setup webauthn data when possible
             webauthnAuth.fillContextForm(context);
@@ -114,7 +135,7 @@ public class PhoneOrPasswordLoginForm extends AbstractUsernameFormAuthenticator 
             }
         }
 
-        fillFormData(form, context.getHttpRequest().getDecodedFormParameters());
+        fillFormData(form, context.getHttpRequest().getDecodedFormParameters(), defaultLoginMethod);
 
         return createLoginForm(form);
     }

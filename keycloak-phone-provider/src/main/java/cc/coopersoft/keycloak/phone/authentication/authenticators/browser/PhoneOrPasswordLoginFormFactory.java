@@ -10,6 +10,8 @@ import org.keycloak.models.KeycloakSession;
 import org.keycloak.models.KeycloakSessionFactory;
 import org.keycloak.models.credential.WebAuthnCredentialModel;
 import org.keycloak.provider.ProviderConfigProperty;
+import org.keycloak.provider.ProviderConfigurationBuilder;
+import org.keycloak.services.ServicesLogger;
 
 import java.util.Collections;
 import java.util.List;
@@ -17,8 +19,10 @@ import java.util.Set;
 
 @AutoService(AuthenticatorFactory.class)
 public class PhoneOrPasswordLoginFormFactory implements AuthenticatorFactory {
+    protected static ServicesLogger log = ServicesLogger.LOGGER;
 
     public static final String PROVIDER_ID = "auth-phone-password-login-form";
+    public static final String CONF_DEFAULT_LOGIN_METHOD = "defaultLoginMethod";
 
     @Override
     public Authenticator create(KeycloakSession session) {
@@ -59,8 +63,24 @@ public class PhoneOrPasswordLoginFormFactory implements AuthenticatorFactory {
 
     @Override
     public boolean isConfigurable() {
-        return false;
+        return true;
     }
+
+    @Override
+    public List<ProviderConfigProperty> getConfigProperties() {
+        // 允许选择默认登录方式是手机号还是用户名密码
+        return ProviderConfigurationBuilder.create()
+                .property()
+                .name(PhoneOrPasswordLoginFormFactory.CONF_DEFAULT_LOGIN_METHOD)
+                .type(ProviderConfigProperty.LIST_TYPE)
+                .label("Default Login Method")
+                .helpText("Select the default login method for users.")
+                .options("phone", "username")
+                .defaultValue("username")
+                .add()
+                .build();
+    }
+
     public static final AuthenticationExecutionModel.Requirement[] REQUIREMENT_CHOICES = {
             AuthenticationExecutionModel.Requirement.REQUIRED
     };
@@ -78,11 +98,6 @@ public class PhoneOrPasswordLoginFormFactory implements AuthenticatorFactory {
     @Override
     public String getHelpText() {
         return "Validates phone sms-code or username password from login form.";
-    }
-
-    @Override
-    public List<ProviderConfigProperty> getConfigProperties() {
-        return null;
     }
 
     @Override
